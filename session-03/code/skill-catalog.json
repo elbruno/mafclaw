@@ -1,0 +1,16 @@
+{
+  "skills": [
+    {
+      "name": "portfolio-check",
+      "purpose": "Summarize a mock watchlist before a safe response."
+    },
+    {
+      "name": "workspace-scan",
+      "purpose": "Represent a placeholder shell-based scan."
+    },
+    {
+      "name": "background-research",
+      "purpose": "Queue a mock follow-up task for later."
+    }
+  ]
+}

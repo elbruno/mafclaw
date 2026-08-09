@@ -1,0 +1,5 @@
+{
+  "serviceName": "mafclaw-session-04",
+  "exporterEndpoint": "https://example.invalid/otlp",
+  "dashboardHint": "Use local Aspire or OpenTelemetry dashboards during demos."
+}
