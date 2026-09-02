@@ -1,137 +1,90 @@
-using System.Text.Json;
+using Azure;
+using Azure.Identity;
+using MafClaw.Session01;
+using System.ClientModel;
 
-var sample = new Session01Sample(
-    ResolveMarketDataPath(),
-    new ConsoleHarness());
+return await ProgramEntry.RunAsync(args);
 
-Console.WriteLine("mafclaw · Session 01 snapshot");
-Console.WriteLine("Illustrative sample only. Mock data only. Not financial advice.");
-Console.WriteLine();
-
-await sample.RunAsync();
-
-static string ResolveMarketDataPath()
+internal static class ProgramEntry
 {
-    var outputPath = Path.Combine(AppContext.BaseDirectory, "mock-market-data.json");
-    if (File.Exists(outputPath))
+    public static async Task<int> RunAsync(string[] args)
     {
-        return outputPath;
-    }
-
-    return Path.Combine(Directory.GetCurrentDirectory(), "mock-market-data.json");
-}
-
-internal sealed class Session01Sample(string marketDataPath, IAgentHarnessFactory harnessFactory)
-{
-    private readonly string _marketDataPath = marketDataPath;
-    private readonly IAgentHarnessFactory _harnessFactory = harnessFactory;
-    private readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web)
-    {
-        WriteIndented = true
-    };
-
-    public async Task RunAsync()
-    {
-        var claw = BuildHarness().AsHarnessAgent();
-
-        Console.WriteLine($"Harness agent ready: {claw.Name}");
-        Console.WriteLine();
-
-        var prompt = "Plan my next moves for MSFT and NVDA, and look up market mood.";
-        Console.WriteLine($"Prompt: {prompt}");
-        Console.WriteLine();
-
-        var plan = new List<string>
+        if (!CliOptions.TryParse(args, out var options, out var parseError))
         {
-            "Load mock portfolio context",
-            "Call get_stock_price for requested symbols",
-            "Call web_search for lightweight market mood context",
-            "Return a short todo-style answer"
-        };
+            if (!string.IsNullOrWhiteSpace(parseError))
+            {
+                Console.Error.WriteLine(parseError);
+            }
 
-        Console.WriteLine("Todo planning");
-        foreach (var item in plan)
-        {
-            Console.WriteLine($"- {item}");
+            CliOptions.PrintUsage(Console.Error);
+            return 1;
         }
 
-        Console.WriteLine();
+        var stockTools = new StockTools(ResolveMarketDataPath());
 
-        var msft = await GetStockPriceAsync("MSFT");
-        var nvda = await GetStockPriceAsync("NVDA");
-        var marketMood = await WebSearchAsync("latest market mood for major tech stocks");
-
-        var result = new
+        if (options.Mode == RuntimeMode.Offline)
         {
-            agent = claw.Name,
-            tools = new[] { "get_stock_price", "web_search", "todo_list" },
-            prices = new[] { msft, nvda },
-            webSearch = marketMood,
-            todo = new[]
-            {
-                $"Review {msft.Symbol} at {msft.Price} {msft.Currency} from mock data.",
-                $"Review {nvda.Symbol} at {nvda.Price} {nvda.Currency} from mock data.",
-                "Compare the mock prices with the web-search headline before making any live-demo claims.",
-                "Keep the sample focused on harness plus tools, not trading advice."
-            }
-        };
+            var offlineClaw = new OfflineClaw(stockTools);
+            await offlineClaw.RunAsync(options.Scenario, Console.In, Console.Out, CancellationToken.None);
+            return 0;
+        }
 
-        Console.WriteLine("Sample response");
-        Console.WriteLine(JsonSerializer.Serialize(result, _jsonOptions));
-    }
-
-    private HarnessDefinition BuildHarness()
-    {
-        return _harnessFactory.Create("mafclaw-session-01", new[]
+        try
         {
-            "get_stock_price",
-            "web_search",
-            "todo_list"
-        });
+            var settings = FoundryConfiguration.Resolve();
+            var runtime = await new FinanceAgentFactory(settings, stockTools).CreateAsync(CancellationToken.None);
+
+            var console = new ClawConsole(runtime.Agent, runtime.TodoProvider);
+            await console.RunAsync(Console.In, Console.Out, CancellationToken.None);
+            return 0;
+        }
+        catch (ConfigurationValidationException ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+            return 2;
+        }
+        catch (CredentialUnavailableException ex)
+        {
+            return WriteError(ErrorDispatch.TryMap(ex)!.Value);
+        }
+        catch (AuthenticationFailedException ex)
+        {
+            return WriteError(ErrorDispatch.TryMap(ex)!.Value);
+        }
+        catch (ClientResultException ex)
+        {
+            return WriteError(ErrorDispatch.TryMap(ex)!.Value);
+        }
+        catch (RequestFailedException ex)
+        {
+            return WriteError(ErrorDispatch.TryMap(ex)!.Value);
+        }
+        catch (HttpRequestException ex)
+        {
+            return WriteError(ErrorDispatch.TryMap(ex)!.Value);
+        }
     }
 
-    private async Task<StockQuote> GetStockPriceAsync(string symbol)
+    private static int WriteError((string message, int exitCode) mapped)
     {
-        await using var stream = File.OpenRead(_marketDataPath);
-        var quotes = await JsonSerializer.DeserializeAsync<List<StockQuote>>(stream, _jsonOptions)
-            ?? throw new InvalidOperationException("Mock market data is missing.");
-
-        var match = quotes.SingleOrDefault(q => string.Equals(q.Symbol, symbol, StringComparison.OrdinalIgnoreCase));
-        return match ?? throw new InvalidOperationException($"No mock quote found for {symbol}.");
+        Console.Error.WriteLine(mapped.message);
+        return mapped.exitCode;
     }
 
-    private Task<WebSearchResult> WebSearchAsync(string query)
+    private static string ResolveMarketDataPath()
     {
-        return Task.FromResult(new WebSearchResult(
-            query,
-            "Mocked web search summary: tech sentiment is cautious but positive heading into the open.",
-            "placeholder-safe"));
+        var outputPath = Path.Combine(AppContext.BaseDirectory, "mock-market-data.json");
+        if (File.Exists(outputPath))
+        {
+            return outputPath;
+        }
+
+        var localPath = Path.Combine(Directory.GetCurrentDirectory(), "mock-market-data.json");
+        if (File.Exists(localPath))
+        {
+            return localPath;
+        }
+
+        throw new FileNotFoundException("mock-market-data.json was not found.", localPath);
     }
 }
-
-internal interface IAgentHarnessFactory
-{
-    HarnessDefinition Create(string name, IReadOnlyList<string> toolNames);
-}
-
-internal sealed class ConsoleHarness : IAgentHarnessFactory
-{
-    public HarnessDefinition Create(string name, IReadOnlyList<string> toolNames)
-    {
-        return new HarnessDefinition(name, toolNames);
-    }
-}
-
-internal sealed record HarnessDefinition(string Name, IReadOnlyList<string> ToolNames)
-{
-    public HarnessAgent AsHarnessAgent()
-    {
-        return new HarnessAgent(Name, ToolNames);
-    }
-}
-
-internal sealed record HarnessAgent(string Name, IReadOnlyList<string> ToolNames);
-
-internal sealed record StockQuote(string Symbol, decimal Price, string Currency, string Source);
-
-internal sealed record WebSearchResult(string Query, string Summary, string Source);
