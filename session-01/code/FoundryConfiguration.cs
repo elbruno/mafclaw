@@ -16,7 +16,11 @@ internal static class FoundryConfiguration
     private const string EndpointCanonicalEnvironmentKey = "Foundry__ProjectEndpoint";
     private const string ModelCanonicalEnvironmentKey = "Foundry__Model";
 
-    /// <summary>Production entry point: loads appsettings.json + user-secrets + env vars.</summary>
+    /// <summary>
+    /// Production entry point. Effective high-to-low precedence is user-secrets,
+    /// working-directory JSON, output-directory JSON, canonical environment
+    /// variables, then environment aliases.
+    /// </summary>
     public static FoundrySettings Resolve()
     {
         var configuration = BuildConfiguration();
@@ -129,9 +133,10 @@ internal static class FoundryConfiguration
     }
 
     /// <summary>
-    /// Builds the configuration stack for local/development execution:
-    /// appsettings.json → .NET user-secrets (non-Production only).
-    /// Environment variables are resolved separately to preserve alias-fallback precedence.
+    /// Builds the JSON and user-secrets configuration stack for local/development
+    /// execution. Providers are added from lowest to highest priority:
+    /// output-directory JSON, working-directory JSON, then user-secrets.
+    /// Environment variables are resolved separately as lower-priority fallbacks.
     /// </summary>
     private static IConfiguration BuildConfiguration()
     {

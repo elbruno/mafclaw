@@ -2,17 +2,12 @@ using System.Text.Json;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 
-namespace MafClaw.Session01;
+namespace MafClaw.Checkpoint04;
 
 internal sealed class ClawConsole(
     AIAgent agent,
     TodoProvider todoProvider)
 {
-    internal const string LiveBanner = "LIVE · mafclaw · Session 01";
-    internal const string CommandBanner =
-        "Mode starts in plan. Commands: /mode [plan|execute], /todos, /exit";
-    internal const string HostedSearchUsedMarker = "[Hosted web search was used.]";
-
     private const string PlanMode = "plan";
     private const string ExecuteMode = "execute";
 
@@ -28,8 +23,9 @@ internal sealed class ClawConsole(
     {
         var session = await _agent.CreateSessionAsync(cancellationToken);
 
-        await output.WriteLineAsync(LiveBanner);
-        await output.WriteLineAsync(CommandBanner);
+        await output.WriteLineAsync("LIVE · mafclaw · checkpoint 04 · planning and todos");
+        await output.WriteLineAsync(
+            "Mode starts in plan. Commands: /mode [plan|execute], /todos, /exit");
 
         while (true)
         {
@@ -50,8 +46,11 @@ internal sealed class ClawConsole(
 
             if (trimmed.StartsWith("/", StringComparison.Ordinal))
             {
-                var shouldExit = await HandleCommandAsync(trimmed, session, output, cancellationToken);
-                if (shouldExit)
+                if (await HandleCommandAsync(
+                        trimmed,
+                        session,
+                        output,
+                        cancellationToken))
                 {
                     break;
                 }
@@ -59,7 +58,12 @@ internal sealed class ClawConsole(
                 continue;
             }
 
-            await HandlePromptAsync(trimmed, session, input, output, cancellationToken);
+            await HandlePromptAsync(
+                trimmed,
+                session,
+                input,
+                output,
+                cancellationToken);
         }
     }
 
@@ -69,16 +73,18 @@ internal sealed class ClawConsole(
         TextWriter output,
         CancellationToken cancellationToken)
     {
-        var segments = command.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        var commandName = segments[0];
+        var segments = command.Split(
+            ' ',
+            2,
+            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-        if (string.Equals(commandName, "/exit", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(segments[0], "/exit", StringComparison.OrdinalIgnoreCase))
         {
             await output.WriteLineAsync("Exiting.");
             return true;
         }
 
-        if (string.Equals(commandName, "/mode", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(segments[0], "/mode", StringComparison.OrdinalIgnoreCase))
         {
             if (segments.Length == 1)
             {
@@ -86,20 +92,19 @@ internal sealed class ClawConsole(
                 return false;
             }
 
-            var requestedMode = segments[1];
-            if (!string.Equals(requestedMode, PlanMode, StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(requestedMode, ExecuteMode, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(segments[1], PlanMode, StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(segments[1], ExecuteMode, StringComparison.OrdinalIgnoreCase))
             {
                 await output.WriteLineAsync("Usage: /mode plan|execute");
                 return false;
             }
 
-            _mode = requestedMode.ToLowerInvariant();
+            _mode = segments[1].ToLowerInvariant();
             await output.WriteLineAsync($"Mode set to {_mode}");
             return false;
         }
 
-        if (string.Equals(commandName, "/todos", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(segments[0], "/todos", StringComparison.OrdinalIgnoreCase))
         {
             var todos = await _todoProvider.GetAllTodosAsync(session, cancellationToken);
             if (todos.Count == 0)
@@ -111,13 +116,15 @@ internal sealed class ClawConsole(
             foreach (var todo in todos.OrderBy(item => item.Id))
             {
                 var status = todo.IsComplete ? "x" : " ";
-                await output.WriteLineAsync($"[{status}] #{todo.Id}: {todo.Title} — {todo.Description}");
+                await output.WriteLineAsync(
+                    $"[{status}] #{todo.Id}: {todo.Title} — {todo.Description}");
             }
 
             return false;
         }
 
-        await output.WriteLineAsync("Unknown command. Supported commands: /mode, /todos, /exit");
+        await output.WriteLineAsync(
+            "Unknown command. Supported commands: /mode, /todos, /exit");
         return false;
     }
 
@@ -130,11 +137,21 @@ internal sealed class ClawConsole(
     {
         if (string.Equals(_mode, PlanMode, StringComparison.OrdinalIgnoreCase))
         {
-            await RunPlanningTurnAsync(prompt, session, input, output, cancellationToken);
+            await RunPlanningTurnAsync(
+                prompt,
+                session,
+                input,
+                output,
+                cancellationToken);
             return;
         }
 
-        var response = await _agent.RunAsync(prompt, session, new AgentRunOptions(), cancellationToken);
+        var response = await _agent.RunAsync(
+            prompt,
+            session,
+            new AgentRunOptions(),
+            cancellationToken);
+
         await WriteResponseAsync(response, output);
     }
 
@@ -150,7 +167,7 @@ internal sealed class ClawConsole(
             ResponseFormat = ChatResponseFormat.ForJsonSchema<PlanningResponse>(
                 _jsonOptions,
                 "planning_response",
-                "Returns clarification questions or approval request before execution.")
+                "Returns clarification questions or an approval request before execution.")
         };
 
         var planningResult = await _agent.RunAsync<PlanningResponse>(
@@ -161,7 +178,8 @@ internal sealed class ClawConsole(
             cancellationToken);
 
         var planning = planningResult.Result ??
-                       throw new InvalidOperationException("Planning response was empty.");
+                       throw new InvalidOperationException(
+                           "The planning response was empty.");
 
         if (planning.Type == PlanningResponseType.Clarification)
         {
@@ -172,7 +190,8 @@ internal sealed class ClawConsole(
                 await output.WriteLineAsync($"{index + 1}. {question.Message}");
                 if (question.Choices is { Count: > 0 })
                 {
-                    await output.WriteLineAsync($"   Choices: {string.Join(", ", question.Choices)}");
+                    await output.WriteLineAsync(
+                        $"   Choices: {string.Join(", ", question.Choices)}");
                 }
             }
 
@@ -188,22 +207,20 @@ internal sealed class ClawConsole(
         await output.WriteAsync("Approve plan? (y/n): ");
         await output.FlushAsync();
 
-        var approvalInput = await input.ReadLineAsync();
-        var isApproved = IsApprovalGranted(approvalInput);
-
-        var shouldExecute = false;
-        PlanApprovalGate.TryExecute(planning, isApproved, () => shouldExecute = true);
-
-        if (!shouldExecute)
+        var approved = IsApprovalGranted(await input.ReadLineAsync());
+        if (!PlanApprovalGate.CanExecute(planning, approved))
         {
-            await output.WriteLineAsync("Plan was not approved. Remaining in plan mode.");
+            await output.WriteLineAsync(
+                "Plan was not approved. Remaining in plan mode.");
             return;
         }
 
         _mode = ExecuteMode;
         await output.WriteLineAsync("Plan approved. Switched to execute mode.");
 
-        var executionPrompt = $"The user approved this plan. Execute now. Original request: {prompt}";
+        var executionPrompt =
+            $"The user approved this plan. Execute now. Original request: {prompt}";
+
         var executionResult = await _agent.RunAsync(
             executionPrompt,
             session,
@@ -213,30 +230,26 @@ internal sealed class ClawConsole(
         await WriteResponseAsync(executionResult, output);
     }
 
-    private static bool IsApprovalGranted(string? approvalInput)
-    {
-        return string.Equals(approvalInput?.Trim(), "y", StringComparison.OrdinalIgnoreCase) ||
-               string.Equals(approvalInput?.Trim(), "yes", StringComparison.OrdinalIgnoreCase);
-    }
+    private static bool IsApprovalGranted(string? input) =>
+        string.Equals(input?.Trim(), "y", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(input?.Trim(), "yes", StringComparison.OrdinalIgnoreCase);
 
-    private static async Task WriteResponseAsync(AgentResponse response, TextWriter output)
+    private static async Task WriteResponseAsync(
+        AgentResponse response,
+        TextWriter output)
     {
-        if (!string.IsNullOrWhiteSpace(response.Text))
-        {
-            await output.WriteLineAsync(response.Text);
-        }
-        else
-        {
-            await output.WriteLineAsync("No assistant text response was returned.");
-        }
+        await output.WriteLineAsync(
+            string.IsNullOrWhiteSpace(response.Text)
+                ? "No assistant text response was returned."
+                : response.Text);
 
         var webSearchUsed = response.Messages
             .SelectMany(message => message.Contents)
-            .Any(content => content is WebSearchToolCallContent || content is WebSearchToolResultContent);
+            .Any(content => content is WebSearchToolCallContent or WebSearchToolResultContent);
 
         if (webSearchUsed)
         {
-            await output.WriteLineAsync(HostedSearchUsedMarker);
+            await output.WriteLineAsync("[Hosted web search was used.]");
         }
     }
 }

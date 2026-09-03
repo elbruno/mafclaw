@@ -1,7 +1,12 @@
-# Session 01 implementation
+# Session 01 final compatibility implementation
 
 Real Microsoft Agent Framework sample for the official Session 1 post:  
 https://devblogs.microsoft.com/agent-framework/meet-your-agent-harness-and-claw/
+
+This folder preserves the previously published, validated final sample while the
+incremental teaching snapshots live under [`../checkpoints`](../README.md#checkpoint-map).
+
+[Session 1 landing page](../README.md) · [Checkpoint 04](../checkpoints/04-planning-and-todos/README.md) · [Setup](../docs/setup.md)
 
 ## Target
 
@@ -18,11 +23,13 @@ https://devblogs.microsoft.com/agent-framework/meet-your-agent-harness-and-claw/
 
 ## Configuration contract
 
-Configuration is resolved in this precedence order:
+Configuration is resolved in this effective high-to-low precedence order:
 
-1. `appsettings.json` in the session code folder (gitignored, optional).
-2. .NET user-secrets — active in Development and all non-Production environments. `UserSecretsId` `8f001de5-00b8-4cd2-835b-e0ea21979f0f` is committed; `dotnet user-secrets init` is never needed.
-3. Environment variables: `Foundry__ProjectEndpoint` / `Foundry__Model` (canonical) or `FOUNDRY_PROJECT_ENDPOINT` / `FOUNDRY_MODEL` (aliases).
+1. .NET user-secrets — active in Development and all non-Production environments. `UserSecretsId` `8f001de5-00b8-4cd2-835b-e0ea21979f0f` is committed; `dotnet user-secrets init` is never needed.
+2. `appsettings.json` in the process working directory.
+3. `appsettings.json` copied beside the built application.
+4. Canonical environment variables: `Foundry__ProjectEndpoint` / `Foundry__Model`.
+5. Alias environment variables: `FOUNDRY_PROJECT_ENDPOINT` / `FOUNDRY_MODEL`.
 
 Canonical keys (satisfied by sources above):
 
@@ -31,7 +38,8 @@ Canonical keys (satisfied by sources above):
 
 Authentication uses `AzureCliCredential` via `az login` locally.  
 No API-key setting is supported or required.
-Hosted web search is enabled by the Harness for current market context.
+Hosted web search is enabled by the Harness for current market context, but it
+runs only when the configured service/model supports it.
 
 ## Build and test
 
@@ -62,22 +70,22 @@ dotnet run --project .\MafClaw.Session01.csproj -- --mode offline --scenario pla
 ```
 
 Offline mode prints `OFFLINE FALLBACK` and does not use Azure, network, or Foundry config.
+It is a separate deterministic `OfflineClaw` path—not model, Agent Framework
+agent, Harness, tool-calling, or hosted-search execution.
 
 ## Run live
 
-Use the setup script (recommended) or set values directly:
+Use the repository setup script as the primary configuration path:
 
 ```powershell
-# Recommended: use the configure script from the repo root
+# Run from the repository root
 # (session-01\code is two levels deep; ..\..\tools reaches the repo root)
 ..\..\tools\configure-user-secrets.ps1 -Session 1
 
-# Direct: set individual keys (run from session-01\code)
-dotnet user-secrets set "Foundry:ProjectEndpoint" "https://<your-project>.services.ai.azure.com/api/projects/<your-project>" --project .\MafClaw.Session01.csproj
-dotnet user-secrets set "Foundry:Model" "gpt-5.4" --project .\MafClaw.Session01.csproj
-
 dotnet run --project .\MafClaw.Session01.csproj -- --mode live
 ```
+
+Live startup prints `LIVE · mafclaw · Session 01`.
 
 Live console commands:
 
@@ -86,5 +94,21 @@ Live console commands:
 - `/exit`
 
 Approval is required only in plan mode before switching to execute. Use `/mode execute` to bypass planning and execute directly.
-The console owns the plan/execute state; the Harness `AgentModeProvider` is disabled because its
-mode-transition notification can be classified as a jailbreak prompt by some Foundry safety policies.
+Approval gates execution of the generated plan; it is not a universal execution
+gate. `/mode execute` explicitly opts into direct execution, and the selected
+mode remains sticky for the console session until changed.
+
+Ownership in this final sample:
+
+- the Harness composes the agent and hosted search, and configures/provides a
+  `TodoProvider` instance by default; `TodoProvider` is a reusable Agent Framework
+  context provider, not a custom tool;
+- application code owns the local mock `get_stock_price` tool;
+- `ClawConsole` owns plan/execute state, structured planning, and explicit approval;
+- the Harness `AgentModeProvider` and file memory are disabled;
+- memory and session resume are official-article supplemental material, not implemented here.
+
+Tool calling is not unique to the Harness; the Harness standardizes how capabilities
+are composed around the `IChatClient`.
+
+All stock values are mock educational data. This sample is not financial advice.

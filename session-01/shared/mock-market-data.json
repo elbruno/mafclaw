@@ -1,0 +1,20 @@
+[
+  {
+    "symbol": "MSFT",
+    "price": 512.34,
+    "currency": "USD",
+    "source": "mock"
+  },
+  {
+    "symbol": "NVDA",
+    "price": 184.72,
+    "currency": "USD",
+    "source": "mock"
+  },
+  {
+    "symbol": "AMZN",
+    "price": 241.18,
+    "currency": "USD",
+    "source": "mock"
+  }
+]

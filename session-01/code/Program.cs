@@ -2,6 +2,7 @@ using Azure;
 using Azure.Identity;
 using MafClaw.Session01;
 using System.ClientModel;
+using System.Text.Json;
 
 return await ProgramEntry.RunAsync(args);
 
@@ -20,11 +21,18 @@ internal static class ProgramEntry
             return 1;
         }
 
-        var stockTools = new StockTools(ResolveMarketDataPath());
+        if (!TryCreateStockTools(
+                ResolveMarketDataPath,
+                static path => new StockTools(path),
+                Console.Error,
+                out var stockTools))
+        {
+            return FixtureFailureExitCode;
+        }
 
         if (options.Mode == RuntimeMode.Offline)
         {
-            var offlineClaw = new OfflineClaw(stockTools);
+            var offlineClaw = new OfflineClaw(stockTools!);
             await offlineClaw.RunAsync(options.Scenario, Console.In, Console.Out, CancellationToken.None);
             return 0;
         }
@@ -32,7 +40,7 @@ internal static class ProgramEntry
         try
         {
             var settings = FoundryConfiguration.Resolve();
-            var runtime = await new FinanceAgentFactory(settings, stockTools).CreateAsync(CancellationToken.None);
+            var runtime = await new FinanceAgentFactory(settings, stockTools!).CreateAsync(CancellationToken.None);
 
             var console = new ClawConsole(runtime.Agent, runtime.TodoProvider);
             await console.RunAsync(Console.In, Console.Out, CancellationToken.None);
@@ -70,6 +78,36 @@ internal static class ProgramEntry
         Console.Error.WriteLine(mapped.message);
         return mapped.exitCode;
     }
+
+    internal const int FixtureFailureExitCode = 6;
+    internal const string FixtureFailureMessage =
+        "The local mock market data fixture is missing or invalid. Restore mock-market-data.json and retry.";
+
+    internal static bool TryCreateStockTools(
+        Func<string> pathResolver,
+        Func<string, StockTools> stockToolsFactory,
+        TextWriter error,
+        out StockTools? stockTools)
+    {
+        try
+        {
+            stockTools = stockToolsFactory(pathResolver());
+            return true;
+        }
+        catch (Exception exception) when (IsFixtureInitializationFailure(exception))
+        {
+            stockTools = null;
+            error.WriteLine(FixtureFailureMessage);
+            return false;
+        }
+    }
+
+    private static bool IsFixtureInitializationFailure(Exception exception) =>
+        exception is IOException
+            or UnauthorizedAccessException
+            or JsonException
+            or InvalidOperationException
+            or ArgumentException;
 
     private static string ResolveMarketDataPath()
     {

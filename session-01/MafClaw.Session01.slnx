@@ -1,0 +1,21 @@
+<Solution>
+  <Folder Name="/checkpoints/" />
+  <Folder Name="/checkpoints/01-standard-agent/">
+    <Project Path="checkpoints/01-standard-agent/MafClaw.Checkpoint01.csproj" />
+  </Folder>
+  <Folder Name="/checkpoints/02-harness-core/">
+    <Project Path="checkpoints/02-harness-core/MafClaw.Checkpoint02.csproj" />
+  </Folder>
+  <Folder Name="/checkpoints/03-tools-and-search/">
+    <Project Path="checkpoints/03-tools-and-search/MafClaw.Checkpoint03.csproj" />
+  </Folder>
+  <Folder Name="/checkpoints/04-planning-and-todos/">
+    <Project Path="checkpoints/04-planning-and-todos/MafClaw.Checkpoint04.csproj" />
+  </Folder>
+  <Folder Name="/code/">
+    <Project Path="code/MafClaw.Session01.csproj" />
+  </Folder>
+  <Folder Name="/code/tests/">
+    <Project Path="code/tests/MafClaw.Session01.Tests/MafClaw.Session01.Tests.csproj" />
+  </Folder>
+</Solution>

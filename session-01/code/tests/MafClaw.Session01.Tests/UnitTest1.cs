@@ -91,6 +91,28 @@ public sealed class FoundryConfigurationTests
     }
 
     [Fact]
+    public void CanonicalEnvironmentVariablesWinOverAliases()
+    {
+        var config = new Dictionary<string, string?>();
+        var env = new Dictionary<string, string?>
+        {
+            ["Foundry__ProjectEndpoint"] = "https://canonical-env.services.ai.azure.com/api/projects/demo",
+            ["Foundry__Model"] = "canonical-env-model",
+            ["FOUNDRY_PROJECT_ENDPOINT"] = "https://alias.services.ai.azure.com/api/projects/alias",
+            ["FOUNDRY_MODEL"] = "alias-model"
+        };
+
+        var settings = FoundryConfiguration.Resolve(
+            config,
+            key => env.TryGetValue(key, out var value) ? value : null);
+
+        Assert.Equal(
+            "https://canonical-env.services.ai.azure.com/api/projects/demo",
+            settings.ProjectEndpoint);
+        Assert.Equal("canonical-env-model", settings.Model);
+    }
+
+    [Fact]
     public void MissingEndpointThrowsActionableError()
     {
         var config = new Dictionary<string, string?>
@@ -168,6 +190,25 @@ public sealed class OfflineClawTests
         Assert.False(executed);
     }
 
+    [Fact]
+    public void PlanApprovalGateAllowsApprovedGeneratedPlanExecution()
+    {
+        var planning = new PlanningResponse
+        {
+            Type = PlanningResponseType.Approval,
+            Questions = [new PlanningQuestion { Message = "Execute generated plan" }]
+        };
+
+        var executed = false;
+        var result = PlanApprovalGate.TryExecute(
+            planning,
+            isApproved: true,
+            () => executed = true);
+
+        Assert.True(result);
+        Assert.True(executed);
+    }
+
     private static StockTools CreateStockTools()
     {
         var path = Path.Combine(AppContext.BaseDirectory, "mock-market-data.json");
@@ -175,6 +216,82 @@ public sealed class OfflineClawTests
     }
 
     private static string Normalize(string value) => value.Replace("\r\n", "\n");
+}
+
+public sealed class ProgramEntryFixtureSafetyTests
+{
+    [Fact]
+    public void MissingFixtureFailureIsSanitized()
+    {
+        var writer = new StringWriter(new StringBuilder());
+
+        var created = ProgramEntry.TryCreateStockTools(
+            () => throw new FileNotFoundException(
+                "Missing fixture at C:\\private\\project\\mock-market-data.json.",
+                "C:\\private\\project\\mock-market-data.json"),
+            static path => new StockTools(path),
+            writer,
+            out var stockTools);
+
+        Assert.False(created);
+        Assert.Null(stockTools);
+        Assert.Equal(
+            ProgramEntry.FixtureFailureMessage + Environment.NewLine,
+            writer.ToString());
+        Assert.DoesNotContain("C:\\private", writer.ToString(), StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("FileNotFoundException", writer.ToString(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void MalformedFixtureFailureIsSanitized()
+    {
+        var writer = new StringWriter(new StringBuilder());
+
+        var created = ProgramEntry.TryCreateStockTools(
+            static () => "mock-market-data.json",
+            static _ => throw new System.Text.Json.JsonException(
+                "Malformed JSON near private fixture details and byte position 42."),
+            writer,
+            out var stockTools);
+
+        Assert.False(created);
+        Assert.Null(stockTools);
+        Assert.Equal(
+            ProgramEntry.FixtureFailureMessage + Environment.NewLine,
+            writer.ToString());
+        Assert.DoesNotContain("byte position", writer.ToString(), StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("JsonException", writer.ToString(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void ValidFixtureCreatesStockToolsWithoutError()
+    {
+        var writer = new StringWriter(new StringBuilder());
+        var path = Path.Combine(AppContext.BaseDirectory, "mock-market-data.json");
+
+        var created = ProgramEntry.TryCreateStockTools(
+            () => path,
+            static fixturePath => new StockTools(fixturePath),
+            writer,
+            out var stockTools);
+
+        Assert.True(created);
+        Assert.NotNull(stockTools);
+        Assert.Equal(string.Empty, writer.ToString());
+    }
+}
+
+public sealed class LiveOutputContractTests
+{
+    [Fact]
+    public void CanonicalLiveOutputUsesExplicitAccurateMarkers()
+    {
+        Assert.Equal("LIVE · mafclaw · Session 01", ClawConsole.LiveBanner);
+        Assert.Equal(
+            "Mode starts in plan. Commands: /mode [plan|execute], /todos, /exit",
+            ClawConsole.CommandBanner);
+        Assert.Equal("[Hosted web search was used.]", ClawConsole.HostedSearchUsedMarker);
+    }
 }
 
 /// <summary>

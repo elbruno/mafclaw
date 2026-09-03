@@ -76,7 +76,9 @@ Both commands must complete without errors.
 MafClaw sessions can run in two modes:
 
 - **Live mode:** Uses your Azure Foundry project and model deployment for real Agent Framework execution.
-- **Offline mode:** Uses deterministic mock data and precomputed responses, suitable for rehearsal and recovery.
+- **Offline mode:** Runs the deterministic `OfflineClaw` simulation with local
+  fixtures and fixed scenario output, suitable for rehearsal and recovery. It is
+  not Agent Framework agent or model execution.
 
 ### Live mode prerequisites
 
@@ -121,7 +123,10 @@ $env:FOUNDRY_PROJECT_ENDPOINT = "https://your-project.services.ai.azure.com/api/
 $env:FOUNDRY_MODEL = "gpt-5.4"
 ```
 
-The canonical double-underscore forms (`Foundry__ProjectEndpoint`, `Foundry__Model`) are also accepted. Environment variables take effect immediately without running the script.
+The canonical double-underscore forms (`Foundry__ProjectEndpoint`,
+`Foundry__Model`) are also accepted. Environment variables are used immediately
+without running the script when higher-priority user-secrets and JSON values are
+absent.
 
 **Explicit parameters** (convenience, but visible in shell history; run from the repository root):
 
@@ -161,13 +166,17 @@ This command prints all stored values. Run it only on the same machine where you
 
 ### Configuration loading order
 
-The app resolves Foundry settings in this precedence order:
+The app resolves Foundry settings in this effective high-to-low precedence order:
 
-1. `appsettings.json` in the session code folder (gitignored, optional).
-2. .NET user-secrets (active in Development and all non-Production environments).
-3. Environment variables: `Foundry__ProjectEndpoint` / `Foundry__Model` (canonical) or `FOUNDRY_PROJECT_ENDPOINT` / `FOUNDRY_MODEL` (aliases).
+1. .NET user-secrets in Development and other non-Production environments.
+2. `appsettings.json` in the process working directory.
+3. `appsettings.json` copied beside the built application.
+4. Canonical environment variables: `Foundry__ProjectEndpoint` and `Foundry__Model`.
+5. Alias environment variables: `FOUNDRY_PROJECT_ENDPOINT` and `FOUNDRY_MODEL`.
 
-User-secrets set via the configure script satisfy step 2 and are the recommended local development approach.
+Later JSON providers override earlier ones internally, and user-secrets are added
+after both JSON providers. Environment variables are explicit lower-priority
+fallbacks in this sample rather than configuration-provider overrides.
 
 ### Offline mode
 
@@ -200,7 +209,9 @@ dotnet run --project .\MafClaw.Session01.csproj -- --mode offline --scenario pla
 ### Expected behavior
 
 - **Live mode:** The agent contacts Foundry, uses real tools, and returns results based on live data and model inference.
-- **Offline mode:** The agent uses mock data and precomputed responses, always returning the same output for the same input.
+- **Offline mode:** The separate `OfflineClaw` simulation uses local mock data and
+  deterministic scenario output. It does not construct or run an agent, Harness,
+  model, or hosted search.
 
 ### Troubleshooting
 
@@ -299,6 +310,12 @@ ping -c 4 8.8.8.8
 ```
 
 If the network is working, the Foundry endpoint may be temporarily unavailable. Try again later.
+
+#### Content-filter or safety refusal
+
+Respect the refusal. Do not repeatedly rephrase the request or use evasive
+wording to bypass service policy. Remove unnecessary sensitive content and use a
+clearly benign educational prompt; otherwise stop.
 
 #### Build fails: .NET 10 not found
 

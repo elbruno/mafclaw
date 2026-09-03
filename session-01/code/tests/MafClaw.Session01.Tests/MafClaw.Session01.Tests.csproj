@@ -25,10 +25,4 @@
     <ProjectReference Include="..\..\MafClaw.Session01.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\..\mock-market-data.json" Link="mock-market-data.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>

@@ -13,7 +13,7 @@ A 4-part Microsoft Reactor live coding series that builds a personal finance CLI
 
 | Session | Date | Title | Status | Links |
 |---|---|---|---|---|
-| 1 | Thu Sep 3, 2026 | Meet Your Claw: A Harness in Three Lines of C# | Code complete, live validation pending | [Blog](https://devblogs.microsoft.com/agent-framework/meet-your-agent-harness-and-claw/) &#124; [Live event](https://aka.ms/mafclaw/1) &#124; [Code snapshot](./session-01) |
+| 1 | Thu Sep 3, 2026 | Meet Your Claw: A Harness in Three Lines of C# | Incremental checkpoints available; live validation environment-dependent | [Session guide](./session-01/README.md) &#124; [Blog](https://devblogs.microsoft.com/agent-framework/meet-your-agent-harness-and-claw/) &#124; [Live event](https://aka.ms/mafclaw/1) |
 | 2 | Thu Sep 10, 2026 | Working With Your Data, Safely: Files, Approvals and Memory | Planned | [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-working-with-your-data-safely/) &#124; [Event](https://aka.ms/mafclaw/2) &#124; Code snapshot coming |
 | 3 | Thu Sep 17, 2026 | Scaling the Claw: Skills, Shell, CodeAct and Background Agents | Planned | [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-scaling-the-claw-or-harness-capabilities/) &#124; [Event](https://aka.ms/mafclaw/3) &#124; Code snapshot coming |
 | 4 | Thu Sep 24, 2026 | Production Ready: Observability, Governance and Deployment | Planned | [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-making-your-claw-production-ready/) &#124; [Event](https://aka.ms/mafclaw/4) &#124; Code snapshot coming |
@@ -22,7 +22,7 @@ A 4-part Microsoft Reactor live coding series that builds a personal finance CLI
 
 - `general/docs/` - Prerequisites, configuration, and troubleshooting for all sessions.
 - `general/code/` - Shared code assets and mock data patterns (reference only, not a dependency).
-- `session-01/` - Session 1 complete runnable snapshot and documentation.
+- `session-01/` - Session 1 landing page, incremental checkpoint guides, and the validated final compatibility sample.
 - `session-02/` - Session 2 folder contains an unsupported .NET 9 placeholder application, not a finished sample. Real .NET 10 snapshot pending after Session 1 goes live.
 - `session-03/` - Session 3 folder contains an unsupported .NET 9 placeholder application, not a finished sample. Real .NET 10 snapshot pending.
 - `session-04/` - Session 4 folder contains an unsupported .NET 9 placeholder application, not a finished sample. Real .NET 10 snapshot pending.
@@ -59,7 +59,7 @@ A 4-part Microsoft Reactor live coding series that builds a personal finance CLI
    # Offline mode — no Azure configuration required
    dotnet run --project .\MafClaw.Session01.csproj -- --mode offline
 
-   # Live mode — requires Foundry configuration from step 3
+   # Live mode — requires Foundry configuration from step 2
    dotnet run --project .\MafClaw.Session01.csproj -- --mode live
    ```
 
@@ -71,12 +71,13 @@ Session 1 implementation is complete with offline mode fully functional and test
 
 - Real Agent Framework harness implementation using official APIs.
 - Live mode (uses Azure Foundry with user-provided credentials) and offline mode (deterministic mock data, no configuration required).
-- Custom tools: `get_stock_price`, todo planning.
+- A local `get_stock_price` tool plus structured planning and a Harness-configured
+  `TodoProvider` context-provider instance.
 - Full documentation, architecture diagrams, and troubleshooting.
 
 Offline mode is fully functional for rehearsal and demonstration without any configuration. The `--mode` argument is required; the sample does not fall back automatically.
 
-See `session-01/docs/README.md` for current status and setup instructions.
+See `session-01/README.md` for the checkpoint path and `session-01/docs/setup.md` for setup instructions.
 
 ## Sessions 2-4 status
 
@@ -93,7 +94,9 @@ This project uses generated mock financial data for demonstration purposes only.
 ### Two modes
 
 - **Live mode:** Connects to Azure Foundry for real Agent Framework execution. Requires configuration and Azure access. Cost applies.
-- **Offline mode:** Uses deterministic mock data. Requires `--mode offline` explicitly. Suitable for learning and rehearsal. No cost or configuration required.
+- **Offline mode:** Runs the deterministic `OfflineClaw` simulation with local mock
+  data. Requires `--mode offline` explicitly. It is not agent or model execution.
+  Suitable for learning and rehearsal, with no service cost or configuration required.
 
 Both modes are explicitly labeled when active.
 
@@ -110,7 +113,7 @@ When using live mode, review Microsoft's privacy statement and your Azure subscr
 ## Support and feedback
 
 - Open an issue: https://aka.ms/mafclaw/repo
-- Questions: See the troubleshooting in `general/docs/README.md` and `session-01/docs/README.md`.
+- Questions: See `session-01/docs/troubleshooting.md` and the general guidance in `general/docs/README.md`.
 
 ## License
 
