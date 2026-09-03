@@ -25,4 +25,4 @@ AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 });
 
 Console.WriteLine(await agent.RunAsync(
-    "What are three things a beginner should consider before buying a stock?"));
+    "What are 2 things a beginner should consider before buying a stock?"));
