@@ -1,48 +1,30 @@
-# Checkpoint 04 — Planning, approval, and todos
+# Checkpoint 04 — Planning and Todos
 
-[Session 1 home](../../README.md) · [Previous: tools and search](../03-tools-and-search/README.md) · Next: [final compatibility sample](../../code/README.md)
+[Session 1 home](../../README.md) · Previous: [03 — Tools and Search](../03-tools-and-search/README.md) · [Final sample](../../code/README.md)
 
-> **Runnable status:** Implemented. This checkpoint requires live Foundry configuration and Azure CLI authentication.
+## What this teaches
 
-## Purpose
+Turn the one-shot agent into an interactive assistant with multi-turn conversations and a todo list. The Harness provides `TodoProvider` natively — the code just retrieves it and displays the items. Planning and mode transitions are handled by the Harness through `AgentModeProvider`, not by custom application code.
 
-Complete the Session 1 teaching path by surfacing the `TodoProvider` instance
-that the Harness configures and provides by default, then add the local planning
-experience used by the validated final sample. `TodoProvider` is a reusable Agent
-Framework context provider; it is not a custom tool.
+## What changed from Checkpoint 03
 
-The responsibilities are intentionally split:
+| Change | Detail |
+|---|---|
+| Interactive REPL | A `while` loop with `Console.ReadLine()` replaces the one-shot prompt |
+| `TodoProvider` | Retrieved via `agent.GetService<TodoProvider>()` — tracks multi-step work items created by the model |
+| Sessions | `agent.CreateSessionAsync()` enables multi-turn conversation state |
+| Instructions expanded | Now mention web search, todos, and multi-step work |
+| Commands | `/todos` displays tracked items; `/exit` quits |
 
-- the Harness configures and provides the `TodoProvider` context-provider instance;
-- `ClawConsole` owns local `plan`/`execute` state;
-- `PlanningResponse` defines clarification and approval shapes;
-- `ClawConsole` asks for explicit approval before switching to execute;
-- Harness `AgentModeProvider` and file memory are disabled.
-- skills, compaction, OpenTelemetry, and tool auto-approval are also disabled to keep this checkpoint focused.
+## What's in the box
 
-This approval is structured **console approval**, not Harness tool approval.
-It gates execution of the generated plan only. Entering `/mode execute`
-explicitly opts into direct execution without a generated-plan approval turn.
-Mode is sticky for the current console session until another `/mode` command or
-an approved plan changes it.
+| File | Lines | Purpose |
+|---|---|---|
+| `Program.cs` | 57 | Interactive REPL with session, `TodoProvider`, `/todos` and `/exit` commands |
+| `StockTools.cs` | 25 | Same `get_stock_price` from Checkpoint 03 |
+| `.csproj` | ~20 | Same packages as Checkpoint 03 |
 
-## Finance scenario
-
-Start in plan mode:
-
-```text
-Plan how to review MSFT and NVDA, including prices, recent context, and risks.
-```
-
-Then:
-
-1. answer any clarification;
-2. review the proposed plan;
-3. approve with `y` or `yes` only when you want execution to continue;
-4. run `/todos` to inspect provider state;
-5. use `/mode` to inspect the local mode.
-
-## Run
+## How to run
 
 From `session-01`:
 
@@ -50,69 +32,41 @@ From `session-01`:
 dotnet run --project .\checkpoints\04-planning-and-todos\MafClaw.Checkpoint04.csproj
 ```
 
-Live console commands:
+## What to expect
 
-```text
-/mode
-/mode plan
-/mode execute
-/todos
-/exit
+```
+Finance assistant ready. Commands: /todos, /exit
+>
 ```
 
-Expected stable markers:
+Try a multi-step request:
 
-```text
-LIVE · mafclaw · checkpoint 04 · planning and todos
-Mode starts in plan. Commands: /mode [plan|execute], /todos, /exit
+```
+Plan how to review MSFT and NVDA, including prices, recent context, and risks.
 ```
 
-A planning turn then produces either:
+The agent will use `get_stock_price`, may use hosted web search for recent context, and can create todo items to track the work. Use `/todos` to see tracked items:
 
-```text
-Clarification required:
+```
+  [ ] Research MSFT fundamentals
+  [x] Get MSFT price
 ```
 
-or an approval path containing:
+Use `/exit` to quit.
 
-```text
-Plan approval required:
-Approve plan? (y/n):
-Plan approved. Switched to execute mode.
-```
+## Key design points
 
-`/todos` prints `No todos yet.` until provider state contains items. Model-generated plan text and live search results are variable.
+- **No `/mode` command.** The Harness handles plan/execute transitions natively through `AgentModeProvider`.
+- **`DisableFileMemory = true`** is the only Harness feature explicitly disabled.
+- **`TodoProvider`** is a reusable Agent Framework context provider configured by the Harness — not a custom tool.
+- **No try/catch.** Failures surface as raw exceptions (see [Troubleshooting](../../docs/troubleshooting.md)).
 
-Live model calls and hosted search can incur Azure charges. Prompts, tool results,
-and hosted-search query content can be sent to the configured service. Review
-your organization's data-sharing, residency, logging, and cost policies, and do
-not use confidential, personal, or real financial data.
+## ⚠️ Privacy note
 
-If a content filter or safety policy refuses a request, respect the refusal. Do
-not use repeated or evasive rephrasing to bypass it. Choose a benign educational
-request or stop.
+Because there is no error-handling wrapper, raw Azure exceptions may contain tenant IDs, account names, and resource identifiers. **Do not screen-share the terminal when errors occur** during a live session.
 
-## Deterministic fallback
+## Next step
 
-If this checkpoint does not yet include its own offline path, use the final compatibility implementation:
+The [final sample](../../code/README.md) in `code/` is a copy of this checkpoint with a distinct assembly name — it is the finished Session 1 code.
 
-```powershell
-dotnet run --project .\code\MafClaw.Session01.csproj -- --mode offline --scenario plan
-```
-
-That path must print `OFFLINE FALLBACK`. It demonstrates the approval boundary only; it is not model, Harness, hosted-search, or service execution.
-
-## Limitations
-
-- The current final sample disables `AgentModeProvider`.
-- File memory is disabled.
-- Session export/import is not implemented.
-- Hosted search remains service-dependent.
-- Stock values remain mock data.
-- Approval does not authorize or execute a real trade.
-
-Memory and session resume are [supplemental concepts in the official article](https://devblogs.microsoft.com/agent-framework/meet-your-agent-harness-and-claw/), not a runnable checkpoint 05 here.
-
-This sample is educational and is not financial advice.
-
-[Previous: tools and search](../03-tools-and-search/README.md) · [Final compatibility sample](../../code/README.md) · [Session 1 home](../../README.md)
+All stock values are mock educational data. This sample is not financial advice.

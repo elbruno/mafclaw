@@ -1,128 +1,57 @@
-using Azure;
+using Azure.AI.Extensions.OpenAI;
+using Azure.AI.Projects;
 using Azure.Identity;
-using MafClaw.Session01;
-using System.ClientModel;
-using System.Text.Json;
+using Microsoft.Agents.AI;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Configuration;
 
-return await ProgramEntry.RunAsync(args);
+var config = new ConfigurationBuilder()
+    .AddUserSecrets<Program>().AddEnvironmentVariables().Build();
+var endpoint = config["Foundry:ProjectEndpoint"]!;
+var model = config["Foundry:Model"] ?? "gpt-5-mini";
 
-internal static class ProgramEntry
+IChatClient chatClient = new AIProjectClient(new Uri(endpoint), new AzureCliCredential())
+    .GetProjectOpenAIClient()
+    .GetResponsesClient()
+    .AsIChatClient(model);
+
+AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 {
-    public static async Task<int> RunAsync(string[] args)
+    DisableFileMemory = true,
+    ChatOptions = new ChatOptions
     {
-        if (!CliOptions.TryParse(args, out var options, out var parseError))
-        {
-            if (!string.IsNullOrWhiteSpace(parseError))
-            {
-                Console.Error.WriteLine(parseError);
-            }
+        Instructions = """
+            You are a personal finance education assistant.
+            Use get_stock_price for stock prices.
+            Use hosted web search for recent market news and cite sources.
+            Use the todo list to track multi-step work.
+            Keep responses concise. Never provide personalized financial advice.
+            """,
+        Tools = [StockTools.GetStockPrice]
+    }
+});
 
-            CliOptions.PrintUsage(Console.Error);
-            return 1;
-        }
+var session = await agent.CreateSessionAsync();
+var todos = agent.GetService<TodoProvider>()!;
 
-        if (!TryCreateStockTools(
-                ResolveMarketDataPath,
-                static path => new StockTools(path),
-                Console.Error,
-                out var stockTools))
-        {
-            return FixtureFailureExitCode;
-        }
+Console.WriteLine("Finance assistant ready. Commands: /todos, /exit");
 
-        if (options.Mode == RuntimeMode.Offline)
-        {
-            var offlineClaw = new OfflineClaw(stockTools!);
-            await offlineClaw.RunAsync(options.Scenario, Console.In, Console.Out, CancellationToken.None);
-            return 0;
-        }
+while (true)
+{
+    Console.Write("> ");
+    var input = Console.ReadLine();
+    if (input is null || input.Trim().Equals("/exit", StringComparison.OrdinalIgnoreCase))
+        break;
 
-        try
-        {
-            var settings = FoundryConfiguration.Resolve();
-            var runtime = await new FinanceAgentFactory(settings, stockTools!).CreateAsync(CancellationToken.None);
-
-            var console = new ClawConsole(runtime.Agent, runtime.TodoProvider);
-            await console.RunAsync(Console.In, Console.Out, CancellationToken.None);
-            return 0;
-        }
-        catch (ConfigurationValidationException ex)
-        {
-            Console.Error.WriteLine(ex.Message);
-            return 2;
-        }
-        catch (CredentialUnavailableException ex)
-        {
-            return WriteError(ErrorDispatch.TryMap(ex)!.Value);
-        }
-        catch (AuthenticationFailedException ex)
-        {
-            return WriteError(ErrorDispatch.TryMap(ex)!.Value);
-        }
-        catch (ClientResultException ex)
-        {
-            return WriteError(ErrorDispatch.TryMap(ex)!.Value);
-        }
-        catch (RequestFailedException ex)
-        {
-            return WriteError(ErrorDispatch.TryMap(ex)!.Value);
-        }
-        catch (HttpRequestException ex)
-        {
-            return WriteError(ErrorDispatch.TryMap(ex)!.Value);
-        }
+    if (input.Trim().StartsWith("/todos", StringComparison.OrdinalIgnoreCase))
+    {
+        var items = await todos.GetAllTodosAsync(session);
+        if (items.Count == 0) { Console.WriteLine("No todos yet."); continue; }
+        foreach (var t in items)
+            Console.WriteLine($"  [{(t.IsComplete ? "x" : " ")}] {t.Title}");
+        continue;
     }
 
-    private static int WriteError((string message, int exitCode) mapped)
-    {
-        Console.Error.WriteLine(mapped.message);
-        return mapped.exitCode;
-    }
-
-    internal const int FixtureFailureExitCode = 6;
-    internal const string FixtureFailureMessage =
-        "The local mock market data fixture is missing or invalid. Restore mock-market-data.json and retry.";
-
-    internal static bool TryCreateStockTools(
-        Func<string> pathResolver,
-        Func<string, StockTools> stockToolsFactory,
-        TextWriter error,
-        out StockTools? stockTools)
-    {
-        try
-        {
-            stockTools = stockToolsFactory(pathResolver());
-            return true;
-        }
-        catch (Exception exception) when (IsFixtureInitializationFailure(exception))
-        {
-            stockTools = null;
-            error.WriteLine(FixtureFailureMessage);
-            return false;
-        }
-    }
-
-    private static bool IsFixtureInitializationFailure(Exception exception) =>
-        exception is IOException
-            or UnauthorizedAccessException
-            or JsonException
-            or InvalidOperationException
-            or ArgumentException;
-
-    private static string ResolveMarketDataPath()
-    {
-        var outputPath = Path.Combine(AppContext.BaseDirectory, "mock-market-data.json");
-        if (File.Exists(outputPath))
-        {
-            return outputPath;
-        }
-
-        var localPath = Path.Combine(Directory.GetCurrentDirectory(), "mock-market-data.json");
-        if (File.Exists(localPath))
-        {
-            return localPath;
-        }
-
-        throw new FileNotFoundException("mock-market-data.json was not found.", localPath);
-    }
+    var response = await agent.RunAsync(input, session);
+    Console.WriteLine(response.Text);
 }

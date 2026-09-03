@@ -1,45 +1,29 @@
-# Checkpoint 03 — Stock tool and hosted search
+# Checkpoint 03 — Tools and Search
 
-[Session 1 home](../../README.md) · [Previous: Harness core](../02-harness-core/README.md) · [Next: planning and todos](../04-planning-and-todos/README.md)
+[Session 1 home](../../README.md) · Previous: [02 — Meet the Harness](../02-harness-agent/README.md) · Next: [04 — Planning and Todos](../04-planning-and-todos/README.md)
 
-> **Runnable status:** Implemented. This checkpoint requires live Foundry configuration, Azure CLI authentication, and a service/model that supports hosted search.
+## What this teaches
 
-## Purpose
+Give the agent a custom tool. Register a `get_stock_price` function with hardcoded mock data — the model decides when to call it. Hosted web search is enabled by default through the Harness (no code needed).
 
-Keep the Harness construction from checkpoint 02, register the local `get_stock_price` function, and enable the Harness's hosted-search composition.
+## What changed from Checkpoint 02
 
-The Harness standardizes how capabilities are assembled. It does not have exclusive ownership of tool calling: a standard Agent Framework agent can also use tools.
+| Change | Detail |
+|---|---|
+| New file: `StockTools.cs` | A static class with an inline dictionary of 3 ticker prices (MSFT, NVDA, AMZN) and one `[Description]`-annotated method |
+| Tools registered | `Tools = [StockTools.GetStockPrice]` added to `ChatOptions` |
+| Instructions updated | Now mention `get_stock_price` for stock prices |
+| Prompt changed | Asks for the current price of MSFT instead of generic advice |
 
-## Finance scenario
+## What's in the box
 
-The program uses this fixed prompt:
+| File | Lines | Purpose |
+|---|---|---|
+| `Program.cs` | 29 | Same Harness pattern, now with a tool in `ChatOptions.Tools` |
+| `StockTools.cs` | 25 | `get_stock_price` — 3 hardcoded tickers in a dictionary, no file I/O |
+| `.csproj` | ~20 | Same packages as Checkpoint 02 |
 
-```text
-Show the illustrative MSFT price using get_stock_price.
-Then find recent NVDA news using hosted web search and include inline source citations.
-```
-
-What stays the same:
-
-- finance instructions and educational tone;
-- Foundry project/model configuration;
-- the explicit `IChatClient` and Harness construction.
-
-What changes:
-
-- `get_stock_price` is registered in `ChatOptions.Tools`;
-- hosted search is enabled;
-- the response prints an explicit used/not-used search marker.
-
-## What owns what
-
-- The application constructs `IChatClient`.
-- The Harness constructs and composes the `AIAgent`.
-- Application code owns `StockTools` and its local mock fixture.
-- The Harness adds hosted search.
-- The service/model decides whether hosted search is supported and can run.
-
-## Run
+## How to run
 
 From `session-01`:
 
@@ -47,42 +31,24 @@ From `session-01`:
 dotnet run --project .\checkpoints\03-tools-and-search\MafClaw.Checkpoint03.csproj
 ```
 
-Successful live output starts with:
+## What to expect
 
-```text
-LIVE · checkpoint 03 · tools and search
-```
+The model calls `get_stock_price` and prints something like `MSFT: 512.34 USD (mock)`. The number comes from the code, not the model — that's the proof the tool was called.
 
-The model response varies. One of these stable lines follows it:
+If the configured model supports hosted web search, you may also see recent market context sourced from the web. No code is needed to enable this — the Harness provides it.
 
-```text
-[Hosted web search was used.]
-[Hosted web search was not used for this response.]
-```
+## Mock data
 
-The used marker verifies that the response contained hosted-search tool call or
-result content. It does **not** verify citation annotations. Inspect citations
-separately when the model returns them. The second marker is an honest result,
-not a successful search claim.
+All prices are hardcoded educational fixtures:
 
-Live execution and hosted search can incur Azure/model charges. Prompts and
-relevant tool/query content are sent to the configured service and, when search
-runs, to the hosted-search capability. Review your organization's data-sharing,
-residency, logging, and cost policies. Do not send confidential, personal, or
-real financial data.
+| Symbol | Price |
+|---|---|
+| MSFT | 512.34 USD |
+| NVDA | 184.72 USD |
+| AMZN | 241.18 USD |
 
-If the service returns a content-filter or safety refusal, respect it. Do not
-retry with evasive wording or attempt to bypass the policy. Remove unnecessary
-sensitive content, choose a clearly benign educational prompt, or stop.
+These are not real market quotes.
 
-## Limitations
+## Next step
 
-- Stock values come from local mock fixtures, not a market-data service.
-- Hosted search is service-dependent and requires live execution.
-- `TodoProvider` is disabled so tools/search remain the focus.
-- No sample-owned plan/execute UX or approval yet.
-- No offline fallback or file memory/session resume.
-
-All displayed stock values are mock data. This sample is educational and is not financial advice.
-
-[Previous: Harness core](../02-harness-core/README.md) · [Next: planning and todos](../04-planning-and-todos/README.md)
+[Checkpoint 04](../04-planning-and-todos/README.md) adds an interactive REPL with the Harness `TodoProvider` and multi-turn conversations.

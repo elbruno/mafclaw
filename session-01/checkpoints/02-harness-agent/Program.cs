@@ -20,10 +20,9 @@ AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
     DisableFileMemory = true,
     ChatOptions = new ChatOptions
     {
-        Instructions = "You are a personal finance education assistant. Use get_stock_price for stock prices. Keep responses concise.",
-        Tools = [StockTools.GetStockPrice]
+        Instructions = "You are a personal finance education assistant. Keep responses concise."
     }
 });
 
 Console.WriteLine(await agent.RunAsync(
-    "What is the current price of MSFT?"));
+    "What are three things a beginner should consider before buying a stock?"));

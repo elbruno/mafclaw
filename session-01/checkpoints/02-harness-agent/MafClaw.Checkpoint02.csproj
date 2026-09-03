@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>OPENAI001;MAAI001</NoWarn>
     <UserSecretsId>8f001de5-00b8-4cd2-835b-e0ea21979f0f</UserSecretsId>
   </PropertyGroup>
 
@@ -15,7 +16,7 @@
     <PackageReference Include="Microsoft.Agents.AI.Foundry" Version="1.20.0-preview.260831.1" />
     <PackageReference Include="Microsoft.Agents.AI.Harness" Version="1.20.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.11" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.11" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.11" />
   </ItemGroup>
 </Project>
