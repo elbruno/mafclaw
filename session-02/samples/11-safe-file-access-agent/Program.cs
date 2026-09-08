@@ -44,6 +44,7 @@ AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
     {
         AutoApprovalRules = [FileAccessProvider.ReadOnlyToolsAutoApprovalRule],
     },
+    AgentModeProviderOptions = new AgentModeProviderOptions { DefaultMode = "execute" },
     ChatOptions = new ChatOptions
     {
         Instructions = """
@@ -57,22 +58,9 @@ AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
     }
 });
 
-var session = await agent.CreateSessionAsync();
-
 Console.WriteLine("mafclaw · Session 02 sample 11");
 Console.WriteLine("Agentic safe file access with Microsoft Agent Framework + Harness.");
 Console.WriteLine("Try: What is in my portfolio?");
 Console.WriteLine("Commands: /exit");
 
-while (true)
-{
-    Console.Write("> ");
-    var input = Console.ReadLine();
-    if (input is null || input.Trim().Equals("/exit", StringComparison.OrdinalIgnoreCase))
-    {
-        break;
-    }
-
-    var response = await agent.RunAsync(input, session);
-    Console.WriteLine(response.Text);
-}
+await AgentConsoleRunner.RunAsync(agent);

@@ -2,6 +2,7 @@ using Azure.AI.Extensions.OpenAI;
 using Azure.AI.Projects;
 using Azure.Identity;
 using Microsoft.Agents.AI;
+using Microsoft.Agents.AI.Foundry;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 
@@ -12,6 +13,8 @@ var config = new ConfigurationBuilder()
 
 var endpoint = config["Foundry:ProjectEndpoint"] ?? config["FOUNDRY_PROJECT_ENDPOINT"];
 var model = config["Foundry:Model"] ?? config["FOUNDRY_MODEL"] ?? "gpt-5-mini";
+var memoryStoreName = config["Foundry:MemoryStore"] ?? config["FOUNDRY_MEMORY_STORE"];
+var embeddingModel = config["Foundry:EmbeddingModel"] ?? config["FOUNDRY_EMBEDDING_MODEL"];
 
 if (string.IsNullOrWhiteSpace(endpoint))
 {
@@ -21,48 +24,56 @@ if (string.IsNullOrWhiteSpace(endpoint))
     return;
 }
 
-MemoryStoreTools.Initialize(Path.Combine(AppContext.BaseDirectory, "memory.json"));
+var projectClient = new AIProjectClient(new Uri(endpoint), new AzureCliCredential());
 
-IChatClient chatClient = new AIProjectClient(new Uri(endpoint), new AzureCliCredential())
+FoundryMemoryProvider? foundryMemory = null;
+if (!string.IsNullOrWhiteSpace(memoryStoreName) && !string.IsNullOrWhiteSpace(embeddingModel))
+{
+    foundryMemory = new FoundryMemoryProvider(
+        projectClient,
+        memoryStoreName,
+        stateInitializer: _ => new(new FoundryMemoryProviderScope("mafclaw-session-02-sample-user")),
+        new FoundryMemoryProviderOptions
+        {
+            UpdateDelay = 0,
+        });
+
+    await foundryMemory.EnsureMemoryStoreCreatedAsync(
+        model,
+        embeddingModel,
+        "Durable memory for the MafClaw Session 2 memory sample.");
+
+    Console.WriteLine($"Foundry memory enabled (store: {memoryStoreName}).");
+}
+else
+{
+    Console.WriteLine("Foundry memory disabled. Set Foundry:MemoryStore and Foundry:EmbeddingModel to enable durable memory.");
+}
+
+IChatClient chatClient = projectClient
     .GetProjectOpenAIClient()
     .GetResponsesClient()
     .AsIChatClient(model);
 
 AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 {
+    AIContextProviders = foundryMemory is null ? null : [foundryMemory],
+    AgentModeProviderOptions = new AgentModeProviderOptions { DefaultMode = "execute" },
     ChatOptions = new ChatOptions
     {
         Instructions = """
             You are a finance education assistant.
-            Use remember_user_preference to store preferences.
-            Use get_memory to read stored values.
-            Explain that this sample uses simple local file memory before the full app expands the pattern.
+            Remember durable facts the user tells you about their investing profile, goals, and preferences.
+            When memory is enabled, Microsoft Foundry extracts and recalls those facts through the configured memory provider.
+            Explain whether Foundry memory is enabled before relying on cross-session recall.
             """,
-        Tools =
-        [
-            MemoryStoreTools.RememberUserPreference,
-            MemoryStoreTools.GetMemory
-        ]
     }
 });
 
-var session = await agent.CreateSessionAsync();
-
 Console.WriteLine("mafclaw · Session 02 sample 31");
-Console.WriteLine("Agentic memory store with Microsoft Agent Framework + Harness.");
+Console.WriteLine("Agentic memory with Microsoft Agent Framework + Harness + FoundryMemoryProvider.");
 Console.WriteLine("Try: Remember that I am a conservative investor.");
-Console.WriteLine("Then restart and ask: What do you remember about my user-preference?");
+Console.WriteLine("Then start a new session and ask: What do you remember about my investor profile?");
 Console.WriteLine("Commands: /exit");
 
-while (true)
-{
-    Console.Write("> ");
-    var input = Console.ReadLine();
-    if (input is null || input.Trim().Equals("/exit", StringComparison.OrdinalIgnoreCase))
-    {
-        break;
-    }
-
-    var response = await agent.RunAsync(input, session);
-    Console.WriteLine(response.Text);
-}
+await AgentConsoleRunner.RunAsync(agent);

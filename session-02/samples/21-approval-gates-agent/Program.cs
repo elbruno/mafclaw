@@ -28,12 +28,14 @@ IChatClient chatClient = new AIProjectClient(new Uri(endpoint), new AzureCliCred
 
 AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 {
+    AgentModeProviderOptions = new AgentModeProviderOptions { DefaultMode = "execute" },
     ChatOptions = new ChatOptions
     {
         Instructions = """
             You are a finance education assistant.
             Any simulated trade must use request_simulated_trade.
-            Explain that approvals protect users before side effects happen.
+            The request_simulated_trade tool is wrapped with the Harness approval-required function wrapper.
+            Explain that Harness approvals protect users before side effects happen.
             Never claim that a real trade was placed.
             """,
         Tools =
@@ -43,22 +45,9 @@ AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
     }
 });
 
-var session = await agent.CreateSessionAsync();
-
 Console.WriteLine("mafclaw · Session 02 sample 21");
 Console.WriteLine("Agentic approval gate with Microsoft Agent Framework + Harness.");
 Console.WriteLine("Try: Buy 10 shares of MSFT.");
 Console.WriteLine("Commands: /exit");
 
-while (true)
-{
-    Console.Write("> ");
-    var input = Console.ReadLine();
-    if (input is null || input.Trim().Equals("/exit", StringComparison.OrdinalIgnoreCase))
-    {
-        break;
-    }
-
-    var response = await agent.RunAsync(input, session);
-    Console.WriteLine(response.Text);
-}
+await AgentConsoleRunner.RunAsync(agent);

@@ -3,7 +3,7 @@
 These samples use a paired structure for each Session 2 concept:
 
 - `10`, `20`, and `30` are small plain C# demos that isolate the concept.
-- `11`, `21`, and `31` are the same ideas exposed as Microsoft Agent Framework/Harness tools.
+- `11`, `21`, and `31` are the same ideas implemented with the official Microsoft Agent Framework Harness or Foundry APIs.
 - `..\code\` is the complete finance advisor that combines all three concepts.
 
 ## 10 and 11 — safe file access
@@ -14,12 +14,12 @@ These samples use a paired structure for each Session 2 concept:
 ## 20 and 21 — approval gates
 
 - `20-approval-gates` models the human-in-the-loop approval flow before side effects.
-- `21-approval-gates-agent` exposes the simulated trade approval as the `request_simulated_trade` agent tool.
+- `21-approval-gates-agent` wraps the simulated trade tool with `ApprovalRequiredAIFunction` so Harness owns the approval boundary.
 
 ## 30 and 31 — memory store
 
 - `30-memory-store` shows durable state stored to disk and restored across a restart.
-- `31-memory-store-agent` exposes local memory as the `remember_user_preference` and `get_memory` agent tools.
+- `31-memory-store-agent` uses `FoundryMemoryProvider` so Foundry can extract and recall durable user facts when memory is configured.
 
 ## Run them
 

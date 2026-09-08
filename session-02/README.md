@@ -14,7 +14,7 @@ The official source article is:
 
 The agent from Session 1 can talk, browse the web, and plan. Session 2 adds the boundary that turns it from a clever conversation partner into a practical assistant for real user data.
 
-The samples use paired demos. The `10`, `20`, and `30` samples teach each safety primitive as plain C# so the behavior is easy to see. The `11`, `21`, and `31` samples immediately show the same primitive registered as a Microsoft Agent Framework Harness tool. The final app in `code/` combines all three into one finance advisor.
+The samples use paired demos. The `10`, `20`, and `30` samples teach each safety primitive as plain C# so the behavior is easy to see. The `11`, `21`, and `31` samples immediately show the same primitive through the official Microsoft Agent Framework Harness or Foundry surface. The final app in `code/` combines all three into one finance advisor.
 
 ### Core concepts
 
@@ -95,9 +95,9 @@ The expected behavior is:
 
 1. The secrets script targets `session-02\code\MafClaw.Session02.csproj`.
 2. The base samples demonstrate safe file access, approval gates, and file-backed memory.
-3. The agentic samples expose each individual behavior as a Harness tool.
+3. The agentic samples use the official surfaces: Harness `FileAccessStore`, `ApprovalRequiredAIFunction`, and `FoundryMemoryProvider`.
 4. The finance advisor app combines those same behaviors as one complete Harness agent.
-5. The app reads and writes only inside its working folder, requests approval before sensitive actions, and preserves memory between runs.
+5. The app reads and writes only inside its working folder, requests approval before sensitive actions, and uses Foundry memory when configured.
 
 ## Session status
 
