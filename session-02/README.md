@@ -14,6 +14,8 @@ The official source article is:
 
 The agent from Session 1 can talk, browse the web, and plan. Session 2 adds the boundary that turns it from a clever conversation partner into a practical assistant for real user data.
 
+The isolated samples first teach each safety primitive as plain C# so the behavior is easy to see. The final sample, `samples/04-agent-harness-bridge`, connects those primitives to the agent world by registering them as Microsoft Agent Framework Harness tools.
+
 ### Core concepts
 
 1. File access
@@ -56,6 +58,7 @@ The live demo is expected to evolve in this order:
 
 - `code/` — the working sample and evolving Session 2 application
 - `docs/` — setup, teaching notes, and the runbook for the session
+- `samples/` — isolated concept demos plus the Agent Framework/Harness bridge sample
 - `general/` in the root repo — shared setup, mock-data, and cross-session guidance
 
 ## How to test it
@@ -75,10 +78,12 @@ dotnet build .\session-02\code\MafClaw.Session02.csproj
 dotnet build .\session-02\samples\01-safe-file-access\MafClaw.Sample01.csproj
 dotnet build .\session-02\samples\02-approval-gate\MafClaw.Sample02.csproj
 dotnet build .\session-02\samples\03-memory-store\MafClaw.Sample03.csproj
+dotnet build .\session-02\samples\04-agent-harness-bridge\MafClaw.Sample04.csproj
 
 dotnet run --project .\session-02\samples\01-safe-file-access\MafClaw.Sample01.csproj
 dotnet run --project .\session-02\samples\02-approval-gate\MafClaw.Sample02.csproj
 dotnet run --project .\session-02\samples\03-memory-store\MafClaw.Sample03.csproj
+dotnet run --project .\session-02\samples\04-agent-harness-bridge\MafClaw.Sample04.csproj
 dotnet run --project .\session-02\code\MafClaw.Session02.csproj
 ```
 
@@ -86,7 +91,8 @@ The expected behavior is:
 
 1. The secrets script targets `session-02\code\MafClaw.Session02.csproj`.
 2. The isolated samples demonstrate safe file access, approval gates, and file-backed memory.
-3. The finance advisor app reads and writes only inside its working folder, requests approval before sensitive actions, and preserves memory between runs.
+3. The Harness bridge sample exposes those same behaviors as agent tools.
+4. The finance advisor app reads and writes only inside its working folder, requests approval before sensitive actions, and preserves memory between runs.
 
 ## Session status
 

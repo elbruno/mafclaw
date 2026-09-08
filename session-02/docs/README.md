@@ -58,7 +58,26 @@ The audience should see the same use case evolve over time:
 3. explain and then remember things about the user
 4. place a simulated trade under approval
 5. persist a watchlist in file memory
-6. review memory across a session restart
+6. connect those primitives to an Agent Framework Harness agent
+7. review memory across a session restart
+
+## Agent connection
+
+The first three samples are intentionally plain C#:
+
+- `01-safe-file-access` proves the file boundary.
+- `02-approval-gate` proves the human approval boundary.
+- `03-memory-store` proves durable local memory.
+
+The bridge back to agents is `04-agent-harness-bridge`. It uses:
+
+- `AIProjectClient`
+- `AzureCliCredential`
+- `AsIChatClient(...)`
+- `AsHarnessAgent(...)`
+- `AIFunctionFactory.Create(...)`
+
+That sample registers the same safety primitives as agent tools. The teaching message is: the agent is still a model-driven loop, but the application owns the tools, the paths, the approvals, and the memory boundaries.
 
 ## Demo safety checklist
 

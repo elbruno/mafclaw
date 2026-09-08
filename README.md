@@ -14,14 +14,14 @@ A 4-part Microsoft Reactor live coding series that builds a personal finance CLI
 | Session | Date | Title | Status | Links |
 |---|---|---|---|---|
 | 1 | Thu Sep 3, 2026 | Meet Your Claw: A Harness in Three Lines of C# | ✅ Ready — 4 incremental checkpoints + finished sample | [Session guide](./session-01/README.md) &#124; [Blog](https://devblogs.microsoft.com/agent-framework/meet-your-agent-harness-and-claw/) &#124; [Live event](https://aka.ms/mafclaw/1) |
-| 2 | Thu Sep 10, 2026 | Working With Your Data, Safely: Files, Approvals and Memory | ✅ Ready — isolated safety samples + finance advisor walkthrough | [Session guide](./session-02/README.md) &#124; [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-working-with-your-data-safely/) &#124; [Event](https://aka.ms/mafclaw/2) |
+| 2 | Thu Sep 10, 2026 | Working With Your Data, Safely: Files, Approvals and Memory | ✅ Ready — isolated safety samples + Agent Framework/Harness bridge + finance advisor walkthrough | [Session guide](./session-02/README.md) &#124; [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-working-with-your-data-safely/) &#124; [Event](https://aka.ms/mafclaw/2) |
 | 3 | Thu Sep 17, 2026 | Scaling the Claw: Skills, Shell, CodeAct and Background Agents | 🔲 Not started | [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-scaling-the-claw-or-harness-capabilities/) &#124; [Event](https://aka.ms/mafclaw/3) |
 | 4 | Thu Sep 24, 2026 | Production Ready: Observability, Governance and Deployment | 🔲 Not started | [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-making-your-claw-production-ready/) &#124; [Event](https://aka.ms/mafclaw/4) |
 
 ## Repository layout
 
 - `session-01/` — Session 1: four incremental checkpoints (hello-agent → harness → tools → planning+todos) and the finished sample.
-- `session-02/` — Session 2: isolated samples for safe file access, approvals, and memory, plus the finished finance advisor walkthrough.
+- `session-02/` — Session 2: isolated samples for safe file access, approvals, and memory, an Agent Framework/Harness bridge sample, plus the finished finance advisor walkthrough.
 - `session-03/` through `session-04/` — Placeholder folders. Not started; real .NET 10 snapshots will replace them after each session goes live.
 - `general/docs/` — Prerequisites, configuration, and troubleshooting for all sessions.
 
@@ -70,6 +70,7 @@ $env:FOUNDRY_EMBEDDING_MODEL = "YOUR-EMBEDDING-MODEL"     # optional
 dotnet run --project .\session-02\samples\01-safe-file-access\MafClaw.Sample01.csproj
 dotnet run --project .\session-02\samples\02-approval-gate\MafClaw.Sample02.csproj
 dotnet run --project .\session-02\samples\03-memory-store\MafClaw.Sample03.csproj
+dotnet run --project .\session-02\samples\04-agent-harness-bridge\MafClaw.Sample04.csproj
 
 # 4. Run the full Session 2 finance advisor app
 dotnet run --project .\session-02\code\MafClaw.Session02.csproj
