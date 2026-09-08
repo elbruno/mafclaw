@@ -9,7 +9,7 @@ These samples use a paired structure for each Session 2 concept:
 ## 10 and 11 — safe file access
 
 - `10-safe-file-access` demonstrates a working folder with allowed reads.
-- `11-safe-file-access-agent` exposes the safe portfolio reader as the `read_portfolio_summary` agent tool.
+- `11-safe-file-access-agent` uses the Harness `FileAccessStore` with the built-in `file_access_*` tools rooted at the approved working folder.
 
 ## 20 and 21 — approval gates
 

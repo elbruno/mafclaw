@@ -21,7 +21,16 @@ if (string.IsNullOrWhiteSpace(endpoint))
     return;
 }
 
-SafeFileAccessTools.Initialize(Path.Combine(AppContext.BaseDirectory, "working"));
+var workingDirectory = Path.Combine(AppContext.BaseDirectory, "working");
+Directory.CreateDirectory(workingDirectory);
+
+var portfolioPath = Path.Combine(workingDirectory, "portfolio.csv");
+if (!File.Exists(portfolioPath))
+{
+    File.WriteAllText(
+        portfolioPath,
+        "symbol,shares,averageCost,risk\nMSFT,25,430.10,moderate\nSPY,40,530.25,low\nNVDA,18,142.50,high\n");
+}
 
 IChatClient chatClient = new AIProjectClient(new Uri(endpoint), new AzureCliCredential())
     .GetProjectOpenAIClient()
@@ -30,18 +39,21 @@ IChatClient chatClient = new AIProjectClient(new Uri(endpoint), new AzureCliCred
 
 AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 {
+    FileAccessStore = new FileSystemAgentFileStore(workingDirectory),
+    ToolApprovalAgentOptions = new ToolApprovalAgentOptions
+    {
+        AutoApprovalRules = [FileAccessProvider.ReadOnlyToolsAutoApprovalRule],
+    },
     ChatOptions = new ChatOptions
     {
         Instructions = """
             You are a finance education assistant.
-            Use read_portfolio_summary to answer portfolio questions.
-            Do not invent portfolio data and do not read outside the approved working folder.
+            The user's mock portfolio is in portfolio.csv.
+            Use the built-in file_access tools to inspect files before answering portfolio questions.
+            Read-only file operations are allowed automatically; writes and destructive file operations require approval.
+            Do not invent portfolio data and do not request data outside the approved working folder.
             Remind the user that the portfolio is mock educational data.
             """,
-        Tools =
-        [
-            SafeFileAccessTools.ReadPortfolioSummary
-        ]
     }
 });
 

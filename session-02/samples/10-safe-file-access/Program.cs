@@ -31,6 +31,9 @@ static string ReadWithinSandbox(string path, string sandboxRoot)
 static bool IsSafePath(string candidatePath, string sandboxRoot)
 {
     var fullCandidate = Path.GetFullPath(candidatePath);
-    var fullRoot = Path.GetFullPath(sandboxRoot);
-    return fullCandidate.StartsWith(fullRoot, StringComparison.OrdinalIgnoreCase);
+    var fullRoot = Path.GetFullPath(sandboxRoot).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+    var fullRootWithSeparator = fullRoot + Path.DirectorySeparatorChar;
+
+    return string.Equals(fullCandidate, fullRoot, StringComparison.OrdinalIgnoreCase)
+        || fullCandidate.StartsWith(fullRootWithSeparator, StringComparison.OrdinalIgnoreCase);
 }
