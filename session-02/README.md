@@ -14,7 +14,7 @@ The official source article is:
 
 The agent from Session 1 can talk, browse the web, and plan. Session 2 adds the boundary that turns it from a clever conversation partner into a practical assistant for real user data.
 
-The isolated samples first teach each safety primitive as plain C# so the behavior is easy to see. The final app in `code/` connects those primitives to the agent world by registering them as Microsoft Agent Framework Harness tools.
+The samples use paired demos. The `10`, `20`, and `30` samples teach each safety primitive as plain C# so the behavior is easy to see. The `11`, `21`, and `31` samples immediately show the same primitive registered as a Microsoft Agent Framework Harness tool. The final app in `code/` combines all three into one finance advisor.
 
 ### Core concepts
 
@@ -58,7 +58,7 @@ The live demo is expected to evolve in this order:
 
 - `code/` — the final Agent Framework/Harness finance advisor application
 - `docs/` — setup, teaching notes, and the runbook for the session
-- `samples/` — isolated concept demos for safe file access, approvals, and memory
+- `samples/` — paired plain C# and agentic demos for safe file access, approvals, and memory
 - `general/` in the root repo — shared setup, mock-data, and cross-session guidance
 
 ## How to test it
@@ -75,26 +75,33 @@ $env:FOUNDRY_EMBEDDING_MODEL = "YOUR-EMBEDDING-MODEL"     # optional
 .\tools\configure-user-secrets.ps1 -Session 2
 
 dotnet build .\session-02\code\MafClaw.Session02.csproj
-dotnet build .\session-02\samples\01-safe-file-access\MafClaw.Sample01.csproj
-dotnet build .\session-02\samples\02-approval-gate\MafClaw.Sample02.csproj
-dotnet build .\session-02\samples\03-memory-store\MafClaw.Sample03.csproj
+dotnet build .\session-02\samples\10-safe-file-access\MafClaw.Sample10.csproj
+dotnet build .\session-02\samples\11-safe-file-access-agent\MafClaw.Sample11.csproj
+dotnet build .\session-02\samples\20-approval-gates\MafClaw.Sample20.csproj
+dotnet build .\session-02\samples\21-approval-gates-agent\MafClaw.Sample21.csproj
+dotnet build .\session-02\samples\30-memory-store\MafClaw.Sample30.csproj
+dotnet build .\session-02\samples\31-memory-store-agent\MafClaw.Sample31.csproj
 
-dotnet run --project .\session-02\samples\01-safe-file-access\MafClaw.Sample01.csproj
-dotnet run --project .\session-02\samples\02-approval-gate\MafClaw.Sample02.csproj
-dotnet run --project .\session-02\samples\03-memory-store\MafClaw.Sample03.csproj
+dotnet run --project .\session-02\samples\10-safe-file-access\MafClaw.Sample10.csproj
+dotnet run --project .\session-02\samples\11-safe-file-access-agent\MafClaw.Sample11.csproj
+dotnet run --project .\session-02\samples\20-approval-gates\MafClaw.Sample20.csproj
+dotnet run --project .\session-02\samples\21-approval-gates-agent\MafClaw.Sample21.csproj
+dotnet run --project .\session-02\samples\30-memory-store\MafClaw.Sample30.csproj
+dotnet run --project .\session-02\samples\31-memory-store-agent\MafClaw.Sample31.csproj
 dotnet run --project .\session-02\code\MafClaw.Session02.csproj
 ```
 
 The expected behavior is:
 
 1. The secrets script targets `session-02\code\MafClaw.Session02.csproj`.
-2. The isolated samples demonstrate safe file access, approval gates, and file-backed memory.
-3. The finance advisor app exposes those same behaviors as Harness agent tools.
-4. The app reads and writes only inside its working folder, requests approval before sensitive actions, and preserves memory between runs.
+2. The base samples demonstrate safe file access, approval gates, and file-backed memory.
+3. The agentic samples expose each individual behavior as a Harness tool.
+4. The finance advisor app combines those same behaviors as one complete Harness agent.
+5. The app reads and writes only inside its working folder, requests approval before sensitive actions, and preserves memory between runs.
 
 ## Session status
 
-This folder is the public-facing Session 2 package. It keeps the pace of the live series: small isolated concept samples first, then the bigger finance-agent walkthrough.
+This folder is the public-facing Session 2 package. It keeps the pace of the live series: isolated concept sample, agentic bridge sample, then the complete finance-agent walkthrough.
 
 ## Privacy and safety notes
 

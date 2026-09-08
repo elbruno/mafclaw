@@ -6,7 +6,7 @@ memory["user-preference"] = "Conservative investor for a house purchase in two y
 memory["watchlist"] = "MSFT, SPY";
 Save(memoryPath, memory);
 
-Console.WriteLine("Session 2 sample: memory store");
+Console.WriteLine("Session 2 sample 30: memory store");
 Console.WriteLine("Saved state before restart:");
 Console.WriteLine($"user-preference = {memory["user-preference"]}");
 Console.WriteLine($"watchlist = {memory["watchlist"]}");

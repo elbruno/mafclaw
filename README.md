@@ -66,10 +66,13 @@ $env:FOUNDRY_MEMORY_STORE = "YOUR-MEMORY-STORE"            # optional
 $env:FOUNDRY_EMBEDDING_MODEL = "YOUR-EMBEDDING-MODEL"     # optional
 .\tools\configure-user-secrets.ps1 -Session 2
 
-# 3. Run the isolated concept samples
-dotnet run --project .\session-02\samples\01-safe-file-access\MafClaw.Sample01.csproj
-dotnet run --project .\session-02\samples\02-approval-gate\MafClaw.Sample02.csproj
-dotnet run --project .\session-02\samples\03-memory-store\MafClaw.Sample03.csproj
+# 3. Run the paired base + agentic samples
+dotnet run --project .\session-02\samples\10-safe-file-access\MafClaw.Sample10.csproj
+dotnet run --project .\session-02\samples\11-safe-file-access-agent\MafClaw.Sample11.csproj
+dotnet run --project .\session-02\samples\20-approval-gates\MafClaw.Sample20.csproj
+dotnet run --project .\session-02\samples\21-approval-gates-agent\MafClaw.Sample21.csproj
+dotnet run --project .\session-02\samples\30-memory-store\MafClaw.Sample30.csproj
+dotnet run --project .\session-02\samples\31-memory-store-agent\MafClaw.Sample31.csproj
 
 # 4. Run the full Session 2 finance advisor app
 dotnet run --project .\session-02\code\MafClaw.Session02.csproj

@@ -5,7 +5,7 @@ Directory.CreateDirectory(sandboxRoot);
 var portfolioPath = Path.Combine(sandboxRoot, "portfolio.csv");
 File.WriteAllText(portfolioPath, "symbol,shares,average_cost\nMSFT,25,430.10\nSPY,40,530.25\nNVDA,18,142.50\n");
 
-Console.WriteLine("Session 2 sample: safe file access");
+Console.WriteLine("Session 2 sample 10: safe file access");
 Console.WriteLine("The agent may only read files inside the sandbox.");
 
 var allowedContent = ReadWithinSandbox(portfolioPath, sandboxRoot);

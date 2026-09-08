@@ -10,8 +10,8 @@ var config = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
-var endpoint = config["Foundry:ProjectEndpoint"];
-var model = config["Foundry:Model"] ?? "gpt-5-mini";
+var endpoint = config["Foundry:ProjectEndpoint"] ?? config["FOUNDRY_PROJECT_ENDPOINT"];
+var model = config["Foundry:Model"] ?? config["FOUNDRY_MODEL"] ?? "gpt-5-mini";
 
 if (string.IsNullOrWhiteSpace(endpoint))
 {

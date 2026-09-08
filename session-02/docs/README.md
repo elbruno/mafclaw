@@ -63,13 +63,16 @@ The audience should see the same use case evolve over time:
 
 ## Agent connection
 
-The first three samples are intentionally plain C#:
+The samples are paired so every concept has a plain C# version and an agentic version:
 
-- `01-safe-file-access` proves the file boundary.
-- `02-approval-gate` proves the human approval boundary.
-- `03-memory-store` proves durable local memory.
+- `10-safe-file-access` proves the file boundary in plain C#.
+- `11-safe-file-access-agent` turns that boundary into a Harness tool.
+- `20-approval-gates` proves the human approval boundary in plain C#.
+- `21-approval-gates-agent` turns the approval boundary into a Harness tool.
+- `30-memory-store` proves durable local memory in plain C#.
+- `31-memory-store-agent` turns memory into Harness tools.
 
-The bridge back to agents is the final app in `code/`. It uses:
+The final app in `code/` combines all three patterns. It uses:
 
 - `AIProjectClient`
 - `AzureCliCredential`
