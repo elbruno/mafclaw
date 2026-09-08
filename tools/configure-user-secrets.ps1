@@ -4,8 +4,8 @@
 
 .DESCRIPTION
     The single entry point for setting up .NET user-secrets across all MafClaw
-    session sample projects. Discovers .csproj files under each session's code
-    folder, runs dotnet user-secrets init when a UserSecretsId is absent, and
+    session sample projects. Discovers the session's configured .csproj files,
+    runs dotnet user-secrets init when a UserSecretsId is absent, and
     stores the required settings without ever printing configured values.
 
     Values are resolved in this order for each key:
@@ -99,15 +99,22 @@ $ErrorActionPreference = 'Stop'
 # Session configuration map — non-secret metadata only.
 # Each entry declares the keys a session owns so the script can set or clear
 # exactly those keys without touching anything else in the user-secrets store.
-# Sessions 2-4 are forward-compatible placeholders; their code is not yet
-# implemented but their .csproj files can safely receive a UserSecretsId.
+# ProjectPaths are relative to each session folder. Only projects that read
+# Foundry configuration are included; plain support samples do not need secrets.
 # ---------------------------------------------------------------------------
 $script:SessionMap = [ordered]@{
     '1' = @{
-        Label  = 'Session 1 – Meet Your Agent Harness and Claw'
-        Status = 'active'
-        Folder = 'session-01'
-        Keys   = @(
+        Label        = 'Session 1 – Meet Your Agent Harness and Claw'
+        Status       = 'active'
+        Folder       = 'session-01'
+        ProjectPaths = @(
+            'checkpoints\01-hello-agent\MafClaw.Checkpoint01.csproj'
+            'checkpoints\02-harness-agent\MafClaw.Checkpoint02.csproj'
+            'checkpoints\03-tools-and-search\MafClaw.Checkpoint03.csproj'
+            'checkpoints\04-planning-and-todos\MafClaw.Checkpoint04.csproj'
+            'code\MafClaw.Session01.csproj'
+        )
+        Keys         = @(
             [pscustomobject]@{
                 Name     = 'Foundry:ProjectEndpoint'
                 Prompt   = 'Azure AI Foundry project endpoint URL'
@@ -125,10 +132,13 @@ $script:SessionMap = [ordered]@{
         )
     }
     '2' = @{
-        Label  = 'Session 2 – Working With Your Data Safely'
-        Status = 'active'
-        Folder = 'session-02'
-        Keys   = @(
+        Label        = 'Session 2 – Working With Your Data Safely'
+        Status       = 'active'
+        Folder       = 'session-02'
+        ProjectPaths = @(
+            'code\MafClaw.Session02.csproj'
+        )
+        Keys         = @(
             [pscustomobject]@{ Name = 'Foundry:ProjectEndpoint'; Prompt = 'Azure AI Foundry project endpoint URL';         EnvVar = 'FOUNDRY_PROJECT_ENDPOINT'; Required = $true;  IsSecret = $false }
             [pscustomobject]@{ Name = 'Foundry:Model';           Prompt = 'Foundry model or deployment name';             EnvVar = 'FOUNDRY_MODEL';            Required = $true;  IsSecret = $false }
             [pscustomobject]@{ Name = 'Foundry:MemoryStore';     Prompt = 'Foundry memory store name (Enter to skip)';    EnvVar = 'FOUNDRY_MEMORY_STORE';     Required = $false; IsSecret = $false }
@@ -136,10 +146,13 @@ $script:SessionMap = [ordered]@{
         )
     }
     '3' = @{
-        Label  = 'Session 3 – Scaling the Claw or Harness Capabilities (placeholder – code not yet implemented)'
-        Status = 'placeholder'
-        Folder = 'session-03'
-        Keys   = @(
+        Label        = 'Session 3 – Scaling the Claw or Harness Capabilities (placeholder – code not yet implemented)'
+        Status       = 'placeholder'
+        Folder       = 'session-03'
+        ProjectPaths = @(
+            'code\MafClaw.Session03.csproj'
+        )
+        Keys         = @(
             [pscustomobject]@{ Name = 'Foundry:ProjectEndpoint'; Prompt = 'Azure AI Foundry project endpoint URL';             EnvVar = 'FOUNDRY_PROJECT_ENDPOINT'; Required = $true;  IsSecret = $false }
             [pscustomobject]@{ Name = 'Foundry:Model';           Prompt = 'Foundry model or deployment name';                 EnvVar = 'FOUNDRY_MODEL';            Required = $true;  IsSecret = $false }
             [pscustomobject]@{ Name = 'Foundry:MemoryStore';     Prompt = 'Foundry memory store name (Enter to skip)';        EnvVar = 'FOUNDRY_MEMORY_STORE';     Required = $false; IsSecret = $false }
@@ -148,10 +161,13 @@ $script:SessionMap = [ordered]@{
         )
     }
     '4' = @{
-        Label  = 'Session 4 – Making Your Claw Production-Ready (placeholder – code not yet implemented)'
-        Status = 'placeholder'
-        Folder = 'session-04'
-        Keys   = @(
+        Label        = 'Session 4 – Making Your Claw Production-Ready (placeholder – code not yet implemented)'
+        Status       = 'placeholder'
+        Folder       = 'session-04'
+        ProjectPaths = @(
+            'code\MafClaw.Session04.csproj'
+        )
+        Keys         = @(
             [pscustomobject]@{ Name = 'Foundry:ProjectEndpoint';              Prompt = 'Azure AI Foundry project endpoint URL';                    EnvVar = 'FOUNDRY_PROJECT_ENDPOINT';              Required = $true;  IsSecret = $false }
             [pscustomobject]@{ Name = 'Foundry:Model';                        Prompt = 'Foundry model or deployment name';                        EnvVar = 'FOUNDRY_MODEL';                         Required = $true;  IsSecret = $false }
             [pscustomobject]@{ Name = 'Foundry:MemoryStore';                  Prompt = 'Foundry memory store name (Enter to skip)';               EnvVar = 'FOUNDRY_MEMORY_STORE';                  Required = $false; IsSecret = $false }
@@ -171,17 +187,24 @@ function Write-Step {
     Write-Host "[mafclaw-secrets] $Msg"
 }
 
-function Get-SessionCsprojPath {
-    param([string]$SessionFolder)
-    $codeDir = Join-Path $resolvedCodeRoot $SessionFolder | Join-Path -ChildPath 'code'
-    if (-not (Test-Path -LiteralPath $codeDir)) {
-        throw "Session code directory not found: $codeDir"
+function Get-SessionCsprojPaths {
+    param([hashtable]$SessionConfig)
+
+    $sessionRoot = Join-Path $resolvedCodeRoot $SessionConfig.Folder
+    if (-not (Test-Path -LiteralPath $sessionRoot)) {
+        throw "Session directory not found: $sessionRoot"
     }
-    $csproj = Get-ChildItem -LiteralPath $codeDir -Filter '*.csproj' | Select-Object -First 1
-    if (-not $csproj) {
-        throw "No .csproj file found in: $codeDir"
+
+    $paths = foreach ($relativePath in $SessionConfig.ProjectPaths) {
+        $candidate = Join-Path $sessionRoot $relativePath
+        if (-not (Test-Path -LiteralPath $candidate)) {
+            throw "Configured project not found: $candidate"
+        }
+
+        (Resolve-Path -LiteralPath $candidate).Path
     }
-    return $csproj.FullName
+
+    return @($paths)
 }
 
 function Test-HasUserSecretsId {
@@ -282,17 +305,21 @@ foreach ($sk in $sessionKeys) {
     $cfg = $script:SessionMap[$sk]
     Write-Step $cfg.Label
 
-    # Resolve the target .csproj
+    # Resolve the target .csproj files
     if ($ProjectPath -and $sessionKeys.Count -eq 1) {
         if (-not (Test-Path -LiteralPath $ProjectPath)) {
             throw "Project not found: $ProjectPath"
         }
-        $csproj = $ProjectPath
+        $projects = @((Resolve-Path -LiteralPath $ProjectPath).Path)
     } else {
-        $csproj = Get-SessionCsprojPath -SessionFolder $cfg.Folder
+        $projects = Get-SessionCsprojPaths -SessionConfig $cfg
     }
 
-    Write-Host "  Project : $csproj"
+    Write-Host '  Projects:'
+    foreach ($project in $projects) {
+        Write-Host "    $project"
+    }
+    Write-Host ''
 
     # List key names (never values) for visibility
     if ($Clear) {
@@ -312,61 +339,65 @@ foreach ($sk in $sessionKeys) {
         Write-Host ''
     }
 
-    # ---- UserSecretsId init (set mode only) ----
-    if (-not $Clear) {
-        if (-not (Test-HasUserSecretsId -CsprojPath $csproj)) {
-            if ($PSCmdlet.ShouldProcess($csproj, 'dotnet user-secrets init')) {
-                Write-Host '  Initialising user-secrets...'
-                $initOut = & dotnet user-secrets init --project $csproj 2>&1
-                if ($LASTEXITCODE -ne 0) {
-                    throw "dotnet user-secrets init failed for '$csproj': $initOut"
-                }
-                Write-Host '  UserSecretsId created.'
-            }
-        } else {
-            Write-Host '  UserSecretsId already present — skipping init.'
-        }
-    }
+    foreach ($csproj in $projects) {
+        Write-Host "  Configuring project: $csproj"
 
-    # ---- Key operations ----
-    foreach ($k in $cfg.Keys) {
-        if ($Clear) {
-            if ($PSCmdlet.ShouldProcess("$csproj : $($k.Name)", 'Remove user-secret')) {
-                $rmOut = & dotnet user-secrets remove $k.Name --project $csproj 2>&1
-                if ($LASTEXITCODE -eq 0) {
-                    Write-Host "  Removed  : $($k.Name)"
-                } else {
-                    Write-Host "  Not found: $($k.Name) (nothing to remove)"
-                }
-            }
-        } else {
-            # Collect value only when not in WhatIf mode (no interactive prompts for dry runs)
-            $value = $null
-            if (-not $isWhatIf) {
-                $value = Resolve-ConfigValue -KeyDef $k -Overrides $overrides -Cache $valueCache
-
-                if ([string]::IsNullOrEmpty($value)) {
-                    if ($k.Required) {
-                        throw "Required value for '$($k.Name)' was not provided."
+        # ---- UserSecretsId init (set mode only) ----
+        if (-not $Clear) {
+            if (-not (Test-HasUserSecretsId -CsprojPath $csproj)) {
+                if ($PSCmdlet.ShouldProcess($csproj, 'dotnet user-secrets init')) {
+                    Write-Host '  Initialising user-secrets...'
+                    $initOut = & dotnet user-secrets init --project $csproj 2>&1
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "dotnet user-secrets init failed for '$csproj': $initOut"
                     }
-                    Write-Host "  Skipped  : $($k.Name) (optional, no value supplied)"
-                    continue
+                    Write-Host '  UserSecretsId created.'
                 }
-            }
-
-            # ShouldProcess prints the WhatIf message and returns $false in WhatIf mode.
-            # In normal mode it returns $true and the set runs.
-            if ($PSCmdlet.ShouldProcess("$csproj : $($k.Name)", 'Set user-secret')) {
-                $setOut = & dotnet user-secrets set $k.Name $value --project $csproj 2>&1
-                if ($LASTEXITCODE -ne 0) {
-                    throw "dotnet user-secrets set failed for '$($k.Name)': $setOut"
-                }
-                Write-Host "  Set      : $($k.Name)"
+            } else {
+                Write-Host '  UserSecretsId already present — skipping init.'
             }
         }
-    }
 
-    Write-Host ''
+        # ---- Key operations ----
+        foreach ($k in $cfg.Keys) {
+            if ($Clear) {
+                if ($PSCmdlet.ShouldProcess("$csproj : $($k.Name)", 'Remove user-secret')) {
+                    $rmOut = & dotnet user-secrets remove $k.Name --project $csproj 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-Host "  Removed  : $($k.Name)"
+                    } else {
+                        Write-Host "  Not found: $($k.Name) (nothing to remove)"
+                    }
+                }
+            } else {
+                # Collect value only when not in WhatIf mode (no interactive prompts for dry runs)
+                $value = $null
+                if (-not $isWhatIf) {
+                    $value = Resolve-ConfigValue -KeyDef $k -Overrides $overrides -Cache $valueCache
+
+                    if ([string]::IsNullOrEmpty($value)) {
+                        if ($k.Required) {
+                            throw "Required value for '$($k.Name)' was not provided."
+                        }
+                        Write-Host "  Skipped  : $($k.Name) (optional, no value supplied)"
+                        continue
+                    }
+                }
+
+                # ShouldProcess prints the WhatIf message and returns $false in WhatIf mode.
+                # In normal mode it returns $true and the set runs.
+                if ($PSCmdlet.ShouldProcess("$csproj : $($k.Name)", 'Set user-secret')) {
+                    $setOut = & dotnet user-secrets set $k.Name $value --project $csproj 2>&1
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "dotnet user-secrets set failed for '$($k.Name)': $setOut"
+                    }
+                    Write-Host "  Set      : $($k.Name)"
+                }
+            }
+        }
+
+        Write-Host ''
+    }
 }
 
 # Summary

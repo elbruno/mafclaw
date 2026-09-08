@@ -58,3 +58,9 @@ If you make a decision that affects other team members, write it to:
 .squad/decisions/inbox/copilot-{brief-slug}.md
 ```
 The Scribe will merge it into the shared decisions file.
+
+## C# coding style
+
+- Keep each C# class, record, interface, and enum in its own `.cs` file named after the type.
+- `Program.cs` should contain only the application entry point/top-level statements and orchestration code.
+- Do not hide reusable sample logic as extra types at the bottom of `Program.cs`; move it into named files so live demos can reveal one concept at a time.
