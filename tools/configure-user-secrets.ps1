@@ -125,8 +125,8 @@ $script:SessionMap = [ordered]@{
         )
     }
     '2' = @{
-        Label  = 'Session 2 – Working With Your Data Safely (placeholder – code not yet implemented)'
-        Status = 'placeholder'
+        Label  = 'Session 2 – Working With Your Data Safely'
+        Status = 'active'
         Folder = 'session-02'
         Keys   = @(
             [pscustomobject]@{ Name = 'Foundry:ProjectEndpoint'; Prompt = 'Azure AI Foundry project endpoint URL';         EnvVar = 'FOUNDRY_PROJECT_ENDPOINT'; Required = $true;  IsSecret = $false }

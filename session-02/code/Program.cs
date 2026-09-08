@@ -1,188 +1,203 @@
+using System.Globalization;
 using System.Text.Json;
 
-var settings = Session02Settings.Load();
-var sample = new Session02Sample(
-    ResolvePath(settings.Sample.MarketDataFile),
-    settings,
-    new ApprovalConsole(),
-    new InMemoryMemoryStore());
+var demo = new Session02Demo();
+await demo.RunAsync();
 
-Console.WriteLine("mafclaw · Session 02 snapshot");
-Console.WriteLine("Illustrative sample only. Mock data only. Not financial advice.");
-Console.WriteLine();
-
-await sample.RunAsync();
-
-static string ResolvePath(string fileName)
+internal sealed class Session02Demo
 {
-    var outputPath = Path.Combine(AppContext.BaseDirectory, fileName);
-    if (File.Exists(outputPath))
+    private readonly string _workingDir;
+    private readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web)
     {
-        return outputPath;
+        WriteIndented = true
+    };
+
+    public Session02Demo()
+    {
+        _workingDir = Path.Combine(AppContext.BaseDirectory, "working");
+        EnsureDemoFiles();
     }
-
-    return Path.Combine(Directory.GetCurrentDirectory(), fileName);
-}
-
-internal sealed class Session02Sample(
-    string marketDataPath,
-    Session02Settings settings,
-    IApprovalGate approvalGate,
-    IMemoryStore memoryStore)
-{
-    private readonly string _marketDataPath = marketDataPath;
-    private readonly Session02Settings _settings = settings;
-    private readonly IApprovalGate _approvalGate = approvalGate;
-    private readonly IMemoryStore _memoryStore = memoryStore;
-    private readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web) { WriteIndented = true };
 
     public async Task RunAsync()
     {
-        var request = new PortfolioRequest("Bruno-demo", new[] { "MSFT", "NVDA" }, "portfolio-notes.txt");
-        Console.WriteLine($"Request: summarize mock positions for {request.ProfileId}");
+        Console.WriteLine("mafclaw · Session 02");
+        Console.WriteLine("Working with your data safely: files, approvals and memory");
+        Console.WriteLine("Mock data only. Not financial advice.");
         Console.WriteLine();
 
-        Console.WriteLine("Planned steps");
-        foreach (var step in new[]
+        var approvalGate = new ConsoleApprovalGate();
+        var memory = new FileMemoryStore(Path.Combine(_workingDir, "memory.json"));
+        var portfolioPath = Path.Combine(_workingDir, "portfolio.csv");
+        var reportPath = Path.Combine(_workingDir, "reports", "portfolio-summary.md");
+
+        Console.WriteLine("Step 1: read the portfolio from a safe working folder");
+        var readApproved = await approvalGate.RequestApprovalAsync("Read local portfolio file");
+        if (!readApproved)
         {
-            "Read approved local file context",
-            "Load mock stock prices",
-            "Store a lightweight memory entry",
-            "Return a short safe summary"
-        })
+            Console.WriteLine("Read denied. The agent must stop at the approval boundary.");
+            return;
+        }
+
+        var portfolio = await LoadPortfolioAsync(portfolioPath);
+        var holdings = portfolio.Select(p => $"{p.Symbol}: {p.Shares} shares @ ${p.AverageCost:F2}").ToList();
+
+        Console.WriteLine("Portfolio contents:");
+        foreach (var item in holdings)
         {
-            Console.WriteLine($"- {step}");
+            Console.WriteLine($"  - {item}");
         }
 
         Console.WriteLine();
-
-        var filePreview = await ReadApprovedFileAsync(request.ContextFile);
-        var quotes = await LoadQuotesAsync(request.Symbols);
-        await _memoryStore.SaveAsync($"last-profile:{request.ProfileId}", $"Viewed {string.Join(", ", request.Symbols)} from mock data.");
-
-        var result = new
+        Console.WriteLine("Step 2: write a short report, but only after approval");
+        var writeApproved = await approvalGate.RequestApprovalAsync("Write portfolio summary to disk");
+        if (writeApproved)
         {
-            session = "02",
-            featureSet = new[] { "file_access", "approvals", "memory" },
-            settings = new
+            var report = BuildSummaryReport(portfolio, "Conservative allocation");
+            Directory.CreateDirectory(Path.GetDirectoryName(reportPath)!);
+            await File.WriteAllTextAsync(reportPath, report);
+            Console.WriteLine($"Report saved to: {reportPath}");
+        }
+        else
+        {
+            Console.WriteLine("Write denied. No report was saved.");
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("Step 3: remember user preferences and watchlist updates");
+        await memory.SaveAsync("user-preference", "Conservative investor; saving for a house in two years.");
+        await memory.SaveAsync("watchlist", "MSFT, SPY");
+
+        Console.WriteLine($"User preference: {await memory.GetAsync("user-preference")}");
+        Console.WriteLine($"Watchlist: {await memory.GetAsync("watchlist")}");
+
+        Console.WriteLine();
+        Console.WriteLine("Step 4: approval gate before side effects");
+        var tradeApproved = await approvalGate.RequestApprovalAsync("Place simulated trade: buy 10 shares of MSFT");
+        if (tradeApproved)
+        {
+            Console.WriteLine("Trade accepted. This is a demo-only simulated order, not a real transaction.");
+        }
+        else
+        {
+            Console.WriteLine("Trade denied. Human approval is required for side effects.");
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("Memory persists across a simulated restart:");
+        var freshStore = new FileMemoryStore(Path.Combine(_workingDir, "memory.json"));
+        Console.WriteLine($"Restarted memory: {await freshStore.GetAsync("user-preference")}");
+        Console.WriteLine($"Restored watchlist: {await freshStore.GetAsync("watchlist")}");
+        Console.WriteLine();
+        Console.WriteLine("Session 2 demo complete.");
+    }
+
+    private void EnsureDemoFiles()
+    {
+        Directory.CreateDirectory(_workingDir);
+        var portfolioPath = Path.Combine(_workingDir, "portfolio.csv");
+        var reportDir = Path.Combine(_workingDir, "reports");
+
+        if (!File.Exists(portfolioPath))
+        {
+            var csv = "symbol,shares,averageCost,risk\nMSFT,35,430.12,moderate\nNVDA,20,142.50,high\nSPY,50,530.25,low\n";
+            File.WriteAllText(portfolioPath, csv);
+        }
+
+        Directory.CreateDirectory(reportDir);
+    }
+
+    private static async Task<List<PortfolioHolding>> LoadPortfolioAsync(string portfolioPath)
+    {
+        var lines = await File.ReadAllLinesAsync(portfolioPath);
+        var holdings = new List<PortfolioHolding>();
+
+        for (var i = 1; i < lines.Length; i++)
+        {
+            var line = lines[i].Trim();
+            if (string.IsNullOrWhiteSpace(line))
             {
-                _settings.Models.PrimaryModel,
-                _settings.Services.SearchEndpoint
-            },
-            filePreview,
-            quotes,
-            memory = await _memoryStore.GetAsync($"last-profile:{request.ProfileId}"),
-            guidance = new[]
-            {
-                "Use approvals before reading attendee-local files.",
-                "Persist only safe demo memory, never secrets.",
-                "Keep all outputs mock and clearly labeled."
+                continue;
             }
+
+            var parts = line.Split(',');
+            if (parts.Length < 4)
+            {
+                continue;
+            }
+
+            holdings.Add(new PortfolioHolding(
+                parts[0],
+                int.Parse(parts[1], CultureInfo.InvariantCulture),
+                decimal.Parse(parts[2], CultureInfo.InvariantCulture),
+                parts[3]));
+        }
+
+        return holdings;
+    }
+
+    private static string BuildSummaryReport(IEnumerable<PortfolioHolding> portfolio, string strategy)
+    {
+        var items = portfolio.ToList();
+        var totalValue = items.Sum(i => i.Shares * i.AverageCost);
+        var lines = new List<string>
+        {
+            "# Portfolio Summary",
+            "",
+            $"Strategy: {strategy}",
+            $"Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC",
+            "",
+            "| Symbol | Shares | Average Cost | Risk |",
+            "| --- | ---: | ---: | --- |"
         };
 
-        Console.WriteLine("Sample response");
-        Console.WriteLine(JsonSerializer.Serialize(result, _jsonOptions));
-    }
-
-    private async Task<string> ReadApprovedFileAsync(string fileName)
-    {
-        var approved = await _approvalGate.RequestApprovalAsync($"Read local file '{fileName}'");
-        if (!approved)
+        foreach (var item in items)
         {
-            return "File read skipped because approval was not granted.";
+            lines.Add($"| {item.Symbol} | {item.Shares} | ${item.AverageCost:F2} | {item.Risk} |");
         }
 
-        return "Approved placeholder file preview: portfolio notes mention a cautious demo posture and mock-only claims.";
-    }
+        lines.Add("");
+        lines.Add($"**Estimated portfolio value:** ${totalValue:F2}");
+        lines.Add("\nThis summary is mock educational content, not financial advice.");
 
-    private async Task<IReadOnlyList<StockQuote>> LoadQuotesAsync(IReadOnlyList<string> symbols)
+        return string.Join(Environment.NewLine, lines);
+    }
+}
+
+internal sealed record PortfolioHolding(string Symbol, int Shares, decimal AverageCost, string Risk);
+
+internal sealed class ConsoleApprovalGate
+{
+    public async Task<bool> RequestApprovalAsync(string action)
     {
-        await using var stream = File.OpenRead(_marketDataPath);
-        var quotes = await JsonSerializer.DeserializeAsync<List<StockQuote>>(stream, _jsonOptions)
-            ?? throw new InvalidOperationException("Mock market data is missing.");
-
-        return quotes.Where(q => symbols.Contains(q.Symbol, StringComparer.OrdinalIgnoreCase)).ToList();
+        Console.Write($"Approve this action: {action}? [y/N]: ");
+        var response = await Task.Run(() => Console.ReadLine());
+        return string.Equals(response, "y", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(response, "yes", StringComparison.OrdinalIgnoreCase);
     }
 }
 
-internal sealed record PortfolioRequest(string ProfileId, IReadOnlyList<string> Symbols, string ContextFile);
-internal sealed record StockQuote(string Symbol, decimal Price, string Currency, string Source);
-
-internal interface IApprovalGate
+internal sealed class FileMemoryStore
 {
-    Task<bool> RequestApprovalAsync(string action);
-}
+    private readonly string _memoryPath;
+    private readonly Dictionary<string, string> _entries;
 
-internal sealed class ApprovalConsole : IApprovalGate
-{
-    public Task<bool> RequestApprovalAsync(string action)
+    public FileMemoryStore(string memoryPath)
     {
-        Console.WriteLine($"Approval gate: auto-approved placeholder for '{action}'.");
-        return Task.FromResult(true);
+        _memoryPath = memoryPath;
+        Directory.CreateDirectory(Path.GetDirectoryName(memoryPath)!);
+        _entries = File.Exists(memoryPath)
+            ? JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(memoryPath)) ?? new Dictionary<string, string>()
+            : new Dictionary<string, string>();
     }
-}
 
-internal interface IMemoryStore
-{
-    Task SaveAsync(string key, string value);
-    Task<string?> GetAsync(string key);
-}
-
-internal sealed class InMemoryMemoryStore : IMemoryStore
-{
-    private readonly Dictionary<string, string> _entries = new(StringComparer.OrdinalIgnoreCase);
-
-    public Task SaveAsync(string key, string value)
+    public async Task SaveAsync(string key, string value)
     {
         _entries[key] = value;
-        return Task.CompletedTask;
+        await File.WriteAllTextAsync(_memoryPath, JsonSerializer.Serialize(_entries, new JsonSerializerOptions { WriteIndented = true }));
     }
 
     public Task<string?> GetAsync(string key)
     {
-        _entries.TryGetValue(key, out var value);
-        return Task.FromResult(value);
+        return Task.FromResult(_entries.TryGetValue(key, out var value) ? value : null);
     }
-}
-
-internal sealed class Session02Settings
-{
-    public ModelSettings Models { get; init; } = new();
-    public ServiceSettings Services { get; init; } = new();
-    public SampleSettings Sample { get; init; } = new();
-
-    public static Session02Settings Load()
-    {
-        var path = ResolveSettingsPath();
-        var json = File.ReadAllText(path);
-        return JsonSerializer.Deserialize<Session02Settings>(json, new JsonSerializerOptions(JsonSerializerDefaults.Web))
-            ?? throw new InvalidOperationException("Unable to load appsettings.template.json");
-    }
-
-    private static string ResolveSettingsPath()
-    {
-        var outputPath = Path.Combine(AppContext.BaseDirectory, "appsettings.template.json");
-        if (File.Exists(outputPath))
-        {
-            return outputPath;
-        }
-
-        return Path.Combine(Directory.GetCurrentDirectory(), "appsettings.template.json");
-    }
-}
-
-internal sealed class ModelSettings
-{
-    public string PrimaryModel { get; init; } = "placeholder-model";
-}
-
-internal sealed class ServiceSettings
-{
-    public string SearchEndpoint { get; init; } = "https://example.invalid/search";
-    public string SearchApiKey { get; init; } = "set-via-user-secrets-or-env";
-}
-
-internal sealed class SampleSettings
-{
-    public string MarketDataFile { get; init; } = "mock-market-data.json";
 }

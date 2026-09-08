@@ -1,31 +1,85 @@
-# Session 02: Working With Your Data, Safely
+# Session 2 — Speaker and demo notes
 
-This session extends the Session 1 harness with safe local data access patterns, approval workflows, and memory storage.
+## Why this session matters
 
-Target framework: .NET 10.
+Session 1 taught the agent to talk and to use tools. Session 2 teaches the agent how to work safely with user-owned files and user-owned actions.
 
-## What this sample will show
+This is the point where the harness becomes a real control plane for a helpful, but bounded, personal assistant.
 
-- Real harness file access guarded by approval gates.
-- Confined read/write access to session-specific portfolio files.
-- Auto-approval policy for read-only operations.
-- Approval-required operations for writes, deletes, and trades.
-- In-memory session state and file-based session persistence.
-- Optional Foundry memory integration (Session 2+).
+## The three teaching pillars
 
-## Status
+### 1. File access
 
-Session 02 code snapshot and documentation are under development. A complete runnable sample will be available after Session 1 publication.
+The assistant should read from a real portfolio file instead of inventing the user's holdings.
 
-For now, read the official blog post for the conceptual foundation:
+The examples show a constrained file-access provider that points at a working folder, enabling:
 
-https://devblogs.microsoft.com/agent-framework/agent-harness-working-with-your-data-safely/
+- list files
+- search files
+- read files
+- write a report
+- delete or overwrite only under approved conditions
 
-See `session-01/docs/README.md` for completed setup and architecture reference.
+The most important teaching point is that the tools are scoped to a safe path and should not be treated as unlimited filesystem access.
 
-## Coming soon
+### 2. Approvals
 
-- Full Session 02 code snapshot with real API implementation.
-- Step-by-step walkthrough and prompts.
-- Approval workflow examples.
-- Advanced troubleshooting.
+A trade is a side-effecting action. It cannot run in the same way as a read-only lookup.
+
+The harness provides approval middleware for:
+
+- `Approve this call`
+- `Always approve this tool`
+- `Always approve this tool with these arguments`
+- `Deny`
+
+This becomes the human-in-the-loop boundary that makes the assistant safer and more accountable.
+
+### 3. Memory
+
+Memory is the next step after file and action safety.
+
+The session introduces two complementary models:
+
+- File memory: store watchlists or notes that the agent intentionally curates in files under a session-scoped working folder.
+- Foundry memory: durable facts about the user are captured and recalled automatically by the platform.
+
+The difference is intentionally important:
+
+- file memory is explicit and coarse-grained
+- Foundry memory is implicit and fine-grained
+
+## The live-session arc
+
+The audience should see the same use case evolve over time:
+
+1. inspect a portfolio file
+2. write a report to disk
+3. explain and then remember things about the user
+4. place a simulated trade under approval
+5. persist a watchlist in file memory
+6. review memory across a session restart
+
+## Demo safety checklist
+
+- use mock data only
+- avoid real personal financial inputs
+- never screen-share raw exceptions or terminal output that includes resource IDs or tenant markers
+- do not claim that every service or region supports every memory type
+- explain that hosted search and memory both involve service-level policies and cost implications
+
+## Planned sample prompts
+
+- `What is in my portfolio?`
+- `Write me a short report on my portfolio and save it.`
+- `I am a conservative investor saving for a house in two years.`
+- `Buy 10 shares of MSFT.`
+- `Add SPY to my watchlist.`
+- `What is on my watchlist?`
+- `What do you know about me?`
+
+## Related references
+
+- [Official article](https://devblogs.microsoft.com/agent-framework/agent-harness-working-with-your-data-safely/)
+- [Session 2 overview](../README.md)
+- [Session 1 overview](../../session-01/README.md)

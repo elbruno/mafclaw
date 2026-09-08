@@ -12,7 +12,7 @@ This folder contains reusable helpers and mock data generators shared across ses
 
 Each `session-0X/code` folder is designed to be fully self-contained and independently runnable. Shared code here is read-only reference material and template building blocks, not a required dependency.
 
-**Current readiness:** Session 1 is runnable. Sessions 2–4 currently contain unsupported .NET 9 placeholder applications — they are not finished samples and are pending replacement with real .NET 10 implementations. Do not attempt to run Sessions 2–4 code or use it as reference until their implementations are published.
+**Current readiness:** Sessions 1 and 2 are runnable. Sessions 3 and 4 currently contain unsupported placeholder applications — they are not finished samples and are pending replacement with real implementations. Do not attempt to run Sessions 3–4 code or use it as reference until their implementations are published.
 
 Never create tight coupling between session folders. If a session needs a helper, copy it into the session folder or build it independently using this folder as a reference.
 
