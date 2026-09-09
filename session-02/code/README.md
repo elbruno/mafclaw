@@ -30,8 +30,8 @@ The app uses:
 
 ### Stage 3 — memory
 
-- Harness file memory remains available for file-like memory artifacts
 - Foundry memory is enabled when `Foundry:MemoryStore` and `Foundry:EmbeddingModel` are configured
+- when disabled, the app prints that Foundry memory is disabled and does not fall back to any local memory store
 - the memory store name is a logical store name, not a URL or secret
 
 ## Module structure
@@ -41,9 +41,12 @@ code/
   MafClaw.Session02.csproj
   Program.cs
   AgentFinanceTools.cs
+  AgentConsoleRunner.cs
   working/
     portfolio.csv
 ```
+
+`AgentConsoleRunner.cs` runs the console loop and handles `ToolApprovalRequestContent` prompts, sending the user's `[y/N]` decision back to Harness as `ToolApprovalResponseContent` so approval-required tools (like the simulated trade) can complete.
 
 ## Expected behavior
 
@@ -53,7 +56,6 @@ The final agent should allow the user to:
 - save a Markdown report to disk
 - place a simulated trade only after approval
 - remember durable user preferences when Foundry memory is configured
-- keep agent-curated memory artifacts with Harness file memory
 
 ## Safety expectations
 

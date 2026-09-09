@@ -78,9 +78,12 @@ The final app in `code/` combines all three patterns. It uses:
 - `AzureCliCredential`
 - `AsIChatClient(...)`
 - `AsHarnessAgent(...)`
-- `AIFunctionFactory.Create(...)`
+- `FileAccessStore` with the built-in `file_access_*` tools for portfolio reads and report writes
+- `ApprovalRequiredAIFunction` to gate the simulated trade tool
+- `FoundryMemoryProvider` for durable user-fact recall, when configured
+- `AgentConsoleRunner` to surface `ToolApprovalRequestContent` prompts and send the approval decision back to Harness
 
-The app registers the same safety primitives as agent tools. The teaching message is: the agent is still a model-driven loop, but the application owns the tools, the paths, the approvals, and the memory boundaries.
+The teaching message is: the agent is still a model-driven loop, but the application owns the tools, the paths, the approvals, and the memory boundaries.
 
 ## Demo safety checklist
 
