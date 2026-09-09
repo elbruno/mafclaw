@@ -110,4 +110,4 @@ Console.WriteLine("  Buy 10 shares of MSFT.");
 Console.WriteLine();
 Console.WriteLine("Commands: /exit");
 
-await AgentConsoleRunner.RunAsync(agent);
+await AgentConsoleRunner.RunAsync(agent, foundryMemory);

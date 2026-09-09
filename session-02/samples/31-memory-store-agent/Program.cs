@@ -76,4 +76,4 @@ Console.WriteLine("Try: Remember that I am a conservative investor.");
 Console.WriteLine("Then start a new session and ask: What do you remember about my investor profile?");
 Console.WriteLine("Commands: /exit");
 
-await AgentConsoleRunner.RunAsync(agent);
+await AgentConsoleRunner.RunAsync(agent, foundryMemory);

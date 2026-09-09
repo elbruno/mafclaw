@@ -1,9 +1,10 @@
 using Microsoft.Agents.AI;
+using Microsoft.Agents.AI.Foundry;
 using Microsoft.Extensions.AI;
 
 internal static class AgentConsoleRunner
 {
-    public static async Task RunAsync(AIAgent agent)
+    public static async Task RunAsync(AIAgent agent, FoundryMemoryProvider? foundryMemory = null)
     {
         var session = await agent.CreateSessionAsync();
 
@@ -18,6 +19,22 @@ internal static class AgentConsoleRunner
 
             var response = await agent.RunAsync(input, session);
             await WriteResponseAndHandleApprovalsAsync(agent, session, response);
+        }
+
+        if (foundryMemory is not null)
+        {
+            // Foundry memory extraction runs as a background job on the service.
+            // Wait for it here so a restarted process can immediately recall what was just said.
+            try
+            {
+                Console.WriteLine("Waiting for Foundry memory updates to finish...");
+                await foundryMemory.WhenUpdatesCompletedAsync();
+                Console.WriteLine("Foundry memory updates complete.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Foundry memory update did not complete cleanly: {ex.Message}");
+            }
         }
     }
 
