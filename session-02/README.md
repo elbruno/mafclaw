@@ -27,6 +27,7 @@ The samples use a teaching ladder. The `10`, `20`, and `30` samples teach each s
    - risky actions should pause and ask before running
    - review prompts provide a safe human-in-the-loop boundary
    - standing approvals and auto-approval rules keep low-risk flows smooth
+   - timeout and retry policies fail closed when the approver does not respond
 
 3. Memory
    - file memory stores files the agent decides to curate, such as a watchlist
@@ -81,6 +82,7 @@ dotnet build .\session-02\samples\10-safe-file-access\MafClaw.Sample10.csproj
 dotnet build .\session-02\samples\11-safe-file-access-agent\MafClaw.Sample11.csproj
 dotnet build .\session-02\samples\20-approval-gates\MafClaw.Sample20.csproj
 dotnet build .\session-02\samples\21-approval-gates-agent\MafClaw.Sample21.csproj
+dotnet build .\session-02\samples\22-approval-retries-timeouts\MafClaw.Sample22.csproj
 dotnet build .\session-02\samples\30-memory-store\MafClaw.Sample30.csproj
 dotnet build .\session-02\samples\31-memory-store-agent\MafClaw.Sample31.csproj
 dotnet build .\session-02\samples\32-local-file-memory-agent\MafClaw.Sample32.csproj
@@ -89,6 +91,7 @@ dotnet run --project .\session-02\samples\10-safe-file-access\MafClaw.Sample10.c
 dotnet run --project .\session-02\samples\11-safe-file-access-agent\MafClaw.Sample11.csproj
 dotnet run --project .\session-02\samples\20-approval-gates\MafClaw.Sample20.csproj
 dotnet run --project .\session-02\samples\21-approval-gates-agent\MafClaw.Sample21.csproj
+dotnet run --project .\session-02\samples\22-approval-retries-timeouts\MafClaw.Sample22.csproj
 dotnet run --project .\session-02\samples\30-memory-store\MafClaw.Sample30.csproj
 dotnet run --project .\session-02\samples\31-memory-store-agent\MafClaw.Sample31.csproj
 dotnet run --project .\session-02\samples\32-local-file-memory-agent\MafClaw.Sample32.csproj
@@ -99,7 +102,7 @@ The expected behavior is:
 
 1. The secrets script targets `session-02\code\MafClaw.Session02.csproj`.
 2. The base samples demonstrate safe file access, approval gates, and file-backed memory.
-3. The agentic samples use Harness `FileAccessStore`, `ApprovalRequiredAIFunction`, explicit local memory tools, and `FoundryMemoryProvider`.
+3. The agentic samples use Harness `FileAccessStore`, `ApprovalRequiredAIFunction`, fail-closed approval retry policies, explicit local memory tools, and `FoundryMemoryProvider`.
 4. The finance advisor app combines those same behaviors as one complete Harness agent.
 5. The app reads and writes only inside its working folder, requests approval before sensitive actions, and uses Foundry memory when configured.
 

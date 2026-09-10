@@ -45,7 +45,10 @@ During the live demo, run the same trade request twice:
 
 1. Ask `Buy 10 shares of MSFT.` and answer `y` at the approval prompt to show the approved path.
 2. Ask `Buy 10 shares of MSFT.` again and answer `n` to show the denied path.
-3. Emphasize that the model's request is not the boundary; the human approval decision is the boundary.
+3. Run sample 22, enter an invalid answer such as `maybe`, then answer `y` to show a bounded retry.
+4. Explain that no response triggers a five-second timeout and that five failed attempts automatically deny the action.
+5. Explain that one denial is sticky for the prompt, so the model cannot reopen consent by asking again.
+6. Emphasize that the model's request is not the boundary; explicit, timely human approval is the boundary.
 
 ### 3. Memory
 
@@ -93,6 +96,7 @@ The samples form a ladder from plain C# to agentic and managed implementations:
 - `11-safe-file-access-agent` turns that boundary into a Harness tool.
 - `20-approval-gates` proves the human approval boundary in plain C#.
 - `21-approval-gates-agent` turns the approval boundary into a Harness tool.
+- `22-approval-retries-timeouts` adds bounded retries, deadlines, and fail-closed denial.
 - `30-memory-store` proves durable local memory in plain C#.
 - `32-local-file-memory-agent` turns local memory into explicit fixed-scope Harness tools.
 - `31-memory-store-agent` demonstrates the managed Foundry Memory alternative.
@@ -121,6 +125,7 @@ Use these line ranges when sharing the code on screen. The short header at the t
 | Blank input guard | `samples/11-safe-file-access-agent/AgentConsoleRunner.cs:20-33` | Ignore accidental empty Enter presses before sending prompts to Harness. |
 | Direct approval | `samples/20-approval-gates/Program.cs:7-29` | A side effect waits for an explicit human decision. |
 | Harness approval | `samples/21-approval-gates-agent/ApprovalGateTools.cs:13-33` and `Program.cs:40-57, 61-64` | `ApprovalRequiredAIFunction` keeps the model from executing the trade directly, then the sample prints approve and deny paths. |
+| Reliable approval | `samples/22-approval-retries-timeouts/Program.cs:35-56, 58-66`, `TimedApprovalPolicy.cs:16-92, 94-168`, and `AgentConsoleRunner.cs:37-90` | Bound waiting time, retry invalid or missing input, make denial sticky, and cap repeated agent approval rounds. |
 | Explicit memory | `samples/30-memory-store/Program.cs:9-29, 30-55` | Save, restart, reload, and show a missing-memory denied path. |
 | Agentic local memory | `samples/32-local-file-memory-agent/Program.cs:14-41, 43-62, 64-74`, `LocalMemoryTools.cs:10-27, 29-43`, and `LocalFileMemoryStore.cs:16-30, 32-67, 71-130` | Give the model only current-user save/recall tools, reveal the JSON with `/memory`, and prove restart persistence. |
 | Foundry memory | `samples/31-memory-store-agent/Program.cs:23-63, 72-91, 98-104` and `FoundryMemoryDemoStore.cs:9-43` | Print the memory store/scope, save the "Remember..." prompt as a real user-profile memory, then recall only the current scope. |

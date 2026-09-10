@@ -138,6 +138,7 @@ $script:SessionMap = [ordered]@{
         ProjectPaths = @(
             'samples\11-safe-file-access-agent\MafClaw.Sample11.csproj'
             'samples\21-approval-gates-agent\MafClaw.Sample21.csproj'
+            'samples\22-approval-retries-timeouts\MafClaw.Sample22.csproj'
             'samples\31-memory-store-agent\MafClaw.Sample31.csproj'
             'samples\32-local-file-memory-agent\MafClaw.Sample32.csproj'
             'code\MafClaw.Session02.csproj'
