@@ -26,6 +26,7 @@ Console.WriteLine();
 Console.WriteLine("State after simulated restart:");
 Console.WriteLine($"user-preference = {reloaded["user-preference"]}");
 Console.WriteLine($"watchlist = {reloaded["watchlist"]}");
+Console.WriteLine($"other-users = {ReadMemory(reloaded, "other-users")}");
 
 static Dictionary<string, string> Load(string path)
 {
@@ -43,4 +44,12 @@ static void Save(string path, Dictionary<string, string> memory)
 {
     // Indented JSON keeps the sample state easy to inspect on screen.
     File.WriteAllText(path, JsonSerializer.Serialize(memory, new JsonSerializerOptions { WriteIndented = true }));
+}
+
+static string ReadMemory(Dictionary<string, string> memory, string key)
+{
+    // Missing keys show the safe "I do not have that memory" path.
+    return memory.TryGetValue(key, out var value)
+        ? value
+        : "Denied: no memory exists for other users.";
 }

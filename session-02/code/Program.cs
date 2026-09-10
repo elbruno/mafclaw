@@ -1,8 +1,8 @@
 // Session flow:
-// A. Load configuration and create the approved working folder.
+// A. Load configuration and create inside/outside demo files.
 // B. Optionally connect Foundry memory for durable user facts.
 // C. Compose file access, approvals, and memory into one Harness agent.
-// D. Start the console runner so the audience can exercise each boundary.
+// D. Print allowed and denied prompts for each safety boundary.
 
 using Azure.AI.Extensions.OpenAI;
 using Azure.AI.Projects;
@@ -41,6 +41,12 @@ if (!File.Exists(portfolioPath))
         portfolioPath,
         "symbol,shares,averageCost,risk\nMSFT,35,430.12,moderate\nNVDA,20,142.50,high\nSPY,50,530.25,low\n");
 }
+
+// Create a harmless decoy file outside the approved root for the denial demo.
+var deniedDirectory = Path.Combine(Path.GetTempPath(), "mafclaw-session-02-final-outside-root");
+Directory.CreateDirectory(deniedDirectory);
+var deniedPath = Path.Combine(deniedDirectory, "outside-portfolio.csv");
+File.WriteAllText(deniedPath, "symbol,shares\nPRIVATE,999\n");
 
 var projectClient = new AIProjectClient(new Uri(endpoint), new AzureCliCredential());
 
@@ -95,7 +101,9 @@ AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
             - Read portfolio data with the built-in file_access tools before answering portfolio questions.
             - Write reports with the built-in file_access tools under the approved working folder.
             - Read-only file operations are auto-approved; writes and destructive operations require Harness approval.
+            - If the user asks for a path outside the approved working folder, say: "I can't access that folder because it is outside the approved working folder."
             - Remember durable user facts with the configured Foundry memory provider when it is enabled.
+            - If the user asks about other users or other people's memory, say you cannot access other users' memory.
             - Simulated trades must go through request_simulated_trade, which is wrapped as an approval-required Harness tool.
             """,
         Tools =
@@ -109,12 +117,17 @@ Console.WriteLine("mafclaw · Session 02");
 Console.WriteLine("Agent Framework + Harness finance advisor");
 Console.WriteLine("This app combines Harness file access, Harness approvals, and optional Foundry memory.");
 Console.WriteLine();
-Console.WriteLine("Try these prompts:");
+Console.WriteLine("Try these allowed prompts:");
 Console.WriteLine("  What is in my portfolio?");
 Console.WriteLine("  Write a short markdown report about my portfolio and save it.");
 Console.WriteLine("  Remember that I am a conservative investor saving for a house in two years.");
 Console.WriteLine("  What do you remember about my investor profile?");
-Console.WriteLine("  Buy 10 shares of MSFT.");
+Console.WriteLine("  Buy 10 shares of MSFT. Then answer y at the approval prompt.");
+Console.WriteLine();
+Console.WriteLine("Try these denied prompts:");
+Console.WriteLine($"  Read {deniedPath}");
+Console.WriteLine("  What do you remember about other users?");
+Console.WriteLine("  Buy 10 shares of MSFT. Then answer n at the approval prompt.");
 Console.WriteLine();
 Console.WriteLine("Commands: /exit");
 

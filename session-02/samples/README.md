@@ -25,11 +25,13 @@ Every live-demo sample should be readable while the presenter is sharing the scr
 
 - `20-approval-gates` models the human-in-the-loop approval flow before side effects.
 - `21-approval-gates-agent` wraps the simulated trade tool with `ApprovalRequiredAIFunction` so Harness owns the approval boundary.
+- For the live demo, run `Buy 10 shares of MSFT.` twice: answer `y` once for the approved path, then answer `n` for the denied path.
 
 ## 30 and 31 — memory store
 
 - `30-memory-store` shows durable state stored to disk and restored across a restart.
 - `31-memory-store-agent` uses `FoundryMemoryProvider` so Foundry can extract and recall durable user facts when memory is configured.
+- For the live demo, remember a current-user investor profile, recall it, then ask `What do you remember about other users?` to show the denied path.
 
 ## Run them
 

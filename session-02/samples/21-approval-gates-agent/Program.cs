@@ -1,8 +1,8 @@
 // Session flow:
 // A. Load the Foundry connection settings.
 // B. Build a Harness agent with one trade tool.
-// C. Let the model request the simulated trade.
-// D. Let Harness pause for human approval before the tool runs.
+// C. Let the model request one simulated trade.
+// D. Run it twice: approve once, then deny once.
 
 using Azure.AI.Extensions.OpenAI;
 using Azure.AI.Projects;
@@ -47,6 +47,7 @@ AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
             Any simulated trade must use request_simulated_trade.
             The request_simulated_trade tool is wrapped with the Harness approval-required function wrapper.
             Explain that Harness approvals protect users before side effects happen.
+            If the user denies approval, explain that no simulated trade was executed.
             Never claim that a real trade was placed.
             """,
         Tools =
@@ -59,7 +60,8 @@ AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 // Keep the live demo simple: one prompt loop, one clear exit command.
 Console.WriteLine("mafclaw · Session 02 sample 21");
 Console.WriteLine("Agentic approval gate with Microsoft Agent Framework + Harness.");
-Console.WriteLine("Try: Buy 10 shares of MSFT.");
+Console.WriteLine("Approved path: Buy 10 shares of MSFT. Then answer y at the approval prompt.");
+Console.WriteLine("Denied path  : Buy 10 shares of MSFT. Then answer n at the approval prompt.");
 Console.WriteLine("Commands: /exit");
 
 await AgentConsoleRunner.RunAsync(agent);

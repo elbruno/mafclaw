@@ -81,14 +81,22 @@ From the repository root:
 dotnet run --project .\session-02\code\MafClaw.Session02.csproj
 ```
 
-Try:
+Try the allowed path:
 
 ```text
 What is in my portfolio?
 Write a short markdown report about my portfolio.
 Remember that I am a conservative investor saving for a house in two years.
 What do you remember about my investor profile?
-Buy 10 shares of MSFT.
+Buy 10 shares of MSFT.  # answer y at the approval prompt
+```
+
+Then try the denied path:
+
+```text
+Read <copy the outside path printed by the app>
+What do you remember about other users?
+Buy 10 shares of MSFT.  # answer n at the approval prompt
 ```
 
 This agent remains intentionally readable and demo-friendly, following the session's live-coding goals.

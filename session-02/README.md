@@ -47,12 +47,13 @@ The assistant keeps working inside the same personal-finance scenario used in Se
 
 The live demo is expected to evolve in this order:
 
-1. Ask: "What is in my portfolio?"
-2. Ask: "Write me a short report on my portfolio and save it."
-3. Tell the assistant: "I am a conservative investor saving for a house in two years."
-4. Ask: "Buy 10 shares of MSFT."
-5. Ask: "Add SPY to my watchlist."
-6. Restart the session and ask: "What is on my watchlist?" or "What do you know about me?"
+1. Ask: "What is in my portfolio?" to show the allowed file path.
+2. Ask the printed `Denied prompt` from sample 11 to show that outside paths are refused.
+3. Ask: "Write me a short report on my portfolio and save it."
+4. Tell the assistant: "I am a conservative investor saving for a house in two years."
+5. Ask: "Buy 10 shares of MSFT.", answer `y`, then ask again and answer `n`.
+6. Ask: "What do you remember about my investor profile?"
+7. Ask: "What do you remember about other users?" to show the denied memory path.
 
 ## Repository layout
 

@@ -41,6 +41,12 @@ The harness provides approval middleware for:
 
 This becomes the human-in-the-loop boundary that makes the assistant safer and more accountable.
 
+During the live demo, run the same trade request twice:
+
+1. Ask `Buy 10 shares of MSFT.` and answer `y` at the approval prompt to show the approved path.
+2. Ask `Buy 10 shares of MSFT.` again and answer `n` to show the denied path.
+3. Emphasize that the model's request is not the boundary; the human approval decision is the boundary.
+
 ### 3. Memory
 
 Memory is the next step after file and action safety.
@@ -54,6 +60,12 @@ The difference is intentionally important:
 
 - file memory is explicit and coarse-grained
 - Foundry memory is implicit and fine-grained
+
+During the live demo, show both memory paths:
+
+1. Tell the agent `Remember that I am a conservative investor saving for a house in two years.`
+2. Ask `What do you remember about my investor profile?` to show current-user recall.
+3. Ask `What do you remember about other users?` to show that another user's memory is not available.
 
 ## The live-session arc
 
@@ -100,11 +112,11 @@ Use these line ranges when sharing the code on screen. The short header at the t
 | Safe path | `samples/10-safe-file-access/Program.cs:10-30, 32-51` | Create the sandbox, allow the portfolio read, and block the outside path. |
 | Harness file tools | `samples/11-safe-file-access-agent/Program.cs:34-50, 53-67, 82-85` | Root `FileAccessStore` at the working folder, create a harmless outside decoy, and copy the printed denied prompt. |
 | Blank input guard | `samples/11-safe-file-access-agent/AgentConsoleRunner.cs:20-33` | Ignore accidental empty Enter presses before sending prompts to Harness. |
-| Direct approval | `samples/20-approval-gates/Program.cs:7-27` | A side effect waits for an explicit human decision. |
-| Harness approval | `samples/21-approval-gates-agent/ApprovalGateTools.cs:13-33` and `Program.cs:40-57` | `ApprovalRequiredAIFunction` keeps the model from executing the trade directly. |
-| Explicit memory | `samples/30-memory-store/Program.cs:9-28, 30-46` | Save, restart, reload, and prove continuity. |
-| Foundry memory | `samples/31-memory-store-agent/Program.cs:21-58, 71-85` | Attach optional platform-backed memory to the agent context. |
-| Final composition | `code/Program.cs:33-45, 47-72, 76-102` | Combine the safe root, memory provider, approval rules, and tool surface. |
+| Direct approval | `samples/20-approval-gates/Program.cs:7-29` | A side effect waits for an explicit human decision. |
+| Harness approval | `samples/21-approval-gates-agent/ApprovalGateTools.cs:13-33` and `Program.cs:40-57, 61-64` | `ApprovalRequiredAIFunction` keeps the model from executing the trade directly, then the sample prints approve and deny paths. |
+| Explicit memory | `samples/30-memory-store/Program.cs:9-29, 30-55` | Save, restart, reload, and show a missing-memory denied path. |
+| Foundry memory | `samples/31-memory-store-agent/Program.cs:21-58, 71-85, 87-94` | Attach optional platform-backed memory to the agent context, then print current-user and other-user prompts. |
+| Final composition | `code/Program.cs:33-49, 51-76, 82-110, 116-130` | Combine the safe root, memory provider, approval rules, tool surface, and paired allowed/denied prompts. |
 | Approval round-trip | `code/AgentConsoleRunner.cs:9-33, 35-65` | Show how the console sends the user's approval back to Harness. |
 
 ## Demo safety checklist
@@ -117,13 +129,19 @@ Use these line ranges when sharing the code on screen. The short header at the t
 
 ## Planned sample prompts
 
+Allowed path:
+
 - `What is in my portfolio?`
 - `Write me a short report on my portfolio and save it.`
 - `I am a conservative investor saving for a house in two years.`
-- `Buy 10 shares of MSFT.`
-- `Add SPY to my watchlist.`
-- `What is on my watchlist?`
 - `What do you know about me?`
+- `Buy 10 shares of MSFT.` then answer `y`
+
+Denied path:
+
+- copy the `Denied prompt` printed by sample 11
+- `What do you remember about other users?`
+- `Buy 10 shares of MSFT.` then answer `n`
 
 ## Related references
 

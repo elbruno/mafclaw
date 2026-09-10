@@ -2,7 +2,7 @@
 // A. Load the Foundry and memory settings.
 // B. Create the optional platform-backed memory provider.
 // C. Attach memory to the Harness agent context.
-// D. Wait for background memory updates when the console exits.
+// D. Ask one user-memory question and one cross-user memory question.
 
 using Azure.AI.Extensions.OpenAI;
 using Azure.AI.Projects;
@@ -80,6 +80,7 @@ AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
             Remember durable facts the user tells you about their investing profile, goals, and preferences.
             When memory is enabled, Microsoft Foundry extracts and recalls those facts through the configured memory provider.
             Explain whether Foundry memory is enabled before relying on cross-session recall.
+            If the user asks about other users or other people's memory, say you cannot access other users' memory.
             """,
     }
 });
@@ -87,8 +88,9 @@ AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 // Keep the live demo simple: one prompt loop, one clear exit command.
 Console.WriteLine("mafclaw · Session 02 sample 31");
 Console.WriteLine("Agentic memory with Microsoft Agent Framework + Harness + FoundryMemoryProvider.");
-Console.WriteLine("Try: Remember that I am a conservative investor.");
-Console.WriteLine("Then start a new session and ask: What do you remember about my investor profile?");
+Console.WriteLine("Allowed prompt: Remember that I am a conservative investor saving for a house in two years.");
+Console.WriteLine("Recall prompt : What do you remember about my investor profile?");
+Console.WriteLine("Denied prompt : What do you remember about other users?");
 Console.WriteLine("Commands: /exit");
 
 await AgentConsoleRunner.RunAsync(agent, foundryMemory);

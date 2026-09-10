@@ -6,6 +6,8 @@
 
 Console.WriteLine("Session 2 sample 20: approval gates");
 Console.WriteLine("A trade is a side effect and should require human approval.");
+Console.WriteLine("Approved path: answer y.");
+Console.WriteLine("Denied path  : answer n or press Enter.");
 
 // Ask for consent before the simulated side effect can happen.
 var approved = Confirm("Approve this simulated buy: 10 shares of MSFT?");
