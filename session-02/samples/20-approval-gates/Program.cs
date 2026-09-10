@@ -1,3 +1,9 @@
+// Session flow:
+// A. Describe the simulated trade as a side effect.
+// B. Ask the human for an explicit yes/no decision.
+// C. Execute the demo action only after approval.
+// D. Print the safe denied path when approval is refused.
+
 Console.WriteLine("Session 2 sample 20: approval gates");
 Console.WriteLine("A trade is a side effect and should require human approval.");
 

@@ -1,3 +1,9 @@
+// Session flow:
+// A. Create one agent session for the console conversation.
+// B. Send each user prompt to the Harness agent.
+// C. Print responses and stop at any approval request.
+// D. Send the user's approval decision back to continue the run.
+
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 

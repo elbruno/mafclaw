@@ -1,3 +1,9 @@
+// Session flow:
+// A. Load configuration and create the approved working folder.
+// B. Optionally connect Foundry memory for durable user facts.
+// C. Compose file access, approvals, and memory into one Harness agent.
+// D. Start the console runner so the audience can exercise each boundary.
+
 using Azure.AI.Extensions.OpenAI;
 using Azure.AI.Projects;
 using Azure.Identity;
@@ -27,6 +33,7 @@ if (string.IsNullOrWhiteSpace(endpoint))
 var workingDirectory = Path.Combine(AppContext.BaseDirectory, "working");
 Directory.CreateDirectory(workingDirectory);
 
+// Seed predictable mock data so the live explanation stays grounded.
 var portfolioPath = Path.Combine(workingDirectory, "portfolio.csv");
 if (!File.Exists(portfolioPath))
 {
@@ -68,6 +75,7 @@ IChatClient chatClient = projectClient
 
 AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 {
+    // Harness owns the safe file root and the low-risk read approval rule.
     FileAccessStore = new FileSystemAgentFileStore(workingDirectory),
     ToolApprovalAgentOptions = new ToolApprovalAgentOptions
     {

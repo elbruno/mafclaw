@@ -1,3 +1,9 @@
+// Session flow:
+// A. Create the approved working folder and seed mock portfolio data.
+// B. Read the portfolio only when the path stays inside that folder.
+// C. Try a file outside the folder to demonstrate the guard.
+// D. Print the allowed and blocked results for the audience.
+
 using System.Globalization;
 
 var sandboxRoot = Path.Combine(AppContext.BaseDirectory, "working");

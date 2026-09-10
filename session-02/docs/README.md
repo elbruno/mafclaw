@@ -85,6 +85,21 @@ The final app in `code/` combines all three patterns. It uses:
 
 The teaching message is: the agent is still a model-driven loop, but the application owns the tools, the paths, the approvals, and the memory boundaries.
 
+## Speaker line references
+
+Use these line ranges when sharing the code on screen. The short header at the top of each file gives the audience the full sequence; pause on the implementation lines below to explain the boundary being added.
+
+| Concept | File and lines | Presentation emphasis |
+|---|---|---|
+| Safe path | `samples/10-safe-file-access/Program.cs:9-25, 27-45` | Create the sandbox, allow the portfolio read, and block the outside path. |
+| Harness file tools | `samples/11-safe-file-access-agent/Program.cs:30-35, 47-55` | Root `FileAccessStore` at the working folder and auto-approve only reads. |
+| Direct approval | `samples/20-approval-gates/Program.cs:8-25` | A side effect waits for an explicit human decision. |
+| Harness approval | `samples/21-approval-gates-agent/ApprovalGateTools.cs:9-29` and `Program.cs:35-51` | `ApprovalRequiredAIFunction` keeps the model from executing the trade directly. |
+| Explicit memory | `samples/30-memory-store/Program.cs:9-23, 29-41` | Save, restart, reload, and prove continuity. |
+| Foundry memory | `samples/31-memory-store-agent/Program.cs:22-46, 64-72` | Attach optional platform-backed memory to the agent context. |
+| Final composition | `code/Program.cs:33-45, 47-72, 76-102` | Combine the safe root, memory provider, approval rules, and tool surface. |
+| Approval round-trip | `code/AgentConsoleRunner.cs:9-33, 35-65` | Show how the console sends the user's approval back to Harness. |
+
 ## Demo safety checklist
 
 - use mock data only

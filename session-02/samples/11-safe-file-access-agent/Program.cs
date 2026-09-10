@@ -1,3 +1,9 @@
+// Session flow:
+// A. Load the Foundry connection settings and create the working folder.
+// B. Build an IChatClient and expose the Harness file-access tools.
+// C. Auto-approve reads while keeping writes behind approval.
+// D. Start the console loop so the audience can ask about the portfolio.
+
 using Azure.AI.Extensions.OpenAI;
 using Azure.AI.Projects;
 using Azure.Identity;
@@ -24,6 +30,7 @@ if (string.IsNullOrWhiteSpace(endpoint))
 var workingDirectory = Path.Combine(AppContext.BaseDirectory, "working");
 Directory.CreateDirectory(workingDirectory);
 
+// Keep the demo data inside the same root exposed to the agent.
 var portfolioPath = Path.Combine(workingDirectory, "portfolio.csv");
 if (!File.Exists(portfolioPath))
 {

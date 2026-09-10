@@ -1,3 +1,9 @@
+// Session flow:
+// A. Load the Foundry connection settings.
+// B. Build a Harness agent with one trade tool.
+// C. Let the model request the simulated trade.
+// D. Let Harness pause for human approval before the tool runs.
+
 using Azure.AI.Extensions.OpenAI;
 using Azure.AI.Projects;
 using Azure.Identity;

@@ -1,3 +1,9 @@
+// Session flow:
+// A. Load the small JSON memory file.
+// B. Save a user preference and watchlist.
+// C. Print the state before the simulated restart.
+// D. Reload the file and prove the state survived.
+
 using System.Text.Json;
 
 var memoryPath = Path.Combine(AppContext.BaseDirectory, "memory.json");

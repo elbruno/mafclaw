@@ -1,3 +1,9 @@
+// Session flow:
+// A. Describe the simulated trade as an agent-callable function.
+// B. Normalize the model-provided side and symbol values.
+// C. Reject invalid quantities before doing any work.
+// D. Wrap the function so Harness approval happens first.
+
 using System.ComponentModel;
 using Microsoft.Extensions.AI;
 

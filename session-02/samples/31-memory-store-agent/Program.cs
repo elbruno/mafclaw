@@ -1,3 +1,9 @@
+// Session flow:
+// A. Load the Foundry and memory settings.
+// B. Create the optional platform-backed memory provider.
+// C. Attach memory to the Harness agent context.
+// D. Wait for background memory updates when the console exits.
+
 using Azure.AI.Extensions.OpenAI;
 using Azure.AI.Projects;
 using Azure.Identity;

@@ -1,3 +1,9 @@
+// Session flow:
+// A. Create one agent session for the console conversation.
+// B. Send each user prompt to the Harness agent.
+// C. Print responses and handle any approval requests.
+// D. Flush asynchronous Foundry memory updates before exit.
+
 using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Foundry;
 using Microsoft.Extensions.AI;
@@ -23,8 +29,7 @@ internal static class AgentConsoleRunner
 
         if (foundryMemory is not null)
         {
-            // Foundry memory extraction runs as a background job on the service.
-            // Wait for it here so a restarted process can immediately recall what was just said.
+            // Foundry extraction runs in the background; flush it before a restart.
             try
             {
                 Console.WriteLine("Waiting for Foundry memory updates to finish...");

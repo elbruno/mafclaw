@@ -26,4 +26,4 @@ AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 });
 
 Console.WriteLine(await agent.RunAsync(
-    "What is the current price of NVDA?"));
+    "What is the current price of MSFT?"));
