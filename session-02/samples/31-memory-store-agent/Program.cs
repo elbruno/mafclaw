@@ -23,6 +23,7 @@ var endpoint = config["Foundry:ProjectEndpoint"] ?? config["FOUNDRY_PROJECT_ENDP
 var model = config["Foundry:Model"] ?? config["FOUNDRY_MODEL"] ?? "gpt-5-mini";
 var memoryStoreName = config["Foundry:MemoryStore"] ?? config["FOUNDRY_MEMORY_STORE"];
 var embeddingModel = config["Foundry:EmbeddingModel"] ?? config["FOUNDRY_EMBEDDING_MODEL"];
+var memoryScope = config["Foundry:MemoryScope"] ?? config["FOUNDRY_MEMORY_SCOPE"] ?? "mafclaw-session-02-sample-user";
 
 // Stop early with setup guidance when the sample is not configured yet.
 if (string.IsNullOrWhiteSpace(endpoint))
@@ -37,17 +38,21 @@ if (string.IsNullOrWhiteSpace(endpoint))
 var projectClient = new AIProjectClient(new Uri(endpoint), new AzureCliCredential());
 
 FoundryMemoryProvider? foundryMemory = null;
+FoundryMemoryDemoStore? demoMemoryStore = null;
 if (!string.IsNullOrWhiteSpace(memoryStoreName) && !string.IsNullOrWhiteSpace(embeddingModel))
 {
     // Scope memory to this workshop sample user so recalls stay predictable.
     foundryMemory = new FoundryMemoryProvider(
         projectClient,
         memoryStoreName,
-        stateInitializer: _ => new(new FoundryMemoryProviderScope("mafclaw-session-02-sample-user")),
+        stateInitializer: _ => new(new FoundryMemoryProviderScope(memoryScope)),
         new FoundryMemoryProviderOptions
         {
             UpdateDelay = 0,
+            StorageInputRequestMessageFilter = _ => Enumerable.Empty<ChatMessage>(),
+            StorageInputResponseMessageFilter = _ => Enumerable.Empty<ChatMessage>(),
         });
+    demoMemoryStore = new FoundryMemoryDemoStore(projectClient, memoryStoreName, memoryScope);
 
     // Create or reuse the service-side memory store before starting the agent.
     await foundryMemory.EnsureMemoryStoreCreatedAsync(
@@ -55,7 +60,7 @@ if (!string.IsNullOrWhiteSpace(memoryStoreName) && !string.IsNullOrWhiteSpace(em
         embeddingModel,
         "Durable memory for the MafClaw Session 2 memory sample.");
 
-    Console.WriteLine($"Foundry memory enabled (store: {memoryStoreName}).");
+    Console.WriteLine($"Foundry memory enabled (store: {memoryStoreName}, scope: {memoryScope}).");
 }
 else
 {
@@ -67,6 +72,9 @@ IChatClient chatClient = projectClient
     .GetProjectOpenAIClient()
     .GetResponsesClient()
     .AsIChatClient(model);
+var memoryStatusInstruction = foundryMemory is null
+    ? "Foundry memory is disabled for this run."
+    : $"Foundry memory is enabled for this run with store '{memoryStoreName}' and scope '{memoryScope}'.";
 
 // Attach the memory provider only when the optional settings are present.
 AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
@@ -75,11 +83,12 @@ AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
     AgentModeProviderOptions = new AgentModeProviderOptions { DefaultMode = "execute" },
     ChatOptions = new ChatOptions
     {
-        Instructions = """
+        Instructions = $"""
             You are a finance education assistant.
-            Remember durable facts the user tells you about their investing profile, goals, and preferences.
-            When memory is enabled, Microsoft Foundry extracts and recalls those facts through the configured memory provider.
-            Explain whether Foundry memory is enabled before relying on cross-session recall.
+            {memoryStatusInstruction}
+            When the user asks you to remember a durable fact, explain that the console sample will save it to Foundry memory after your response.
+            Do not claim the memory has already been saved; the console prints the actual save confirmation.
+            When memory is enabled, Microsoft Foundry recalls saved facts through the configured memory provider.
             If the user asks about other users or other people's memory, say you cannot access other users' memory.
             """,
     }
@@ -91,6 +100,7 @@ Console.WriteLine("Agentic memory with Microsoft Agent Framework + Harness + Fou
 Console.WriteLine("Allowed prompt: Remember that I am a conservative investor saving for a house in two years.");
 Console.WriteLine("Recall prompt : What do you remember about my investor profile?");
 Console.WriteLine("Denied prompt : What do you remember about other users?");
+Console.WriteLine("Memory check  : After the allowed prompt, refresh Foundry Memory and filter by the printed scope.");
 Console.WriteLine("Commands: /exit");
 
-await AgentConsoleRunner.RunAsync(agent, foundryMemory);
+await AgentConsoleRunner.RunAsync(agent, demoMemoryStore);

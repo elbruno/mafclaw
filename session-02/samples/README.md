@@ -30,7 +30,7 @@ Every live-demo sample should be readable while the presenter is sharing the scr
 ## 30 and 31 — memory store
 
 - `30-memory-store` shows durable state stored to disk and restored across a restart.
-- `31-memory-store-agent` uses `FoundryMemoryProvider` so Foundry can extract and recall durable user facts when memory is configured.
+- `31-memory-store-agent` saves `Remember...` prompts as Foundry `UserProfile` memories, prints the saved scope/count, and uses `FoundryMemoryProvider` to recall durable user facts when memory is configured.
 - For the live demo, remember a current-user investor profile, recall it, then ask `What do you remember about other users?` to show the denied path.
 
 ## Run them

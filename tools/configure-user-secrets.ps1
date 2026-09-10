@@ -146,6 +146,7 @@ $script:SessionMap = [ordered]@{
             [pscustomobject]@{ Name = 'Foundry:Model';           Prompt = 'Foundry model or deployment name';             EnvVar = 'FOUNDRY_MODEL';            Required = $true;  IsSecret = $false }
             [pscustomobject]@{ Name = 'Foundry:MemoryStore';     Prompt = 'Foundry memory store name (Enter to skip)';    EnvVar = 'FOUNDRY_MEMORY_STORE';     Required = $false; IsSecret = $false }
             [pscustomobject]@{ Name = 'Foundry:EmbeddingModel';  Prompt = 'Foundry embedding model name (Enter to skip)'; EnvVar = 'FOUNDRY_EMBEDDING_MODEL';  Required = $false; IsSecret = $false }
+            [pscustomobject]@{ Name = 'Foundry:MemoryScope';     Prompt = 'Foundry memory scope/user id (Enter for sample default)'; EnvVar = 'FOUNDRY_MEMORY_SCOPE'; Required = $false; IsSecret = $false }
         )
     }
     '3' = @{
@@ -160,6 +161,7 @@ $script:SessionMap = [ordered]@{
             [pscustomobject]@{ Name = 'Foundry:Model';           Prompt = 'Foundry model or deployment name';                 EnvVar = 'FOUNDRY_MODEL';            Required = $true;  IsSecret = $false }
             [pscustomobject]@{ Name = 'Foundry:MemoryStore';     Prompt = 'Foundry memory store name (Enter to skip)';        EnvVar = 'FOUNDRY_MEMORY_STORE';     Required = $false; IsSecret = $false }
             [pscustomobject]@{ Name = 'Foundry:EmbeddingModel';  Prompt = 'Foundry embedding model name (Enter to skip)';     EnvVar = 'FOUNDRY_EMBEDDING_MODEL';  Required = $false; IsSecret = $false }
+            [pscustomobject]@{ Name = 'Foundry:MemoryScope';     Prompt = 'Foundry memory scope/user id (Enter for sample default)'; EnvVar = 'FOUNDRY_MEMORY_SCOPE'; Required = $false; IsSecret = $false }
             [pscustomobject]@{ Name = 'Foundry:ToolboxEndpoint'; Prompt = 'Foundry Toolbox or MCP endpoint (Enter to skip)';  EnvVar = 'FOUNDRY_TOOLBOX_ENDPOINT'; Required = $false; IsSecret = $false }
         )
     }
@@ -175,6 +177,7 @@ $script:SessionMap = [ordered]@{
             [pscustomobject]@{ Name = 'Foundry:Model';                        Prompt = 'Foundry model or deployment name';                        EnvVar = 'FOUNDRY_MODEL';                         Required = $true;  IsSecret = $false }
             [pscustomobject]@{ Name = 'Foundry:MemoryStore';                  Prompt = 'Foundry memory store name (Enter to skip)';               EnvVar = 'FOUNDRY_MEMORY_STORE';                  Required = $false; IsSecret = $false }
             [pscustomobject]@{ Name = 'Foundry:EmbeddingModel';               Prompt = 'Foundry embedding model name (Enter to skip)';            EnvVar = 'FOUNDRY_EMBEDDING_MODEL';               Required = $false; IsSecret = $false }
+            [pscustomobject]@{ Name = 'Foundry:MemoryScope';                  Prompt = 'Foundry memory scope/user id (Enter for sample default)'; EnvVar = 'FOUNDRY_MEMORY_SCOPE';                  Required = $false; IsSecret = $false }
             [pscustomobject]@{ Name = 'Foundry:ToolboxEndpoint';              Prompt = 'Foundry Toolbox or MCP endpoint (Enter to skip)';         EnvVar = 'FOUNDRY_TOOLBOX_ENDPOINT';              Required = $false; IsSecret = $false }
             [pscustomobject]@{ Name = 'ApplicationInsights:ConnectionString'; Prompt = 'Application Insights connection string (Enter to skip)';  EnvVar = 'APPLICATIONINSIGHTS_CONNECTION_STRING'; Required = $false; IsSecret = $true  }
             [pscustomobject]@{ Name = 'Foundry:EvaluationEndpoint';           Prompt = 'Foundry evaluation endpoint (Enter to skip)';             EnvVar = 'FOUNDRY_EVALUATION_ENDPOINT';           Required = $false; IsSecret = $false }

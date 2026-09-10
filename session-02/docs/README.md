@@ -54,18 +54,21 @@ Memory is the next step after file and action safety.
 The session introduces two complementary models:
 
 - File memory: store watchlists or notes that the agent intentionally curates in files under a session-scoped working folder.
-- Foundry memory: durable facts about the user are captured and recalled automatically by the platform.
+- Foundry memory: durable facts about the user are saved to the platform memory store and recalled by the platform.
 
 The difference is intentionally important:
 
 - file memory is explicit and coarse-grained
-- Foundry memory is implicit and fine-grained
+- Foundry memory is platform-backed and scoped per user or demo identity
 
 During the live demo, show both memory paths:
 
 1. Tell the agent `Remember that I am a conservative investor saving for a house in two years.`
-2. Ask `What do you remember about my investor profile?` to show current-user recall.
-3. Ask `What do you remember about other users?` to show that another user's memory is not available.
+2. Wait for the console to print `Foundry memory saved`, then refresh Foundry Memory and filter by the printed scope.
+3. Ask `What do you remember about my investor profile?` to show current-user recall.
+4. Ask `What do you remember about other users?` to show that another user's memory is not available.
+
+If the console prints `Foundry memory save failed (403)` and the service details mention `401 Authentication` for the embedding deployment, the store exists but the backing Azure OpenAI resource rejected memory creation. Fix the Foundry memory store embedding deployment/authentication before expecting the UI to show saved memories.
 
 ## The live-session arc
 
@@ -115,9 +118,9 @@ Use these line ranges when sharing the code on screen. The short header at the t
 | Direct approval | `samples/20-approval-gates/Program.cs:7-29` | A side effect waits for an explicit human decision. |
 | Harness approval | `samples/21-approval-gates-agent/ApprovalGateTools.cs:13-33` and `Program.cs:40-57, 61-64` | `ApprovalRequiredAIFunction` keeps the model from executing the trade directly, then the sample prints approve and deny paths. |
 | Explicit memory | `samples/30-memory-store/Program.cs:9-29, 30-55` | Save, restart, reload, and show a missing-memory denied path. |
-| Foundry memory | `samples/31-memory-store-agent/Program.cs:21-58, 71-85, 87-94` | Attach optional platform-backed memory to the agent context, then print current-user and other-user prompts. |
-| Final composition | `code/Program.cs:33-49, 51-76, 82-110, 116-130` | Combine the safe root, memory provider, approval rules, tool surface, and paired allowed/denied prompts. |
-| Approval round-trip | `code/AgentConsoleRunner.cs:9-33, 35-65` | Show how the console sends the user's approval back to Harness. |
+| Foundry memory | `samples/31-memory-store-agent/Program.cs:23-63, 72-91, 98-104` and `FoundryMemoryDemoStore.cs:9-43` | Print the memory store/scope, save the "Remember..." prompt as a real user-profile memory, then recall only the current scope. |
+| Final composition | `code/Program.cs:33-50, 54-75, 91-123, 131-143` | Combine the safe root, memory provider, approval rules, tool surface, and paired allowed/denied prompts. |
+| Approval round-trip | `code/AgentConsoleRunner.cs:13-52, 54-77` | Show how the console saves memory prompts and sends the user's approval back to Harness. |
 
 ## Demo safety checklist
 

@@ -91,6 +91,8 @@ What do you remember about my investor profile?
 Buy 10 shares of MSFT.  # answer y at the approval prompt
 ```
 
+After the `Remember...` prompt, the console should print `Foundry memory saved` with the memory scope and user-profile memory count. Refresh Foundry Memory and filter by that printed scope to verify the item. If it prints `Foundry memory save failed (403)` with an embedding `401 Authentication` in the service details, fix the Foundry memory store backing embedding deployment before expecting memories in the UI.
+
 Then try the denied path:
 
 ```text

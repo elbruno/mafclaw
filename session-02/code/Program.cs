@@ -21,6 +21,7 @@ var endpoint = config["Foundry:ProjectEndpoint"] ?? config["FOUNDRY_PROJECT_ENDP
 var model = config["Foundry:Model"] ?? config["FOUNDRY_MODEL"] ?? "gpt-5-mini";
 var memoryStoreName = config["Foundry:MemoryStore"] ?? config["FOUNDRY_MEMORY_STORE"];
 var embeddingModel = config["Foundry:EmbeddingModel"] ?? config["FOUNDRY_EMBEDDING_MODEL"];
+var memoryScope = config["Foundry:MemoryScope"] ?? config["FOUNDRY_MEMORY_SCOPE"] ?? "mafclaw-session-02-user";
 
 if (string.IsNullOrWhiteSpace(endpoint))
 {
@@ -51,23 +52,27 @@ File.WriteAllText(deniedPath, "symbol,shares\nPRIVATE,999\n");
 var projectClient = new AIProjectClient(new Uri(endpoint), new AzureCliCredential());
 
 FoundryMemoryProvider? foundryMemory = null;
+FoundryMemoryDemoStore? demoMemoryStore = null;
 if (!string.IsNullOrWhiteSpace(memoryStoreName) && !string.IsNullOrWhiteSpace(embeddingModel))
 {
     foundryMemory = new FoundryMemoryProvider(
         projectClient,
         memoryStoreName,
-        stateInitializer: _ => new(new FoundryMemoryProviderScope("mafclaw-session-02-user")),
+        stateInitializer: _ => new(new FoundryMemoryProviderScope(memoryScope)),
         new FoundryMemoryProviderOptions
         {
             UpdateDelay = 0,
+            StorageInputRequestMessageFilter = _ => Enumerable.Empty<ChatMessage>(),
+            StorageInputResponseMessageFilter = _ => Enumerable.Empty<ChatMessage>(),
         });
+    demoMemoryStore = new FoundryMemoryDemoStore(projectClient, memoryStoreName, memoryScope);
 
     await foundryMemory.EnsureMemoryStoreCreatedAsync(
         model,
         embeddingModel,
         "Durable memory for the MafClaw Session 2 finance advisor.");
 
-    Console.WriteLine($"Foundry memory enabled (store: {memoryStoreName}).");
+    Console.WriteLine($"Foundry memory enabled (store: {memoryStoreName}, scope: {memoryScope}).");
 }
 else
 {
@@ -78,6 +83,9 @@ IChatClient chatClient = projectClient
     .GetProjectOpenAIClient()
     .GetResponsesClient()
     .AsIChatClient(model);
+var memoryStatusInstruction = foundryMemory is null
+    ? "Foundry memory is disabled for this run."
+    : $"Foundry memory is enabled for this run with store '{memoryStoreName}' and scope '{memoryScope}'.";
 
 AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 {
@@ -91,8 +99,9 @@ AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
     AgentModeProviderOptions = new AgentModeProviderOptions { DefaultMode = "execute" },
     ChatOptions = new ChatOptions
     {
-        Instructions = """
+        Instructions = $"""
             You are a personal finance education assistant for a live coding workshop.
+            {memoryStatusInstruction}
             Use the provided Harness tools instead of inventing portfolio data.
             Explain that all values are mock educational data, not financial advice.
 
@@ -102,7 +111,9 @@ AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
             - Write reports with the built-in file_access tools under the approved working folder.
             - Read-only file operations are auto-approved; writes and destructive operations require Harness approval.
             - If the user asks for a path outside the approved working folder, say: "I can't access that folder because it is outside the approved working folder."
-            - Remember durable user facts with the configured Foundry memory provider when it is enabled.
+            - When the user asks you to remember a durable fact, explain that the console app will save it to Foundry memory after your response.
+            - Do not claim the memory has already been saved; the console prints the actual save confirmation.
+            - Recall durable user facts with the configured Foundry memory provider when it is enabled.
             - If the user asks about other users or other people's memory, say you cannot access other users' memory.
             - Simulated trades must go through request_simulated_trade, which is wrapped as an approval-required Harness tool.
             """,
@@ -131,4 +142,4 @@ Console.WriteLine("  Buy 10 shares of MSFT. Then answer n at the approval prompt
 Console.WriteLine();
 Console.WriteLine("Commands: /exit");
 
-await AgentConsoleRunner.RunAsync(agent, foundryMemory);
+await AgentConsoleRunner.RunAsync(agent, demoMemoryStore);

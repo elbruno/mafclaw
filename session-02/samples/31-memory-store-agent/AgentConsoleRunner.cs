@@ -2,15 +2,17 @@
 // A. Create one agent session for the console conversation.
 // B. Send each user prompt to the Harness agent.
 // C. Print responses and handle any approval requests.
-// D. Flush asynchronous Foundry memory updates before exit.
+// D. Save explicit memory prompts and show a verifiable Foundry count.
 
 using Microsoft.Agents.AI;
-using Microsoft.Agents.AI.Foundry;
 using Microsoft.Extensions.AI;
+using System.ClientModel;
 
 internal static class AgentConsoleRunner
 {
-    public static async Task RunAsync(AIAgent agent, FoundryMemoryProvider? foundryMemory = null)
+    public static async Task RunAsync(
+        AIAgent agent,
+        FoundryMemoryDemoStore? demoMemoryStore = null)
     {
         // Reuse one session so the agent keeps turn context during the demo.
         var session = await agent.CreateSessionAsync();
@@ -33,22 +35,42 @@ internal static class AgentConsoleRunner
             // Send the prompt to Harness, then handle normal text or approvals.
             var response = await agent.RunAsync(input, session);
             await WriteResponseAndHandleApprovalsAsync(agent, session, response);
+
+            if (demoMemoryStore is not null && FoundryMemoryDemoStore.IsRememberPrompt(input))
+            {
+                try
+                {
+                    await demoMemoryStore.SaveUserProfileMemoryAsync(input);
+                    var memoryCount = await demoMemoryStore.CountUserProfileMemoriesAsync();
+                    Console.WriteLine($"Foundry memory saved for scope '{demoMemoryStore.Scope}'. User-profile memories in scope: {memoryCount}.");
+                    Console.WriteLine("Refresh Foundry Memory and filter by that scope to show the saved item.");
+                }
+                catch (ClientResultException ex)
+                {
+                    Console.WriteLine($"Foundry memory save failed ({ex.Status}): {GetRelevantErrorMessage(ex)}");
+                    Console.WriteLine("Check the Foundry memory store embedding deployment and Azure OpenAI authentication before retrying.");
+                }
+            }
+        }
+    }
+
+    private static string GetRelevantErrorMessage(ClientResultException exception)
+    {
+        if (exception.Message.Contains("Authentication to the Azure OpenAI resource failed", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Authentication to the Azure OpenAI resource failed for the memory store embedding deployment.";
         }
 
-        if (foundryMemory is not null)
+        if (exception.Message.Contains("embedding", StringComparison.OrdinalIgnoreCase) &&
+            exception.Message.Contains("Authentication", StringComparison.OrdinalIgnoreCase))
         {
-            // Foundry extraction runs in the background; flush it before a restart.
-            try
-            {
-                Console.WriteLine("Waiting for Foundry memory updates to finish...");
-                await foundryMemory.WhenUpdatesCompletedAsync();
-                Console.WriteLine("Foundry memory updates complete.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Foundry memory update did not complete cleanly: {ex.Message}");
-            }
+            return "The memory store embedding deployment rejected the request.";
         }
+
+        return exception.Message
+            .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
+            .FirstOrDefault()
+            ?? exception.Message;
     }
 
     private static async Task WriteResponseAndHandleApprovalsAsync(AIAgent agent, AgentSession session, AgentResponse response)
