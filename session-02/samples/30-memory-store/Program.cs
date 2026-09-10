@@ -6,7 +6,10 @@
 
 using System.Text.Json;
 
+// Store memory next to the sample output so it survives a simulated restart.
 var memoryPath = Path.Combine(AppContext.BaseDirectory, "memory.json");
+
+// Load existing memory, then add the facts this sample wants to preserve.
 var memory = Load(memoryPath);
 memory["user-preference"] = "Conservative investor for a house purchase in two years.";
 memory["watchlist"] = "MSFT, SPY";
@@ -17,6 +20,7 @@ Console.WriteLine("Saved state before restart:");
 Console.WriteLine($"user-preference = {memory["user-preference"]}");
 Console.WriteLine($"watchlist = {memory["watchlist"]}");
 
+// Reload from disk to prove the values were persisted.
 var reloaded = Load(memoryPath);
 Console.WriteLine();
 Console.WriteLine("State after simulated restart:");
@@ -25,6 +29,7 @@ Console.WriteLine($"watchlist = {reloaded["watchlist"]}");
 
 static Dictionary<string, string> Load(string path)
 {
+    // First run starts with empty memory.
     if (!File.Exists(path))
     {
         return new Dictionary<string, string>();
@@ -36,5 +41,6 @@ static Dictionary<string, string> Load(string path)
 
 static void Save(string path, Dictionary<string, string> memory)
 {
+    // Indented JSON keeps the sample state easy to inspect on screen.
     File.WriteAllText(path, JsonSerializer.Serialize(memory, new JsonSerializerOptions { WriteIndented = true }));
 }

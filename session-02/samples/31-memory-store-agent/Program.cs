@@ -12,16 +12,19 @@ using Microsoft.Agents.AI.Foundry;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 
+// Read configuration from .NET user-secrets first, then environment variables.
 var config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .AddEnvironmentVariables()
     .Build();
 
+// Memory needs both a logical memory store and an embedding model.
 var endpoint = config["Foundry:ProjectEndpoint"] ?? config["FOUNDRY_PROJECT_ENDPOINT"];
 var model = config["Foundry:Model"] ?? config["FOUNDRY_MODEL"] ?? "gpt-5-mini";
 var memoryStoreName = config["Foundry:MemoryStore"] ?? config["FOUNDRY_MEMORY_STORE"];
 var embeddingModel = config["Foundry:EmbeddingModel"] ?? config["FOUNDRY_EMBEDDING_MODEL"];
 
+// Stop early with setup guidance when the sample is not configured yet.
 if (string.IsNullOrWhiteSpace(endpoint))
 {
     Console.WriteLine("Missing Foundry:ProjectEndpoint.");
@@ -30,11 +33,13 @@ if (string.IsNullOrWhiteSpace(endpoint))
     return;
 }
 
+// The project client is reused for chat and memory setup.
 var projectClient = new AIProjectClient(new Uri(endpoint), new AzureCliCredential());
 
 FoundryMemoryProvider? foundryMemory = null;
 if (!string.IsNullOrWhiteSpace(memoryStoreName) && !string.IsNullOrWhiteSpace(embeddingModel))
 {
+    // Scope memory to this workshop sample user so recalls stay predictable.
     foundryMemory = new FoundryMemoryProvider(
         projectClient,
         memoryStoreName,
@@ -44,6 +49,7 @@ if (!string.IsNullOrWhiteSpace(memoryStoreName) && !string.IsNullOrWhiteSpace(em
             UpdateDelay = 0,
         });
 
+    // Create or reuse the service-side memory store before starting the agent.
     await foundryMemory.EnsureMemoryStoreCreatedAsync(
         model,
         embeddingModel,
@@ -56,11 +62,13 @@ else
     Console.WriteLine("Foundry memory disabled. Set Foundry:MemoryStore and Foundry:EmbeddingModel to enable durable memory.");
 }
 
+// Adapt the Foundry project client into the chat client shape expected by Harness.
 IChatClient chatClient = projectClient
     .GetProjectOpenAIClient()
     .GetResponsesClient()
     .AsIChatClient(model);
 
+// Attach the memory provider only when the optional settings are present.
 AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 {
     AIContextProviders = foundryMemory is null ? null : [foundryMemory],
@@ -76,6 +84,7 @@ AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
     }
 });
 
+// Keep the live demo simple: one prompt loop, one clear exit command.
 Console.WriteLine("mafclaw · Session 02 sample 31");
 Console.WriteLine("Agentic memory with Microsoft Agent Framework + Harness + FoundryMemoryProvider.");
 Console.WriteLine("Try: Remember that I am a conservative investor.");

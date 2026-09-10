@@ -7,6 +7,7 @@
 Console.WriteLine("Session 2 sample 20: approval gates");
 Console.WriteLine("A trade is a side effect and should require human approval.");
 
+// Ask for consent before the simulated side effect can happen.
 var approved = Confirm("Approve this simulated buy: 10 shares of MSFT?");
 if (approved)
 {
@@ -19,6 +20,7 @@ else
 
 static bool Confirm(string prompt)
 {
+    // Keep the approval prompt explicit and default to no.
     Console.Write($"{prompt} [y/N]: ");
     var response = Console.ReadLine();
     return response is not null && (response.Equals("y", StringComparison.OrdinalIgnoreCase) || response.Equals("yes", StringComparison.OrdinalIgnoreCase));

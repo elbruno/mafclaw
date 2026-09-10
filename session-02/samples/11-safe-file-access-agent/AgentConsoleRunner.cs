@@ -11,10 +11,12 @@ internal static class AgentConsoleRunner
 {
     public static async Task RunAsync(AIAgent agent)
     {
+        // Reuse one session so the agent keeps turn context during the demo.
         var session = await agent.CreateSessionAsync();
 
         while (true)
         {
+            // Read one prompt from the console and let /exit end the sample.
             Console.Write("> ");
             var input = Console.ReadLine();
             if (input is null || input.Trim().Equals("/exit", StringComparison.OrdinalIgnoreCase))
@@ -22,6 +24,7 @@ internal static class AgentConsoleRunner
                 break;
             }
 
+            // Send the prompt to Harness, then handle normal text or approvals.
             var response = await agent.RunAsync(input, session);
             await WriteResponseAndHandleApprovalsAsync(agent, session, response);
         }
@@ -31,11 +34,13 @@ internal static class AgentConsoleRunner
     {
         while (true)
         {
+            // Print assistant text first so the audience sees the model response.
             if (!string.IsNullOrWhiteSpace(response.Text))
             {
                 Console.WriteLine(response.Text);
             }
 
+            // Harness returns approval requests as content in the response.
             var approvalRequests = response.Messages
                 .SelectMany(message => message.Contents)
                 .OfType<ToolApprovalRequestContent>()
@@ -49,6 +54,7 @@ internal static class AgentConsoleRunner
             var approvalResponses = new List<AIContent>();
             foreach (var request in approvalRequests)
             {
+                // Show the tool name and arguments before asking the user.
                 var functionCall = request.ToolCall as FunctionCallContent;
                 var toolName = functionCall?.Name ?? request.ToolCall.CallId;
                 var arguments = functionCall?.Arguments is null
@@ -61,11 +67,13 @@ internal static class AgentConsoleRunner
                     (input.Equals("y", StringComparison.OrdinalIgnoreCase) ||
                      input.Equals("yes", StringComparison.OrdinalIgnoreCase));
 
+                // Convert the console decision into the Harness approval response.
                 approvalResponses.Add(request.CreateResponse(
                     approved,
                     approved ? "Approved by console user." : "Denied by console user."));
             }
 
+            // Continue the same run with the approval answers attached.
             response = await agent.RunAsync([new ChatMessage(ChatRole.User, approvalResponses)], session);
         }
     }

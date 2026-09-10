@@ -11,14 +11,17 @@ using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 
+// Read configuration from .NET user-secrets first, then environment variables.
 var config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .AddEnvironmentVariables()
     .Build();
 
+// The agentic sample needs a Foundry project and model to run live.
 var endpoint = config["Foundry:ProjectEndpoint"] ?? config["FOUNDRY_PROJECT_ENDPOINT"];
 var model = config["Foundry:Model"] ?? config["FOUNDRY_MODEL"] ?? "gpt-5-mini";
 
+// Stop early with setup guidance when the sample is not configured yet.
 if (string.IsNullOrWhiteSpace(endpoint))
 {
     Console.WriteLine("Missing Foundry:ProjectEndpoint.");
@@ -27,11 +30,13 @@ if (string.IsNullOrWhiteSpace(endpoint))
     return;
 }
 
+// Adapt the Foundry project client into the chat client shape expected by Harness.
 IChatClient chatClient = new AIProjectClient(new Uri(endpoint), new AzureCliCredential())
     .GetProjectOpenAIClient()
     .GetResponsesClient()
     .AsIChatClient(model);
 
+// Give the agent only the approval-gated trade tool.
 AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 {
     AgentModeProviderOptions = new AgentModeProviderOptions { DefaultMode = "execute" },
@@ -51,6 +56,7 @@ AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
     }
 });
 
+// Keep the live demo simple: one prompt loop, one clear exit command.
 Console.WriteLine("mafclaw · Session 02 sample 21");
 Console.WriteLine("Agentic approval gate with Microsoft Agent Framework + Harness.");
 Console.WriteLine("Try: Buy 10 shares of MSFT.");

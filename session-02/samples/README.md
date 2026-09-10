@@ -6,6 +6,15 @@ These samples use a paired structure for each Session 2 concept:
 - `11`, `21`, and `31` are the same ideas implemented with the official Microsoft Agent Framework Harness or Foundry APIs.
 - `..\code\` is the complete finance advisor that combines all three concepts.
 
+## Sample authoring rule
+
+Every live-demo sample should be readable while the presenter is sharing the screen:
+
+- start the main code file with a short A/B/C/D flow summary
+- add simple inline comments before major code blocks, not on every line
+- explain boundaries, setup, tool registration, and persistence points where they appear in code
+- keep comments short enough that they help narration without hiding the code
+
 ## 10 and 11 — safe file access
 
 - `10-safe-file-access` demonstrates a working folder with allowed reads.

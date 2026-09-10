@@ -15,8 +15,11 @@ internal static class ApprovalGateTools
         [Description("Ticker symbol, for example MSFT.")] string symbol,
         [Description("Number of shares.")] int shares)
     {
+        // Normalize model-provided text before echoing it back to the user.
         var normalizedSide = side.Trim().ToLowerInvariant();
         var normalizedSymbol = symbol.Trim().ToUpperInvariant();
+
+        // Validate the request before returning an approved-looking result.
         if (shares <= 0)
         {
             return "Denied: share quantity must be greater than zero.";
@@ -25,6 +28,7 @@ internal static class ApprovalGateTools
         return $"Approved: simulated {normalizedSide} order for {shares} shares of {normalizedSymbol}. This is not a real transaction.";
     }
 
+    // Harness asks for approval before this function can execute.
     public static AIFunction RequestSimulatedTrade { get; } =
         new ApprovalRequiredAIFunction(AIFunctionFactory.Create(RequestSimulatedTradeOrder, "request_simulated_trade"));
 }

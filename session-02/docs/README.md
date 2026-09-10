@@ -91,12 +91,12 @@ Use these line ranges when sharing the code on screen. The short header at the t
 
 | Concept | File and lines | Presentation emphasis |
 |---|---|---|
-| Safe path | `samples/10-safe-file-access/Program.cs:9-25, 27-45` | Create the sandbox, allow the portfolio read, and block the outside path. |
+| Safe path | `samples/10-safe-file-access/Program.cs:10-30, 32-51` | Create the sandbox, allow the portfolio read, and block the outside path. |
 | Harness file tools | `samples/11-safe-file-access-agent/Program.cs:34-43, 47-61` | Root `FileAccessStore` at the working folder and auto-approve only reads. |
-| Direct approval | `samples/20-approval-gates/Program.cs:8-25` | A side effect waits for an explicit human decision. |
-| Harness approval | `samples/21-approval-gates-agent/ApprovalGateTools.cs:9-29` and `Program.cs:35-51` | `ApprovalRequiredAIFunction` keeps the model from executing the trade directly. |
-| Explicit memory | `samples/30-memory-store/Program.cs:9-23, 29-41` | Save, restart, reload, and prove continuity. |
-| Foundry memory | `samples/31-memory-store-agent/Program.cs:22-46, 64-72` | Attach optional platform-backed memory to the agent context. |
+| Direct approval | `samples/20-approval-gates/Program.cs:7-27` | A side effect waits for an explicit human decision. |
+| Harness approval | `samples/21-approval-gates-agent/ApprovalGateTools.cs:13-33` and `Program.cs:40-57` | `ApprovalRequiredAIFunction` keeps the model from executing the trade directly. |
+| Explicit memory | `samples/30-memory-store/Program.cs:9-28, 30-46` | Save, restart, reload, and prove continuity. |
+| Foundry memory | `samples/31-memory-store-agent/Program.cs:21-58, 71-85` | Attach optional platform-backed memory to the agent context. |
 | Final composition | `code/Program.cs:33-45, 47-72, 76-102` | Combine the safe root, memory provider, approval rules, and tool surface. |
 | Approval round-trip | `code/AgentConsoleRunner.cs:9-33, 35-65` | Show how the console sends the user's approval back to Harness. |
 
