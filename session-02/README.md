@@ -14,7 +14,7 @@ The official source article is:
 
 The agent from Session 1 can talk, browse the web, and plan. Session 2 adds the boundary that turns it from a clever conversation partner into a practical assistant for real user data.
 
-The samples use paired demos. The `10`, `20`, and `30` samples teach each safety primitive as plain C# so the behavior is easy to see. The `11`, `21`, and `31` samples immediately show the same primitive through the official Microsoft Agent Framework Harness or Foundry surface. The final app in `code/` combines all three into one finance advisor.
+The samples use a teaching ladder. The `10`, `20`, and `30` samples teach each safety primitive as plain C# so the behavior is easy to see. The agentic samples then show the same boundaries through Microsoft Agent Framework, Harness, local tools, and Foundry Memory. The final app in `code/` combines all three into one finance advisor.
 
 ### Core concepts
 
@@ -30,8 +30,9 @@ The samples use paired demos. The `10`, `20`, and `30` samples teach each safety
 
 3. Memory
    - file memory stores files the agent decides to curate, such as a watchlist
+   - agentic local memory uses explicit fixed-scope tools over an inspectable JSON file
    - Foundry memory remembers facts about the user across sessions
-   - both are useful, but they solve different problems
+   - each approach is useful, but ownership, scalability, and infrastructure differ
 
 ## The sample story
 
@@ -59,7 +60,7 @@ The live demo is expected to evolve in this order:
 
 - `code/` — the final Agent Framework/Harness finance advisor application
 - `docs/` — setup, teaching notes, and the runbook for the session
-- `samples/` — paired plain C# and agentic demos for safe file access, approvals, and memory
+- `samples/` — plain C#, agentic, and managed demos for safe file access, approvals, and memory
 - `general/` in the root repo — shared setup, mock-data, and cross-session guidance
 
 ## How to test it
@@ -82,6 +83,7 @@ dotnet build .\session-02\samples\20-approval-gates\MafClaw.Sample20.csproj
 dotnet build .\session-02\samples\21-approval-gates-agent\MafClaw.Sample21.csproj
 dotnet build .\session-02\samples\30-memory-store\MafClaw.Sample30.csproj
 dotnet build .\session-02\samples\31-memory-store-agent\MafClaw.Sample31.csproj
+dotnet build .\session-02\samples\32-local-file-memory-agent\MafClaw.Sample32.csproj
 
 dotnet run --project .\session-02\samples\10-safe-file-access\MafClaw.Sample10.csproj
 dotnet run --project .\session-02\samples\11-safe-file-access-agent\MafClaw.Sample11.csproj
@@ -89,6 +91,7 @@ dotnet run --project .\session-02\samples\20-approval-gates\MafClaw.Sample20.csp
 dotnet run --project .\session-02\samples\21-approval-gates-agent\MafClaw.Sample21.csproj
 dotnet run --project .\session-02\samples\30-memory-store\MafClaw.Sample30.csproj
 dotnet run --project .\session-02\samples\31-memory-store-agent\MafClaw.Sample31.csproj
+dotnet run --project .\session-02\samples\32-local-file-memory-agent\MafClaw.Sample32.csproj
 dotnet run --project .\session-02\code\MafClaw.Session02.csproj
 ```
 
@@ -96,7 +99,7 @@ The expected behavior is:
 
 1. The secrets script targets `session-02\code\MafClaw.Session02.csproj`.
 2. The base samples demonstrate safe file access, approval gates, and file-backed memory.
-3. The agentic samples use the official surfaces: Harness `FileAccessStore`, `ApprovalRequiredAIFunction`, and `FoundryMemoryProvider`.
+3. The agentic samples use Harness `FileAccessStore`, `ApprovalRequiredAIFunction`, explicit local memory tools, and `FoundryMemoryProvider`.
 4. The finance advisor app combines those same behaviors as one complete Harness agent.
 5. The app reads and writes only inside its working folder, requests approval before sensitive actions, and uses Foundry memory when configured.
 

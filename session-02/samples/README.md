@@ -1,9 +1,9 @@
 # Session 2 samples
 
-These samples use a paired structure for each Session 2 concept:
+These samples use a concept-to-agent teaching ladder:
 
 - `10`, `20`, and `30` are small plain C# demos that isolate the concept.
-- `11`, `21`, and `31` are the same ideas implemented with the official Microsoft Agent Framework Harness or Foundry APIs.
+- `11`, `21`, `31`, and `32` implement those ideas with Microsoft Agent Framework, Harness, or Foundry APIs.
 - `..\code\` is the complete finance advisor that combines all three concepts.
 
 ## Sample authoring rule
@@ -27,11 +27,13 @@ Every live-demo sample should be readable while the presenter is sharing the scr
 - `21-approval-gates-agent` wraps the simulated trade tool with `ApprovalRequiredAIFunction` so Harness owns the approval boundary.
 - For the live demo, run `Buy 10 shares of MSFT.` twice: answer `y` once for the approved path, then answer `n` for the denied path.
 
-## 30 and 31 — memory store
+## 30, 31, and 32 — memory store
 
 - `30-memory-store` shows durable state stored to disk and restored across a restart.
 - `31-memory-store-agent` saves `Remember...` prompts as Foundry `UserProfile` memories, prints the saved scope/count, and uses `FoundryMemoryProvider` to recall durable user facts when memory is configured.
-- For the live demo, remember a current-user investor profile, recall it, then ask `What do you remember about other users?` to show the denied path.
+- `32-local-file-memory-agent` gives the agent explicit current-user save/recall tools backed by an inspectable local JSON file.
+- For the reliable live demo, run sample 32: save the profile, enter `/memory`, restart, recall it, then ask `What do you remember about other users?`.
+- Use sample 31 to compare the local application-owned approach with managed Foundry Memory.
 
 ## Run them
 
@@ -53,6 +55,7 @@ dotnet run --project .\samples\21-approval-gates-agent\MafClaw.Sample21.csproj
 
 dotnet run --project .\samples\30-memory-store\MafClaw.Sample30.csproj
 dotnet run --project .\samples\31-memory-store-agent\MafClaw.Sample31.csproj
+dotnet run --project .\samples\32-local-file-memory-agent\MafClaw.Sample32.csproj
 ```
 
 From the repository root:
@@ -66,4 +69,5 @@ dotnet run --project .\session-02\samples\21-approval-gates-agent\MafClaw.Sample
 
 dotnet run --project .\session-02\samples\30-memory-store\MafClaw.Sample30.csproj
 dotnet run --project .\session-02\samples\31-memory-store-agent\MafClaw.Sample31.csproj
+dotnet run --project .\session-02\samples\32-local-file-memory-agent\MafClaw.Sample32.csproj
 ```

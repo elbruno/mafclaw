@@ -33,6 +33,7 @@ The app uses:
 - Foundry memory is enabled when `Foundry:MemoryStore` and `Foundry:EmbeddingModel` are configured
 - when disabled, the app prints that Foundry memory is disabled and does not fall back to any local memory store
 - the memory store name is a logical store name, not a URL or secret
+- `samples\32-local-file-memory-agent` demonstrates the alternative application-owned local JSON approach; the final app intentionally remains on managed Foundry Memory
 
 ## Module structure
 

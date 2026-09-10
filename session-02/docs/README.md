@@ -51,22 +51,25 @@ During the live demo, run the same trade request twice:
 
 Memory is the next step after file and action safety.
 
-The session introduces two complementary models:
+The session introduces three levels:
 
 - File memory: store watchlists or notes that the agent intentionally curates in files under a session-scoped working folder.
+- Agentic local memory: expose explicit current-user save and recall tools over an inspectable JSON file.
 - Foundry memory: durable facts about the user are saved to the platform memory store and recalled by the platform.
 
 The difference is intentionally important:
 
 - file memory is explicit and coarse-grained
+- agentic local memory is reliable and inspectable, but the application owns isolation, concurrency, retention, and scale
 - Foundry memory is platform-backed and scoped per user or demo identity
 
-During the live demo, show both memory paths:
+During the live demo, make sample 32 the reliable agentic path:
 
 1. Tell the agent `Remember that I am a conservative investor saving for a house in two years.`
-2. Wait for the console to print `Foundry memory saved`, then refresh Foundry Memory and filter by the printed scope.
-3. Ask `What do you remember about my investor profile?` to show current-user recall.
-4. Ask `What do you remember about other users?` to show that another user's memory is not available.
+2. Enter `/memory` and show the exact JSON file.
+3. Exit, restart, and ask `What do you remember about my investor profile?`.
+4. Ask `What do you remember about other users?` to show that no cross-user tool exists.
+5. Compare sample 31 as the managed Foundry Memory version.
 
 If the console prints `Foundry memory save failed (403)` and the service details mention `401 Authentication` for the embedding deployment, the store exists but the backing Azure OpenAI resource rejected memory creation. Fix the Foundry memory store embedding deployment/authentication before expecting the UI to show saved memories.
 
@@ -84,14 +87,15 @@ The audience should see the same use case evolve over time:
 
 ## Agent connection
 
-The samples are paired so every concept has a plain C# version and an agentic version:
+The samples form a ladder from plain C# to agentic and managed implementations:
 
 - `10-safe-file-access` proves the file boundary in plain C#.
 - `11-safe-file-access-agent` turns that boundary into a Harness tool.
 - `20-approval-gates` proves the human approval boundary in plain C#.
 - `21-approval-gates-agent` turns the approval boundary into a Harness tool.
 - `30-memory-store` proves durable local memory in plain C#.
-- `31-memory-store-agent` turns memory into Harness tools.
+- `32-local-file-memory-agent` turns local memory into explicit fixed-scope Harness tools.
+- `31-memory-store-agent` demonstrates the managed Foundry Memory alternative.
 
 The final app in `code/` combines all three patterns. It uses:
 
@@ -118,6 +122,7 @@ Use these line ranges when sharing the code on screen. The short header at the t
 | Direct approval | `samples/20-approval-gates/Program.cs:7-29` | A side effect waits for an explicit human decision. |
 | Harness approval | `samples/21-approval-gates-agent/ApprovalGateTools.cs:13-33` and `Program.cs:40-57, 61-64` | `ApprovalRequiredAIFunction` keeps the model from executing the trade directly, then the sample prints approve and deny paths. |
 | Explicit memory | `samples/30-memory-store/Program.cs:9-29, 30-55` | Save, restart, reload, and show a missing-memory denied path. |
+| Agentic local memory | `samples/32-local-file-memory-agent/Program.cs:14-41, 43-62, 64-74`, `LocalMemoryTools.cs:10-27, 29-43`, and `LocalFileMemoryStore.cs:16-30, 32-67, 71-130` | Give the model only current-user save/recall tools, reveal the JSON with `/memory`, and prove restart persistence. |
 | Foundry memory | `samples/31-memory-store-agent/Program.cs:23-63, 72-91, 98-104` and `FoundryMemoryDemoStore.cs:9-43` | Print the memory store/scope, save the "Remember..." prompt as a real user-profile memory, then recall only the current scope. |
 | Final composition | `code/Program.cs:33-50, 54-75, 91-123, 131-143` | Combine the safe root, memory provider, approval rules, tool surface, and paired allowed/denied prompts. |
 | Approval round-trip | `code/AgentConsoleRunner.cs:13-52, 54-77` | Show how the console saves memory prompts and sends the user's approval back to Harness. |
