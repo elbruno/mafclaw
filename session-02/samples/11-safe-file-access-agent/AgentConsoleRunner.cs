@@ -24,6 +24,11 @@ internal static class AgentConsoleRunner
                 break;
             }
 
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                continue;
+            }
+
             // Send the prompt to Harness, then handle normal text or approvals.
             var response = await agent.RunAsync(input, session);
             await WriteResponseAndHandleApprovalsAsync(agent, session, response);

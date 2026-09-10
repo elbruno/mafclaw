@@ -19,6 +19,7 @@ Every live-demo sample should be readable while the presenter is sharing the scr
 
 - `10-safe-file-access` demonstrates a working folder with allowed reads.
 - `11-safe-file-access-agent` uses the Harness `FileAccessStore` with the built-in `file_access_*` tools rooted at the approved working folder.
+- For the live demo, ask `What is in my portfolio?` first, then copy the `Denied prompt` printed by sample 11 to show the agent refusing a harmless path outside the approved root.
 
 ## 20 and 21 — approval gates
 

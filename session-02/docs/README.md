@@ -22,6 +22,12 @@ The examples show a constrained file-access provider that points at a working fo
 
 The most important teaching point is that the tools are scoped to a safe path and should not be treated as unlimited filesystem access.
 
+During the live demo, show both paths:
+
+1. Ask `What is in my portfolio?` to show the allowed read from the approved working folder.
+2. Copy the `Denied prompt` printed by `11-safe-file-access-agent` to ask for a harmless decoy file outside that folder.
+3. Emphasize that the correct behavior is refusal: the agent should say it cannot access that folder because it is outside the approved working folder.
+
 ### 2. Approvals
 
 A trade is a side-effecting action. It cannot run in the same way as a read-only lookup.
@@ -92,7 +98,8 @@ Use these line ranges when sharing the code on screen. The short header at the t
 | Concept | File and lines | Presentation emphasis |
 |---|---|---|
 | Safe path | `samples/10-safe-file-access/Program.cs:10-30, 32-51` | Create the sandbox, allow the portfolio read, and block the outside path. |
-| Harness file tools | `samples/11-safe-file-access-agent/Program.cs:34-43, 47-61` | Root `FileAccessStore` at the working folder and auto-approve only reads. |
+| Harness file tools | `samples/11-safe-file-access-agent/Program.cs:34-50, 53-67, 82-85` | Root `FileAccessStore` at the working folder, create a harmless outside decoy, and copy the printed denied prompt. |
+| Blank input guard | `samples/11-safe-file-access-agent/AgentConsoleRunner.cs:20-33` | Ignore accidental empty Enter presses before sending prompts to Harness. |
 | Direct approval | `samples/20-approval-gates/Program.cs:7-27` | A side effect waits for an explicit human decision. |
 | Harness approval | `samples/21-approval-gates-agent/ApprovalGateTools.cs:13-33` and `Program.cs:40-57` | `ApprovalRequiredAIFunction` keeps the model from executing the trade directly. |
 | Explicit memory | `samples/30-memory-store/Program.cs:9-28, 30-46` | Save, restart, reload, and prove continuity. |
