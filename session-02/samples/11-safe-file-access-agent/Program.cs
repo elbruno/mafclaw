@@ -11,14 +11,17 @@ using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 
+// Read configuration from .NET user-secrets first, then environment variables.
 var config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .AddEnvironmentVariables()
     .Build();
 
+// These values point the sample at the Azure AI Foundry project and model.
 var endpoint = config["Foundry:ProjectEndpoint"] ?? config["FOUNDRY_PROJECT_ENDPOINT"];
 var model = config["Foundry:Model"] ?? config["FOUNDRY_MODEL"] ?? "gpt-5-mini";
 
+// Stop early with setup guidance when the sample is not configured yet.
 if (string.IsNullOrWhiteSpace(endpoint))
 {
     Console.WriteLine("Missing Foundry:ProjectEndpoint.");
@@ -27,6 +30,7 @@ if (string.IsNullOrWhiteSpace(endpoint))
     return;
 }
 
+// This folder is the only file root the Harness agent will be allowed to use.
 var workingDirectory = Path.Combine(AppContext.BaseDirectory, "working");
 Directory.CreateDirectory(workingDirectory);
 
@@ -39,11 +43,13 @@ if (!File.Exists(portfolioPath))
         "symbol,shares,averageCost,risk\nMSFT,25,430.10,moderate\nSPY,40,530.25,low\nNVDA,18,142.50,high\n");
 }
 
+// Adapt the Foundry project client into the chat client shape expected by Harness.
 IChatClient chatClient = new AIProjectClient(new Uri(endpoint), new AzureCliCredential())
     .GetProjectOpenAIClient()
     .GetResponsesClient()
     .AsIChatClient(model);
 
+// Create a Harness agent and give it scoped file tools instead of raw disk access.
 AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 {
     FileAccessStore = new FileSystemAgentFileStore(workingDirectory),
@@ -65,6 +71,7 @@ AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
     }
 });
 
+// Keep the live demo simple: one prompt loop, one clear exit command.
 Console.WriteLine("mafclaw · Session 02 sample 11");
 Console.WriteLine("Agentic safe file access with Microsoft Agent Framework + Harness.");
 Console.WriteLine("Try: What is in my portfolio?");
