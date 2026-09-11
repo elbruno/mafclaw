@@ -19,7 +19,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.11" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\10-skills\skills\**\*.*" Link="skills\%(RecursiveDir)%(Filename)%(Extension)">
+    <None Include="skills\**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Azure.AI.Extensions.OpenAI;
 using Azure.AI.Projects;
 using Azure.Identity;
@@ -23,7 +24,7 @@ if (string.IsNullOrWhiteSpace(endpoint))
 
 var skillsDirectory = Path.Combine(AppContext.BaseDirectory, "skills");
 var skillsProvider = new AgentSkillsProviderBuilder()
-    .UseFileSkills([skillsDirectory])
+    .UseFileSkills([skillsDirectory], scriptRunner: RejectScriptExecution)
     .Build();
 
 IChatClient chatClient = new AIProjectClient(new Uri(endpoint), new AzureCliCredential())
@@ -54,3 +55,15 @@ Console.WriteLine("Try: What risk does a 55% NVDA allocation create?");
 Console.WriteLine("Commands: /exit");
 
 await AgentConsoleRunner.RunAsync(agent);
+
+// This sample's SKILL.md files only bundle instructions and reference data, so no
+// script ever runs. A real skill package with a scripts/ folder would execute it here
+// (for example, via a subprocess) instead of throwing.
+static Task<object?> RejectScriptExecution(
+    AgentFileSkill skill,
+    AgentFileSkillScript script,
+    JsonElement? arguments,
+    IServiceProvider? serviceProvider,
+    CancellationToken cancellationToken) =>
+    Task.FromException<object?>(new NotSupportedException(
+        $"Skill '{skill.Frontmatter.Name}' has no runnable scripts in this sample."));
