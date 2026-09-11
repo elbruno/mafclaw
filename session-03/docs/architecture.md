@@ -28,11 +28,24 @@ advertise -> select -> load instructions/resources -> bounded host action
   host-owned execution; Sample 11 uses `AgentSkillsProviderBuilder` to expose
   the same packages to a live Harness agent through progressive disclosure.
 - **Shell:** the host owns the allowlist, working directory, timeout,
-  cancellation, and output cap.
+  cancellation, and output cap. Sample 20 walks the boundary in plain C#;
+  Sample 21 confines a live `LocalShellExecutor` to a seeded
+  `working/confirmations` folder and exposes it as an approval-gated
+  `run_shell` tool, so a Harness agent can reorganize files but never escape
+  the confined root.
 - **CodeAct:** calculations are explicit code with inspectable inputs and
-  outputs rather than unsupported model arithmetic.
-- **Background agents:** the queue returns a ticket and status. `queued` is not
-  evidence that the work completed.
+  outputs rather than unsupported model arithmetic. Sample 30 shows the
+  boundary in plain C#; Sample 31 lets a live Harness agent read
+  `holdings.csv` through the normal `file_access` tools, then write and run
+  Python in a `HyperlightCodeActProvider` micro-VM sandbox (approval required
+  on every execution) to compute the answer and show its work.
+- **Background agents:** Sample 40 models the queue-and-status boundary in
+  plain C#; Sample 41 hands a live Harness agent a lean `TickerResearchAgent`
+  (a plain chat-client agent scoped to `HostedWebSearchTool`) through
+  `HarnessAgentOptions.BackgroundAgents`, so it can fan research out per
+  ticker, run those requests concurrently, and aggregate the results.
 
-The complete app is intentionally host-driven and offline. A future live MAF
-bridge can replace the fixed orchestration without widening these boundaries.
+The plain-C# samples (`10`, `20`, `30`, `40`) stay host-driven and offline so
+the boundary is visible without any live dependency. Their MAF-bridge
+counterparts (`11`, `21`, `31`, `41`) are live Harness agents against a real
+Azure AI Foundry project - see `setup.md` for configuring credentials.

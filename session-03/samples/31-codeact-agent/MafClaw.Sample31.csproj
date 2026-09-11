@@ -4,9 +4,20 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>OPENAI001;MAAI001</NoWarn>
+    <UserSecretsId>9d2c6a4f-1b8e-4a5d-9f30-7c5e2d4b6f18</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Azure.AI.Projects" Version="2.1.0-beta.4" />
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
     <PackageReference Include="Microsoft.Agents.AI" Version="1.20.0" />
+    <PackageReference Include="Microsoft.Agents.AI.Foundry" Version="1.20.0-preview.260831.1" />
     <PackageReference Include="Microsoft.Agents.AI.Harness" Version="1.20.0" />
+    <PackageReference Include="Microsoft.Agents.AI.Hyperlight" Version="1.20.0-preview.260831.1" />
+    <PackageReference Include="Hyperlight.HyperlightSandbox.Guest.Python" Version="0.6.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.11" />
   </ItemGroup>
 </Project>

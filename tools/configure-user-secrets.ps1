@@ -157,6 +157,9 @@ $script:SessionMap = [ordered]@{
         Folder       = 'session-03'
         ProjectPaths = @(
             'samples\11-skills-agent\MafClaw.Sample11.csproj'
+            'samples\21-confined-shell-agent\MafClaw.Sample21.csproj'
+            'samples\31-codeact-agent\MafClaw.Sample31.csproj'
+            'samples\41-background-agents\MafClaw.Sample41.csproj'
         )
         Keys         = @(
             [pscustomobject]@{ Name = 'Foundry:ProjectEndpoint'; Prompt = 'Azure AI Foundry project endpoint URL'; EnvVar = 'FOUNDRY_PROJECT_ENDPOINT'; Required = $true; IsSecret = $false }
