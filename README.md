@@ -7,6 +7,11 @@ A 4-part Microsoft Reactor live coding series that builds a personal finance CLI
 - **Series page:** https://aka.ms/mafclaw
 - **Blog introduction:** http://aka.ms/mafclaw/blog
 - **Sample repository:** http://aka.ms/mafclaw/repo
+- **.NET YouTube recordings:**
+  - [Session 1](https://www.youtube.com/watch?v=iUs15X1v2w4)
+  - [Session 2](https://www.youtube.com/watch?v=V58coa0llUo)
+  - [Session 3](https://www.youtube.com/watch?v=rMhX0-oE4aY)
+  - [Session 4](https://www.youtube.com/watch?v=dCIBza-WxUc)
 - **Target runtime:** .NET 10
 
 ## Sessions
