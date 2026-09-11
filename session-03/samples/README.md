@@ -59,3 +59,10 @@ Each sample's C# entry point and helper begins with an objective and A/B/C
 step header. Inline comments are limited to the major teaching blocks, so the
 source can be used directly during an online session without hiding the
 behavior behind excessive narration.
+
+In the Microsoft Agent Framework bridge samples (11, 21, 31, and 41), comments
+also identify the concrete framework type at each integration point and the
+host plumbing it replaces. Present each pair in this order: first show the
+plain-C# primitive, then point to the MAF type that provides the same capability
+without reimplementing agent context, tool adaptation, approvals, sandbox
+bridging, or background delegation.

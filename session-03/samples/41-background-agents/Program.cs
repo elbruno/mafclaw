@@ -4,12 +4,6 @@
 // B. Register it as a BackgroundAgents capability.
 // C. Run the console and aggregate concurrent research.
 
-// Session flow:
-// A. Load the Foundry connection settings.
-// B. Build a lean research sub-agent with only a web-search tool.
-// C. Hand it to the main Harness agent as a BackgroundAgent so work can run concurrently.
-// D. Ask the agent to research multiple tickers and aggregate the findings.
-
 using Azure.AI.Extensions.OpenAI;
 using Azure.AI.Projects;
 using Azure.Identity;
@@ -39,14 +33,18 @@ IChatClient chatClient = new AIProjectClient(new Uri(endpoint), new AzureCliCred
     .GetResponsesClient()
     .AsIChatClient(model);
 
-// A lean, web-search-only sub-agent. No Harness machinery: it only needs to research one ticker.
-// B. Keep the research sub-agent lean: one role and one search capability.
+// B. AsAIAgent creates the focused research worker. It supplies the standard
+// agent shape, so we do not implement our own prompt/message adapter.
 AIAgent research = chatClient.AsAIAgent(
     name: "TickerResearchAgent",
     description: "Searches the web for recent news about a single stock ticker.",
     instructions: "You research a single ticker and return 3-4 factual bullet points with sources.",
+    // HostedWebSearchTool gives this worker one hosted capability without a
+    // custom HTTP client or search-result adapter in the sample.
     tools: [new HostedWebSearchTool()]);
 
+// Microsoft Agent Framework's BackgroundAgents registration exposes fan-out and
+// fan-in tools, avoiding custom queueing, delegation, and result-collection code.
 AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 {
     BackgroundAgents = [research],

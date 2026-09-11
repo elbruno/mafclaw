@@ -4,12 +4,6 @@
 // B. Confine shell execution and require approval.
 // C. Run the live agent console.
 
-// Session flow:
-// A. Load the Foundry connection settings.
-// B. Confine a shell executor to a scratch "confirmations" folder with a deny-list policy.
-// C. Attach the shell as the Harness agent's approval-gated run_shell tool.
-// D. Ask the agent to tidy up the messy confirmation files.
-
 using Azure.AI.Extensions.OpenAI;
 using Azure.AI.Projects;
 using Azure.Identity;
@@ -35,12 +29,13 @@ if (string.IsNullOrWhiteSpace(endpoint))
     return;
 }
 
-// Every shell command is re-anchored to this folder and cannot escape it.
-// B. Seed and confine the mock confirmation folder.
+// B. Seed the only folder this lesson allows the agent to change.
 var vaultDir = Path.Combine(AppContext.BaseDirectory, "working", "confirmations");
 Directory.CreateDirectory(vaultDir);
 SeedMessyConfirmations(vaultDir);
 
+// Microsoft.Agents.AI.Tools.Shell's LocalShellExecutor supplies the confined
+// execution boundary, avoiding a custom process runner and path-enforcement layer.
 await using var shell = new LocalShellExecutor(new LocalShellExecutorOptions
 {
     WorkingDirectory = vaultDir,
@@ -51,6 +46,8 @@ await using var shell = new LocalShellExecutor(new LocalShellExecutorOptions
     ]),
     Timeout = TimeSpan.FromSeconds(15),
 });
+// AsAIFunction adapts the safe executor into an agent tool and keeps human
+// approval in the framework contract instead of a hand-written tool protocol.
 var runShell = shell.AsAIFunction(
     "run_shell",
     "Run a shell command confined to the trade-confirmations working directory.",
@@ -61,6 +58,8 @@ IChatClient chatClient = new AIProjectClient(new Uri(endpoint), new AzureCliCred
     .GetResponsesClient()
     .AsIChatClient(model);
 
+// AsHarnessAgent coordinates prompts, tool calls, and approvals so the host
+// supplies policy while Microsoft Agent Framework supplies the agent loop.
 AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 {
     AgentModeProviderOptions = new AgentModeProviderOptions { DefaultMode = "execute" },

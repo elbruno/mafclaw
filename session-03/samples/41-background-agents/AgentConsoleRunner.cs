@@ -11,7 +11,8 @@ internal static class AgentConsoleRunner
 {
     public static async Task RunAsync(AIAgent agent)
     {
-        // A. Keep concurrent research requests in one session.
+        // A. AIAgent.CreateSessionAsync gives MAF-owned conversation state, so
+        // this sample does not implement its own message-history container.
         var session = await agent.CreateSessionAsync();
 
         while (true)
@@ -28,7 +29,7 @@ internal static class AgentConsoleRunner
                 continue;
             }
 
-            // B. Display responses and inspect any approval requests.
+            // B. AIAgent.RunAsync executes the framework agent loop for one prompt.
             var response = await agent.RunAsync(input, session);
             while (true)
             {
@@ -48,6 +49,8 @@ internal static class AgentConsoleRunner
                 }
 
                 // C. Return explicit approval decisions before continuing.
+                // C. ToolApprovalRequestContent maps the console choice to MAF's
+                // approval response instead of a custom tool-call protocol.
                 var approvals = new List<AIContent>();
                 foreach (var request in requests)
                 {
