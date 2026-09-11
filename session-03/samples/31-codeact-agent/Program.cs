@@ -4,13 +4,6 @@
 // B. Mount read-only file access and the approval-gated CodeAct provider.
 // C. Run the agent console and show the generated calculation.
 
-// Session flow:
-// A. Load the Foundry connection settings.
-// B. Mount a read-only holdings CSV into a Hyperlight micro-VM sandbox.
-// C. Expose a single execute_code tool so the model writes and runs its own JavaScript
-//    over the mounted data, instead of calling a fixed pre-written function.
-// D. Every code execution requires approval before it runs inside the sandbox.
-
 using Azure.AI.Extensions.OpenAI;
 using Azure.AI.Projects;
 using Azure.Identity;
@@ -37,9 +30,8 @@ if (string.IsNullOrWhiteSpace(endpoint))
     return;
 }
 
-// The file_access tools are scoped to this folder only; CodeAct never touches disk directly -
-// the agent reads holdings.csv with file_access, then hands the numbers to the sandbox to compute.
-// B. Give file access a fixed folder, then let the sandbox do computation only.
+// B. Give file access a fixed folder; the agent reads the CSV, then passes
+// values to the sandbox rather than letting generated code access host files.
 var workingDirectory = Path.Combine(AppContext.BaseDirectory, "working");
 Directory.CreateDirectory(workingDirectory);
 var holdingsPath = Path.Combine(workingDirectory, "holdings.csv");
@@ -50,6 +42,8 @@ if (!File.Exists(holdingsPath))
         "symbol,shares,price,sector\nMSFT,35,430.12,Technology\nNVDA,20,142.50,Technology\nJNJ,40,156.30,Healthcare\nXOM,25,118.75,Energy\n");
 }
 
+// Microsoft.Agents.AI.Hyperlight's HyperlightCodeActProvider turns the Python
+// micro-VM into an approval-gated agent capability, avoiding a custom sandbox bridge.
 var codeActOptions = HyperlightCodeActProviderOptions.CreateForWasm(PythonGuestModule.GetModulePath());
 codeActOptions.ApprovalMode = CodeActApprovalMode.AlwaysRequire;
 var codeAct = new HyperlightCodeActProvider(codeActOptions);
@@ -59,12 +53,17 @@ IChatClient chatClient = new AIProjectClient(new Uri(endpoint), new AzureCliCred
     .GetResponsesClient()
     .AsIChatClient(model);
 
+// HarnessAgentOptions wires file access, CodeAct, and approvals into one agent
+// loop, instead of requiring the application to dispatch each request itself.
 AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 {
+    // FileSystemAgentFileStore gives MAF file_access tools a scoped root instead
+    // of making the application implement file-tool registration and validation.
     FileAccessStore = new FileSystemAgentFileStore(workingDirectory),
     AIContextProviders = [codeAct],
     ToolApprovalAgentOptions = new ToolApprovalAgentOptions
     {
+        // FileAccessProvider supplies a reusable rule for safe read-only calls.
         AutoApprovalRules = [FileAccessProvider.ReadOnlyToolsAutoApprovalRule],
     },
     ChatOptions = new ChatOptions
@@ -85,5 +84,3 @@ Console.WriteLine("Commands: /exit");
 
 // C. Start the console so the generated code and approval are visible.
 await AgentConsoleRunner.RunAsync(agent);
-
-

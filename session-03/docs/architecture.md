@@ -50,6 +50,26 @@ the boundary is visible without any live dependency. Their MAF-bridge
 counterparts (`11`, `21`, `31`, `41`) are live Harness agents against a real
 Azure AI Foundry project - see `setup.md` for configuring credentials.
 
+## Reading the MAF bridge comments
+
+Teach each numbered pair as a comparison, not as a framework magic trick. The
+plain sample first makes the capability and boundary visible; the MAF version
+then labels the specific type that provides the reusable agent integration:
+
+- **11:** `AgentSkillsProviderBuilder` handles skill discovery and progressive
+  disclosure, and `AsHarnessAgent` supplies the agent/context routing loop.
+- **21:** `LocalShellExecutor` and `AsAIFunction` provide the confined shell
+  tool contract, while `AsHarnessAgent` handles its invocation and approval flow.
+- **31:** `HyperlightCodeActProvider` bridges an approval-gated sandbox into
+  the agent, and `HarnessAgentOptions` composes it with file access and approval.
+- **41:** `AsAIAgent` creates the focused worker and
+  `HarnessAgentOptions.BackgroundAgents` provides background delegation and
+  result collection.
+
+The comments state what each type saves the application from implementing.
+They do not imply that the framework makes safety decisions automatically: the
+host still chooses the folders, policies, instructions, and approval settings.
+
 ## Why the comments are structured
 
 The A/B/C headers mirror the teaching sequence: establish inputs, perform one

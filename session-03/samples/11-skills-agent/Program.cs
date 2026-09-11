@@ -29,17 +29,23 @@ if (string.IsNullOrWhiteSpace(endpoint))
     return;
 }
 
-// B. Advertise local skills through the provider; content loads on demand.
+// B. Microsoft Agent Framework's AgentSkillsProviderBuilder replaces custom
+// skill discovery and progressive-disclosure plumbing: it advertises metadata,
+// then loads the selected SKILL.md package and resources on demand.
 var skillsDirectory = Path.Combine(AppContext.BaseDirectory, "skills");
 var skillsProvider = new AgentSkillsProviderBuilder()
     .UseFileSkills([skillsDirectory], scriptRunner: RejectScriptExecution)
     .Build();
 
+// Azure's AIProjectClient connects the configured Foundry project to the
+// Microsoft.Extensions.AI IChatClient abstraction used by Agent Framework.
 IChatClient chatClient = new AIProjectClient(new Uri(endpoint), new AzureCliCredential())
     .GetProjectOpenAIClient()
     .GetResponsesClient()
     .AsIChatClient(model);
 
+// Microsoft Agent Framework's AsHarnessAgent turns the chat client and context
+// provider into an agent, saving us from writing the tool/context routing loop.
 AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 {
     DisableAgentSkillsProvider = true,
