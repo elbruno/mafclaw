@@ -30,3 +30,10 @@ printed result.
 
 The implementation is intentionally host-driven: the catalog describes skills,
 while the application owns tool validation, process limits, and workflow status.
+
+## How to teach the code
+
+The source is intentionally small and host-driven. Each C# file begins with
+an objective plus A/B/C steps, and major blocks have short comments that map
+the code to the spoken explanation: load inputs, apply one boundary, and
+return an inspectable result.

@@ -18,3 +18,10 @@ The private teaching materials remain under `sessions\session-03\`:
 - `run-of-show.md`
 - `test-plan.md`
 - `slides\`
+
+## Source-comment convention
+
+Session 03 code is written for live online teaching. Every C# file identifies
+its objective and A/B/C steps at the top, then uses short comments before the
+major blocks. The comments explain the boundary to point at; they do not
+replace the implementation or add production behavior.

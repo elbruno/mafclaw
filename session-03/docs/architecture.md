@@ -49,3 +49,10 @@ The plain-C# samples (`10`, `20`, `30`, `40`) stay host-driven and offline so
 the boundary is visible without any live dependency. Their MAF-bridge
 counterparts (`11`, `21`, `31`, `41`) are live Harness agents against a real
 Azure AI Foundry project - see `setup.md` for configuring credentials.
+
+## Why the comments are structured
+
+The A/B/C headers mirror the teaching sequence: establish inputs, perform one
+bounded action, and return an inspectable result. This keeps each primitive
+visible in the source while the inline comments call out the trust boundary
+being demonstrated.

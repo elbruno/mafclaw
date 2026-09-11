@@ -53,3 +53,9 @@ dotnet run --project .\samples\41-background-agents\MafClaw.Sample41.csproj
 
 All values are mock educational data. These samples are not financial advice.
 
+## Presenter-friendly source
+
+Each sample's C# entry point and helper begins with an objective and A/B/C
+step header. Inline comments are limited to the major teaching blocks, so the
+source can be used directly during an online session without hiding the
+behavior behind excessive narration.

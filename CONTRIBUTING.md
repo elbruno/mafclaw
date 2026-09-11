@@ -13,4 +13,4 @@ Thanks for your interest in contributing.
 - Keep changes focused
 - Update docs when behavior changes
 - Ensure sample code remains runnable
-- For live-demo samples, add a short top-of-file step summary and simple inline comments before each major code block so the presenter can explain the code while sharing the screen
+- For every C# file, add a short top-of-file header that explains the file objective and its major steps (A, B, and C, adding steps only when needed). Add minimal inline comments before major code blocks so a presenter can explain the code during an online training session.

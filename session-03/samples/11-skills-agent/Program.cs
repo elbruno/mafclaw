@@ -1,3 +1,9 @@
+// Objective: bridge local SKILL.md packages into a live Harness agent.
+// Steps:
+// A. Load Foundry configuration and local skills.
+// B. Give the agent progressive-disclosure skill context.
+// C. Run the console loop with script execution denied.
+
 using System.Text.Json;
 using Azure.AI.Extensions.OpenAI;
 using Azure.AI.Projects;
@@ -6,6 +12,7 @@ using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 
+// A. Load endpoint and model settings without hard-coding credentials.
 var configuration = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .AddEnvironmentVariables()
@@ -22,6 +29,7 @@ if (string.IsNullOrWhiteSpace(endpoint))
     return;
 }
 
+// B. Advertise local skills through the provider; content loads on demand.
 var skillsDirectory = Path.Combine(AppContext.BaseDirectory, "skills");
 var skillsProvider = new AgentSkillsProviderBuilder()
     .UseFileSkills([skillsDirectory], scriptRunner: RejectScriptExecution)
@@ -54,6 +62,7 @@ Console.WriteLine("Try: Value 25 shares of MSFT using the mock data.");
 Console.WriteLine("Try: What risk does a 55% NVDA allocation create?");
 Console.WriteLine("Commands: /exit");
 
+// C. Start the teachable interactive loop.
 await AgentConsoleRunner.RunAsync(agent);
 
 // This sample's SKILL.md files only bundle instructions and reference data, so no

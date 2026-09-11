@@ -1,3 +1,9 @@
+// Objective: wire the offline Session 03 components and print one inspectable result.
+// Steps:
+// A. Load local settings and mock data.
+// B. Construct the bounded tools and orchestrator.
+// C. Run the workflow and format its JSON summary.
+
 using System.Text.Json;
 
 var settings = Session03Settings.Load();

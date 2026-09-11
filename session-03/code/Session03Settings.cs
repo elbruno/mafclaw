@@ -1,3 +1,9 @@
+// Objective: load the offline advisor's bounded shell and background settings.
+// Steps:
+// A. Read the checked-in template configuration.
+// B. Resolve the copied output path or source-folder fallback.
+// C. Fail visibly when the template cannot be loaded.
+
 using System.Text.Json;
 
 internal sealed class Session03Settings

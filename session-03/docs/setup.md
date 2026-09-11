@@ -69,3 +69,9 @@ Try these prompts:
   latest news.` The agent fans the tickers out to a background research
   sub-agent, runs them concurrently, and aggregates the findings.
 
+## Teaching-source check
+
+Before presenting, open the relevant C# file and use its objective header to
+frame the explanation. The A/B/C comments should match the visible execution
+order; if a sample changes, update its comments with the code rather than
+adding a separate script that can drift.

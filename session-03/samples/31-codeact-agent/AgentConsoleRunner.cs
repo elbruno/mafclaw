@@ -1,3 +1,9 @@
+// Objective: run the CodeAct agent conversation and surface execution approvals.
+// Steps:
+// A. Create a session and accept prompts.
+// B. Display responses and pending tool requests.
+// C. Send explicit approval or denial responses.
+
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 
@@ -5,6 +11,7 @@ internal static class AgentConsoleRunner
 {
     public static async Task RunAsync(AIAgent agent)
     {
+        // A. Keep the CodeAct conversation in one session.
         var session = await agent.CreateSessionAsync();
 
         while (true)
@@ -21,6 +28,7 @@ internal static class AgentConsoleRunner
                 continue;
             }
 
+            // B. Display the model response and inspect tool requests.
             var response = await agent.RunAsync(input, session);
             while (true)
             {
@@ -39,6 +47,7 @@ internal static class AgentConsoleRunner
                     break;
                 }
 
+                // C. Send explicit approval or denial for each execution.
                 var approvals = new List<AIContent>();
                 foreach (var request in requests)
                 {

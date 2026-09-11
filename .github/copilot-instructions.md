@@ -64,3 +64,5 @@ The Scribe will merge it into the shared decisions file.
 - Keep each C# class, record, interface, and enum in its own `.cs` file named after the type.
 - `Program.cs` should contain only the application entry point/top-level statements and orchestration code.
 - Do not hide reusable sample logic as extra types at the bottom of `Program.cs`; move it into named files so live demos can reveal one concept at a time.
+- Write C# so it can be taught in an online training session. Every C# file must begin with a short header that states the file objective and its major steps (A, B, and C, adding steps only when needed). Keep the implementation minimal and add short comments before major code blocks to explain what the presenter should point out.
+- When a change to public staging is agreed, synchronize its corresponding files to the `elbruno/mafclaw` public repository before declaring the work complete. Keep the public repository's source and public documentation aligned; do not copy private planning, rehearsal, or credential material.

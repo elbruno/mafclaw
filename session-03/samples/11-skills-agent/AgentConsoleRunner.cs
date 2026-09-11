@@ -1,3 +1,9 @@
+// Objective: provide the reusable console loop for interactive agent samples.
+// Steps:
+// A. Create one agent session.
+// B. Send prompts and display responses.
+// C. Pause for explicit tool approvals.
+
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 
@@ -5,6 +11,7 @@ internal static class AgentConsoleRunner
 {
     public static async Task RunAsync(AIAgent agent)
     {
+        // A. Keep conversation state in one explicit agent session.
         var session = await agent.CreateSessionAsync();
 
         while (true)
@@ -21,6 +28,7 @@ internal static class AgentConsoleRunner
                 continue;
             }
 
+            // B. Send one prompt and handle any approval messages.
             var response = await agent.RunAsync(input, session);
             while (true)
             {

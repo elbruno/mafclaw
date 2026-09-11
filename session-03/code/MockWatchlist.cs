@@ -1,3 +1,9 @@
+// Objective: load the mock watchlist and produce a small portfolio summary.
+// Steps:
+// A. Locate and deserialize the educational JSON data.
+// B. Calculate the count, symbols, and average change.
+// C. Return a structured result for the orchestration sample.
+
 using System.Text.Json;
 
 internal sealed class MockWatchlist(IReadOnlyList<WatchlistItem> items)

@@ -1,3 +1,9 @@
+// Objective: bridge background-agent fan-out into a live Harness agent.
+// Steps:
+// A. Load Foundry settings and create a lean research agent.
+// B. Register it as a BackgroundAgents capability.
+// C. Run the console and aggregate concurrent research.
+
 // Session flow:
 // A. Load the Foundry connection settings.
 // B. Build a lean research sub-agent with only a web-search tool.
@@ -11,6 +17,7 @@ using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 
+// A. Load endpoint and model settings for the live bridge.
 var configuration = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .AddEnvironmentVariables()
@@ -33,6 +40,7 @@ IChatClient chatClient = new AIProjectClient(new Uri(endpoint), new AzureCliCred
     .AsIChatClient(model);
 
 // A lean, web-search-only sub-agent. No Harness machinery: it only needs to research one ticker.
+// B. Keep the research sub-agent lean: one role and one search capability.
 AIAgent research = chatClient.AsAIAgent(
     name: "TickerResearchAgent",
     description: "Searches the web for recent news about a single stock ticker.",
@@ -59,4 +67,5 @@ Console.WriteLine("The Harness exposes background_agents_* tools to fan work out
 Console.WriteLine("Try: Research MSFT, NVDA and SPY and summarize the latest news.");
 Console.WriteLine("Commands: /exit");
 
+// C. Start the console so fan-out and fan-in can be demonstrated.
 await AgentConsoleRunner.RunAsync(agent);

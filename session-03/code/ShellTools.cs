@@ -1,3 +1,9 @@
+// Objective: run exactly one safe local command with visible process limits.
+// Steps:
+// A. Validate the command against the allowlist.
+// B. Run it in the fixed working directory with timeout and cancellation.
+// C. Cap output and return an inspectable result.
+
 using System.Diagnostics;
 
 internal interface IShellTool
