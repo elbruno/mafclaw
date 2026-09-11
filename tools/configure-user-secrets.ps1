@@ -152,20 +152,11 @@ $script:SessionMap = [ordered]@{
         )
     }
     '3' = @{
-        Label        = 'Session 3 – Scaling the Claw or Harness Capabilities (placeholder – code not yet implemented)'
-        Status       = 'placeholder'
+        Label        = 'Session 3 – Scaling the Claw: Skills, Shell, CodeAct, and Background Agents (offline package — no secrets required)'
+        Status       = 'offline'
         Folder       = 'session-03'
-        ProjectPaths = @(
-            'code\MafClaw.Session03.csproj'
-        )
-        Keys         = @(
-            [pscustomobject]@{ Name = 'Foundry:ProjectEndpoint'; Prompt = 'Azure AI Foundry project endpoint URL';             EnvVar = 'FOUNDRY_PROJECT_ENDPOINT'; Required = $true;  IsSecret = $false }
-            [pscustomobject]@{ Name = 'Foundry:Model';           Prompt = 'Foundry model or deployment name';                 EnvVar = 'FOUNDRY_MODEL';            Required = $true;  IsSecret = $false }
-            [pscustomobject]@{ Name = 'Foundry:MemoryStore';     Prompt = 'Foundry memory store name (Enter to skip)';        EnvVar = 'FOUNDRY_MEMORY_STORE';     Required = $false; IsSecret = $false }
-            [pscustomobject]@{ Name = 'Foundry:EmbeddingModel';  Prompt = 'Foundry embedding model name (Enter to skip)';     EnvVar = 'FOUNDRY_EMBEDDING_MODEL';  Required = $false; IsSecret = $false }
-            [pscustomobject]@{ Name = 'Foundry:MemoryScope';     Prompt = 'Foundry memory scope/user id (Enter for sample default)'; EnvVar = 'FOUNDRY_MEMORY_SCOPE'; Required = $false; IsSecret = $false }
-            [pscustomobject]@{ Name = 'Foundry:ToolboxEndpoint'; Prompt = 'Foundry Toolbox or MCP endpoint (Enter to skip)';  EnvVar = 'FOUNDRY_TOOLBOX_ENDPOINT'; Required = $false; IsSecret = $false }
-        )
+        ProjectPaths = @()
+        Keys         = @()
     }
     '4' = @{
         Label        = 'Session 4 – Making Your Claw Production-Ready (placeholder – code not yet implemented)'
@@ -312,6 +303,15 @@ $valueCache = @{}
 foreach ($sk in $sessionKeys) {
     $cfg = $script:SessionMap[$sk]
     Write-Step $cfg.Label
+
+    # Sessions with no owned keys are fully offline (no Foundry credentials
+    # or other secrets are read by any of their projects). Skip project
+    # discovery and user-secrets calls entirely rather than no-op looping.
+    if ($cfg.Keys.Count -eq 0 -and -not ($ProjectPath -and $sessionKeys.Count -eq 1)) {
+        Write-Host '  This session is fully offline — no user-secrets are required.'
+        Write-Host ''
+        continue
+    }
 
     # Resolve the target .csproj files
     if ($ProjectPath -and $sessionKeys.Count -eq 1) {

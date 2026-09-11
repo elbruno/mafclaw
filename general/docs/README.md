@@ -72,7 +72,7 @@ See the [Session 1 guide](../../session-01/README.md) for the full checkpoint wa
 
 ## Configuration: Foundry project and model
 
-All samples require access to a Microsoft Foundry project with a deployed model (e.g. `gpt-5-mini`).
+Sessions 1 and 2 require access to a Microsoft Foundry project with a deployed model (e.g. `gpt-5-mini`). Session 3 is fully offline and needs no Foundry project, model, or network access — see the [Session 3 guide](../../session-03/README.md).
 
 ### Configure user secrets
 

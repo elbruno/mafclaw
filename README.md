@@ -22,7 +22,8 @@ A 4-part Microsoft Reactor live coding series that builds a personal finance CLI
 
 - `session-01/` — Session 1: four incremental checkpoints (hello-agent → harness → tools → planning+todos) and the finished sample.
 - `session-02/` — Session 2: isolated samples for safe file access, approvals, and memory, plus the final Agent Framework/Harness finance advisor walkthrough.
-- `session-03/` through `session-04/` — Placeholder folders. Not started; real .NET 10 snapshots will replace them after each session goes live.
+- `session-03/` — Session 3: an offline runnable package covering skills, confined shell, CodeAct, and background agents (`code/`, `samples/`, `docs/`), cumulative with Session 2.
+- `session-04/` — Placeholder folder. Not started; a real .NET 10 snapshot will replace it after the session goes live.
 - `general/docs/` — Prerequisites, configuration, and troubleshooting for all sessions.
 
 ## Getting started
@@ -79,6 +80,31 @@ dotnet run --project .\session-02\code\MafClaw.Session02.csproj
 ```
 
 For the full walkthrough, see the [Session 2 guide](./session-02/README.md).
+
+### Quick start (Session 3)
+
+```powershell
+# 1. Enter the repo
+cd mafclaw
+
+# 2. No credentials needed — Session 3 is fully offline
+cd session-03
+
+# 3. Run the complete cumulative finance advisor
+dotnet run --project .\code\MafClaw.Session03.csproj
+
+# 4. Run the numbered sample ladder (skills, confined shell, CodeAct, background agents)
+dotnet run --project .\samples\10-skills\MafClaw.Sample10.csproj
+dotnet run --project .\samples\11-skills-agent\MafClaw.Sample11.csproj
+dotnet run --project .\samples\20-confined-shell\MafClaw.Sample20.csproj
+dotnet run --project .\samples\21-confined-shell-agent\MafClaw.Sample21.csproj
+dotnet run --project .\samples\30-codeact-calculation\MafClaw.Sample30.csproj
+dotnet run --project .\samples\31-codeact-agent\MafClaw.Sample31.csproj
+dotnet run --project .\samples\40-background-queue\MafClaw.Sample40.csproj
+dotnet run --project .\samples\41-background-agents\MafClaw.Sample41.csproj
+```
+
+For the full walkthrough, see the [Session 3 guide](./session-03/README.md).
 
 ## Session 4 status
 
