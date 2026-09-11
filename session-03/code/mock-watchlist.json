@@ -1,0 +1,14 @@
+[
+  {
+    "symbol": "MSFT",
+    "changePercent": 1.2
+  },
+  {
+    "symbol": "NVDA",
+    "changePercent": -0.8
+  },
+  {
+    "symbol": "SPY",
+    "changePercent": 0.4
+  }
+]

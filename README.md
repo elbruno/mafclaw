@@ -15,7 +15,7 @@ A 4-part Microsoft Reactor live coding series that builds a personal finance CLI
 |---|---|---|---|---|
 | 1 | Thu Sep 3, 2026 | Meet Your Claw: A Harness in Three Lines of C# | ✅ Ready — 4 incremental checkpoints + finished sample | [Session guide](./session-01/README.md) &#124; [Blog](https://devblogs.microsoft.com/agent-framework/meet-your-agent-harness-and-claw/) &#124; [Live event](https://aka.ms/mafclaw/1) |
 | 2 | Thu Sep 10, 2026 | Working With Your Data, Safely: Files, Approvals and Memory | ✅ Ready — isolated safety samples + final Harness finance advisor app | [Session guide](./session-02/README.md) &#124; [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-working-with-your-data-safely/) &#124; [Event](https://aka.ms/mafclaw/2) |
-| 3 | Thu Sep 17, 2026 | Scaling the Claw: Skills, Shell, CodeAct and Background Agents | 🔲 Not started | [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-scaling-the-claw-or-harness-capabilities/) &#124; [Event](https://aka.ms/mafclaw/3) |
+| 3 | Thu Sep 17, 2026 | Scaling the Claw: Skills, Shell, CodeAct and Background Agents | 🟡 Offline package ready; live bridge follow-up | [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-scaling-the-claw-or-harness-capabilities/) &#124; [Event](https://aka.ms/mafclaw/3) |
 | 4 | Thu Sep 24, 2026 | Production Ready: Observability, Governance and Deployment | 🔲 Not started | [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-making-your-claw-production-ready/) &#124; [Event](https://aka.ms/mafclaw/4) |
 
 ## Repository layout
@@ -80,9 +80,11 @@ dotnet run --project .\session-02\code\MafClaw.Session02.csproj
 
 For the full walkthrough, see the [Session 2 guide](./session-02/README.md).
 
-## Sessions 3–4 status
+## Session 4 status
 
-Sessions 3 and 4 do **not** have runnable code yet. The `session-03/` and `session-04/` folders contain unsupported placeholder applications — do not use them as reference code. Real implementations will replace each folder after the corresponding session goes live.
+Session 4 does **not** have runnable code yet. The `session-04/` folder contains an unsupported placeholder application — do not use it as reference code. A real implementation will replace it once the session goes live.
+
+Session 3 is now an offline runnable package: a complete finance advisor (`session-03/code/`) carrying forward Session 2's file-access, approval, and memory boundaries plus the new skills, shell, CodeAct, and background-agent concepts, and a numbered `session-03/samples/` ladder (`10`/`11`, `20`/`21`, `30`/`31`, `40`/`41`). The samples intentionally make no model or network calls; a future update will add the live Microsoft Agent Framework Harness wiring once the corresponding preview APIs are pinned and validated.
 
 ## Important notes
 

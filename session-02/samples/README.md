@@ -29,13 +29,14 @@ Every live-demo sample should be readable while the presenter is sharing the scr
 - For the live demo, run `Buy 10 shares of MSFT.` twice: answer `y` once for the approved path, then answer `n` for the denied path.
 - Then run sample 22 and either enter an invalid response before `y`, or do not respond to show fail-closed automatic denial.
 
-## 30, 31, and 32 — memory store
+## 30, 31, 32, and 33 — memory store
 
 - `30-memory-store` shows durable state stored to disk and restored across a restart.
 - `31-memory-store-agent` saves `Remember...` prompts as Foundry `UserProfile` memories, prints the saved scope/count, and uses `FoundryMemoryProvider` to recall durable user facts when memory is configured.
 - `32-local-file-memory-agent` gives the agent explicit current-user save/recall tools backed by an inspectable local JSON file.
+- `33-local-file-memory-context-provider` creates a local `FileMemoryProvider` variable and assigns it through `AIContextProviders = [localFileMemory]`, matching the provider shape used by sample 31 without requiring Foundry Memory.
 - For the reliable live demo, run sample 32: save the profile, enter `/memory`, restart, recall it, then ask `What do you remember about other users?`.
-- Use sample 31 to compare the local application-owned approach with managed Foundry Memory.
+- Use sample 31 to compare the local application-owned approach with managed Foundry Memory, and sample 33 to show the same `AIContextProviders` wiring with local files.
 
 ## Run them
 
@@ -59,6 +60,7 @@ dotnet run --project .\samples\22-approval-retries-timeouts\MafClaw.Sample22.csp
 dotnet run --project .\samples\30-memory-store\MafClaw.Sample30.csproj
 dotnet run --project .\samples\31-memory-store-agent\MafClaw.Sample31.csproj
 dotnet run --project .\samples\32-local-file-memory-agent\MafClaw.Sample32.csproj
+dotnet run --project .\samples\33-local-file-memory-context-provider\MafClaw.Sample33.csproj
 ```
 
 From the repository root:
@@ -74,4 +76,5 @@ dotnet run --project .\session-02\samples\22-approval-retries-timeouts\MafClaw.S
 dotnet run --project .\session-02\samples\30-memory-store\MafClaw.Sample30.csproj
 dotnet run --project .\session-02\samples\31-memory-store-agent\MafClaw.Sample31.csproj
 dotnet run --project .\session-02\samples\32-local-file-memory-agent\MafClaw.Sample32.csproj
+dotnet run --project .\session-02\samples\33-local-file-memory-context-provider\MafClaw.Sample33.csproj
 ```

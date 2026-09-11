@@ -12,7 +12,7 @@ This folder contains reusable helpers and mock data generators shared across ses
 
 Each `session-0X/code` folder is designed to be fully self-contained and independently runnable. Shared code here is read-only reference material and template building blocks, not a required dependency.
 
-**Current readiness:** Sessions 1 and 2 are runnable. Sessions 3 and 4 currently contain unsupported placeholder applications — they are not finished samples and are pending replacement with real implementations. Do not attempt to run Sessions 3–4 code or use it as reference until their implementations are published.
+**Current readiness:** Sessions 1, 2, and 3 are runnable. Session 4 currently contains an unsupported placeholder application — it is not a finished sample and is pending replacement with a real implementation. Do not attempt to run Session 4 code or use it as reference until its implementation is published.
 
 Never create tight coupling between session folders. If a session needs a helper, copy it into the session folder or build it independently using this folder as a reference.
 

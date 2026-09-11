@@ -2,15 +2,15 @@
   "skills": [
     {
       "name": "portfolio-check",
-      "purpose": "Summarize a mock watchlist before a safe response."
+      "purpose": "Summarize the mock watchlist before a safe response."
     },
     {
       "name": "workspace-scan",
-      "purpose": "Represent a placeholder shell-based scan."
+      "purpose": "Run one configured, allowlisted workspace check."
     },
     {
       "name": "background-research",
-      "purpose": "Queue a mock follow-up task for later."
+      "purpose": "Queue a bounded follow-up task and return its ticket."
     }
   ]
 }

@@ -1,31 +1,20 @@
-# Session 03: Scaling the Claw
+# Session 03 documentation
 
-This session extends the Session 2 harness with scalable capabilities: local skills, optional MCP-based skills, confined shell execution, CodeAct, and concurrent background research agents.
+This folder contains the session-specific materials that accompany the final
+advisor and numbered sample ladder:
 
-Target framework: .NET 10.
+- [`setup.md`](setup.md) - prerequisites and build commands
+- [`architecture.md`](architecture.md) - the four host-owned boundaries
+- [`troubleshooting.md`](troubleshooting.md) - rehearsal and failure guidance
 
-## What this sample will show
-
-- File-based skill catalog with progressive loading.
-- Optional Foundry-managed or MCP-based skill integration.
-- Confined, approval-gated shell execution.
-- CodeAct for safe platform-specific operations.
-- Concurrent background research agents.
-- Deterministic local skill, shell dry-run, and calculation fallbacks.
-
-## Status
-
-Session 03 code snapshot and documentation are under development. A complete runnable sample will be available after Session 2 publication.
-
-For now, read the official blog post for the conceptual foundation:
+The official Microsoft Agent Framework article is:
 
 https://devblogs.microsoft.com/agent-framework/agent-harness-scaling-the-claw-or-harness-capabilities/
 
-See `session-01/docs/README.md` and `session-02/docs/README.md` for completed setup and architecture reference.
+The private teaching materials remain under `sessions\session-03\`:
 
-## Coming soon
-
-- Full Session 03 code snapshot with real skill discovery and orchestration.
-- Background agent coordination examples.
-- Shell execution safety and approval patterns.
-- Advanced troubleshooting.
+- `README.md`
+- `demo-script.md`
+- `run-of-show.md`
+- `test-plan.md`
+- `slides\`
