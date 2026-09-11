@@ -72,7 +72,11 @@ See the [Session 1 guide](../../session-01/README.md) for the full checkpoint wa
 
 ## Configuration: Foundry project and model
 
-Sessions 1 and 2 require access to a Microsoft Foundry project with a deployed model (e.g. `gpt-5-mini`). Session 3 is fully offline and needs no Foundry project, model, or network access — see the [Session 3 guide](../../session-03/README.md).
+Sessions 1 and 2 require access to a Microsoft Foundry project with a deployed
+model (e.g. `gpt-5-mini`). Session 3's complete advisor and all samples except
+`11-skills-agent` are offline; Sample 11 is a live file-based Skills/Harness
+demo and needs Foundry configuration — see the
+[Session 3 guide](../../session-03/README.md).
 
 ### Configure user secrets
 

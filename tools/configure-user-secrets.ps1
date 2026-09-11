@@ -152,11 +152,16 @@ $script:SessionMap = [ordered]@{
         )
     }
     '3' = @{
-        Label        = 'Session 3 – Scaling the Claw: Skills, Shell, CodeAct, and Background Agents (offline package — no secrets required)'
-        Status       = 'offline'
+        Label        = 'Session 3 – Scaling the Claw: Skills, Shell, CodeAct, and Background Agents'
+        Status       = 'active'
         Folder       = 'session-03'
-        ProjectPaths = @()
-        Keys         = @()
+        ProjectPaths = @(
+            'samples\11-skills-agent\MafClaw.Sample11.csproj'
+        )
+        Keys         = @(
+            [pscustomobject]@{ Name = 'Foundry:ProjectEndpoint'; Prompt = 'Azure AI Foundry project endpoint URL'; EnvVar = 'FOUNDRY_PROJECT_ENDPOINT'; Required = $true; IsSecret = $false }
+            [pscustomobject]@{ Name = 'Foundry:Model'; Prompt = 'Foundry model or deployment name'; EnvVar = 'FOUNDRY_MODEL'; Required = $true; IsSecret = $false }
+        )
     }
     '4' = @{
         Label        = 'Session 4 – Making Your Claw Production-Ready (placeholder – code not yet implemented)'

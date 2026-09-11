@@ -9,10 +9,12 @@ deliberate user-scoped memory. Session 03 then composes the new skill, shell,
 CodeAct, and background-agent surfaces around them.
 
 ```text
-skill catalog
+file-based SKILL.md packages
       |
       v
-portfolio check -> confined shell check -> background ticket
+advertise -> select -> load instructions/resources -> bounded host action
+      |
+      +-> confined shell check -> background ticket
       |                 |                       |
       +-----------------+-----------------------+
                         v
@@ -21,8 +23,10 @@ portfolio check -> confined shell check -> background ticket
 
 ## Boundaries
 
-- **Skills:** descriptions are data; the host decides which implementation is
-  available.
+- **Skills:** `SKILL.md` packages contain front matter, focused instructions,
+  and optional references/scripts. Sample 10 shows their plain-C# discovery and
+  host-owned execution; Sample 11 uses `AgentSkillsProviderBuilder` to expose
+  the same packages to a live Harness agent through progressive disclosure.
 - **Shell:** the host owns the allowlist, working directory, timeout,
   cancellation, and output cap.
 - **CodeAct:** calculations are explicit code with inspectable inputs and

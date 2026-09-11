@@ -18,12 +18,18 @@ designed to fail closed; do not broaden the allowlist during a live demo.
 That is the intended result. A ticket records accepted work; it is not a
 completed research result.
 
-## MAF bridge sample does not call a model
+## Skills bridge reports a missing Foundry endpoint
 
-That is intentional. The bridge samples demonstrate tool registration and
-boundary ownership without requiring credentials or incurring cloud cost.
-Model-backed `AsHarnessAgent` wiring belongs in the complete app after the
-corresponding preview API is validated.
+Sample `11-skills-agent` is intentionally a live Agent Framework/Harness
+example. From the repository root, run:
+
+```powershell
+az login --output none
+.\tools\configure-user-secrets.ps1 -Session 3
+```
+
+Samples `10`, `20`, `21`, `30`, `31`, `40`, and `41`, plus the complete
+advisor, remain offline and do not need credentials.
 
 ## Privacy
 

@@ -9,20 +9,23 @@ Session 03 uses the same concept-to-agent ladder as Session 02:
 
 | Sample | Topic | Plain concept | MAF bridge |
 |---|---|---|---|
-| 10 / 11 | Skills | Read a discoverable skill catalog | Register the catalog as an agent context surface |
+| 10 / 11 | Skills | Discover and load local `SKILL.md` packages with bundled resources | Load the same files with `AgentSkillsProviderBuilder` and run them through a Harness agent |
 | 20 / 21 | Shell | Validate and run one confined command | Expose the boundary as a MAF tool |
 | 30 / 31 | CodeAct | Calculate portfolio value with explicit code | Register the calculator as a MAF function |
 | 40 / 41 | Background agents | Queue and observe independent research | Model a MAF background-agent handoff |
 
-The bridge samples are intentionally offline-safe: they show the C# tool
-registration boundary without requiring Foundry credentials. The complete live
-`AsHarnessAgent` wiring belongs in the session `code` app once the hosted
-feature APIs are pinned and validated.
+Samples `10`, `20`, `30`, `31`, `40`, and `41` are offline-safe. Sample `11`
+is intentionally a live Microsoft Agent Framework demo: it uses
+`AgentSkillsProviderBuilder` to discover the same file-based skill packages
+that Sample `10` makes visible, then supplies that provider to a Harness agent.
+Configure its Foundry endpoint and model with
+`.\tools\configure-user-secrets.ps1 -Session 3` before running it.
 
 ## Run the samples
 
 ```powershell
 dotnet run --project .\samples\10-skills\MafClaw.Sample10.csproj
+# Requires Foundry credentials configured for Session 3:
 dotnet run --project .\samples\11-skills-agent\MafClaw.Sample11.csproj
 dotnet run --project .\samples\20-confined-shell\MafClaw.Sample20.csproj
 dotnet run --project .\samples\21-confined-shell-agent\MafClaw.Sample21.csproj
