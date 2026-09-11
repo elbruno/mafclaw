@@ -1,3 +1,9 @@
+// Objective: expose a confined shell executor as an approval-gated agent tool.
+// Steps:
+// A. Load Foundry settings and seed mock confirmations.
+// B. Confine shell execution and require approval.
+// C. Run the live agent console.
+
 // Session flow:
 // A. Load the Foundry connection settings.
 // B. Confine a shell executor to a scratch "confirmations" folder with a deny-list policy.
@@ -12,6 +18,7 @@ using Microsoft.Agents.AI.Tools.Shell;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 
+// A. Load endpoint and model settings for the live bridge.
 var configuration = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .AddEnvironmentVariables()
@@ -29,6 +36,7 @@ if (string.IsNullOrWhiteSpace(endpoint))
 }
 
 // Every shell command is re-anchored to this folder and cannot escape it.
+// B. Seed and confine the mock confirmation folder.
 var vaultDir = Path.Combine(AppContext.BaseDirectory, "working", "confirmations");
 Directory.CreateDirectory(vaultDir);
 SeedMessyConfirmations(vaultDir);
@@ -74,6 +82,7 @@ Console.WriteLine("The Harness exposes an approval-gated run_shell tool confined
 Console.WriteLine("Try: Tidy up my trade confirmations.");
 Console.WriteLine("Commands: /exit");
 
+// C. Let the agent propose commands while the console owns approval.
 await AgentConsoleRunner.RunAsync(agent);
 
 static void SeedMessyConfirmations(string vaultDir)

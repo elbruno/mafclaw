@@ -1,3 +1,9 @@
+// Objective: let a live agent read a file and compute inside a Hyperlight sandbox.
+// Steps:
+// A. Load Foundry settings and seed the mock holdings file.
+// B. Mount read-only file access and the approval-gated CodeAct provider.
+// C. Run the agent console and show the generated calculation.
+
 // Session flow:
 // A. Load the Foundry connection settings.
 // B. Mount a read-only holdings CSV into a Hyperlight micro-VM sandbox.
@@ -14,6 +20,7 @@ using Microsoft.Agents.AI.Hyperlight;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 
+// A. Load endpoint and model settings for the live bridge.
 var configuration = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .AddEnvironmentVariables()
@@ -32,6 +39,7 @@ if (string.IsNullOrWhiteSpace(endpoint))
 
 // The file_access tools are scoped to this folder only; CodeAct never touches disk directly -
 // the agent reads holdings.csv with file_access, then hands the numbers to the sandbox to compute.
+// B. Give file access a fixed folder, then let the sandbox do computation only.
 var workingDirectory = Path.Combine(AppContext.BaseDirectory, "working");
 Directory.CreateDirectory(workingDirectory);
 var holdingsPath = Path.Combine(workingDirectory, "holdings.csv");
@@ -75,6 +83,7 @@ Console.WriteLine("The agent reads holdings.csv via file_access, then writes and
 Console.WriteLine("Try: What is the total portfolio value, and what percent is in Technology?");
 Console.WriteLine("Commands: /exit");
 
+// C. Start the console so the generated code and approval are visible.
 await AgentConsoleRunner.RunAsync(agent);
 
 

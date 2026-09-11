@@ -1,3 +1,9 @@
+// Objective: run a background-agent conversation and surface tool approvals.
+// Steps:
+// A. Create a session and accept prompts.
+// B. Print responses and inspect approval requests.
+// C. Send explicit approval or denial responses.
+
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 
@@ -5,6 +11,7 @@ internal static class AgentConsoleRunner
 {
     public static async Task RunAsync(AIAgent agent)
     {
+        // A. Keep concurrent research requests in one session.
         var session = await agent.CreateSessionAsync();
 
         while (true)
@@ -21,6 +28,7 @@ internal static class AgentConsoleRunner
                 continue;
             }
 
+            // B. Display responses and inspect any approval requests.
             var response = await agent.RunAsync(input, session);
             while (true)
             {
@@ -39,6 +47,7 @@ internal static class AgentConsoleRunner
                     break;
                 }
 
+                // C. Return explicit approval decisions before continuing.
                 var approvals = new List<AIContent>();
                 foreach (var request in requests)
                 {

@@ -1,3 +1,9 @@
+// Objective: compose the four Session 03 boundaries into one offline morning brief.
+// Steps:
+// A. Show the planned workflow so the presenter can narrate it.
+// B. Run the watchlist, shell, and background operations in order.
+// C. Return structured results and explicit safety guidance.
+
 internal sealed class Session03Sample(
     Session03Settings settings,
     SkillCatalog skillCatalog,

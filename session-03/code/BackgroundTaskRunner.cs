@@ -1,3 +1,9 @@
+// Objective: queue a small background task and expose its observable status.
+// Steps:
+// A. Store a queued ticket.
+// B. Complete the ticket after the simulated delay.
+// C. Return status without pretending queued work is complete.
+
 using System.Collections.Concurrent;
 
 internal interface IBackgroundTaskRunner
@@ -11,6 +17,7 @@ internal sealed class BackgroundTaskRunner(BackgroundSettings settings) : IBackg
 
     public Task<BackgroundTaskTicket> QueueAsync(string name, string description)
     {
+        // A. Publish the ticket before work continues independently.
         var ticketId = $"bg-{Guid.NewGuid():N}"[..10];
         var queued = new BackgroundTaskTicket(ticketId, name, description, "queued");
         _tickets[ticketId] = queued;
@@ -20,6 +27,7 @@ internal sealed class BackgroundTaskRunner(BackgroundSettings settings) : IBackg
 
     private async Task CompleteLaterAsync(string ticketId)
     {
+        // B. Simulate asynchronous work, then update the same ticket.
         await Task.Delay(settings.SimulatedDurationMilliseconds);
         _tickets.AddOrUpdate(
             ticketId,

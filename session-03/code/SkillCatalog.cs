@@ -1,3 +1,9 @@
+// Objective: load the catalog that advertises the sample's local skills.
+// Steps:
+// A. Resolve the checked-in catalog file.
+// B. Deserialize skill names and purposes.
+// C. Return the catalog for the host-owned workflow.
+
 using System.Text.Json;
 
 internal sealed class SkillCatalog

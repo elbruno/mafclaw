@@ -38,3 +38,10 @@ See [`samples/README.md`](samples/README.md) for the complete numbered ladder.
 - [`docs/setup.md`](docs/setup.md)
 - [`docs/architecture.md`](docs/architecture.md)
 - [`docs/troubleshooting.md`](docs/troubleshooting.md)
+
+## Teaching-oriented source
+
+Every C# file in this package starts with an objective and A/B/C step header.
+Short comments before major blocks identify the boundary being demonstrated,
+so presenters can explain the code while sharing the screen without adding
+implementation noise.

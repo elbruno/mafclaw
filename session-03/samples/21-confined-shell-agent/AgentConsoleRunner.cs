@@ -1,3 +1,9 @@
+// Objective: run an agent conversation and make each tool approval visible.
+// Steps:
+// A. Create one session and accept prompts.
+// B. Print responses and collect approval requests.
+// C. Send each approval decision back to the agent.
+
 // Session flow:
 // A. Create one agent session for the console conversation.
 // B. Send each user prompt to the Harness agent.
@@ -11,6 +17,7 @@ internal static class AgentConsoleRunner
 {
     public static async Task RunAsync(AIAgent agent)
     {
+        // A. Keep the approval conversation in one session.
         var session = await agent.CreateSessionAsync();
 
         while (true)
@@ -33,6 +40,7 @@ internal static class AgentConsoleRunner
                 continue;
             }
 
+            // B. Run the prompt, then inspect response content for approvals.
             var response = await agent.RunAsync(input, session);
             await WriteResponseAndHandleApprovalsAsync(agent, session, response);
         }

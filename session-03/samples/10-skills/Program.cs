@@ -1,5 +1,12 @@
+// Objective: teach the file-based skill lifecycle with plain C#.
+// Steps:
+// A. Discover and advertise local skills.
+// B. Load the selected instructions and reference data.
+// C. Execute one bounded mock valuation.
+
 using System.Globalization;
 
+// A. Discover portable skill packages from the sample folder.
 var skillsDirectory = Path.Combine(AppContext.BaseDirectory, "skills");
 var skills = DiscoverSkills(skillsDirectory);
 
@@ -13,6 +20,7 @@ foreach (var skill in skills)
     Console.WriteLine($"   - {skill.Name}: {skill.Description}");
 }
 
+// B. Select the skill that matches the mock user request.
 var request = "Value MSFT for my mock portfolio.";
 var selectedSkill = skills.Single(skill => skill.Name == "valuation");
 
@@ -22,6 +30,7 @@ Console.WriteLine($"3. Selected skill: {selectedSkill.Name}");
 Console.WriteLine("4. Load its instructions and resource:");
 Console.WriteLine(Indent(selectedSkill.Instructions, "   "));
 
+// C. Load bundled references and perform a host-owned calculation.
 var prices = LoadPrices(selectedSkill.Directory);
 var result = ValueHolding("MSFT", 25, prices);
 Console.WriteLine($"5. Host-owned execution: 25 MSFT x ${result.Price.ToString("0.00", CultureInfo.InvariantCulture)} = ${result.Value.ToString("0.00", CultureInfo.InvariantCulture)}");

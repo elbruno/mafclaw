@@ -54,3 +54,9 @@ folder. Denying a command is a safe way to show the boundary during a demo.
 
 Use only the included mock portfolio and watchlist. Never paste real holdings,
 account identifiers, credentials, or confidential data into a sample.
+
+## When comments and code drift
+
+If a presenter cannot follow a sample from its objective and A/B/C header, treat
+that as a documentation defect. Keep the code minimal, restore the header and
+major-block comments, and rerun the sample build before rehearsal.
