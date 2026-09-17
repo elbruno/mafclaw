@@ -64,6 +64,20 @@ needs hardware virtualization. If it fails to launch the sandbox:
   design. The agent reads data through the normal `file_access` tools and
   only uses the sandbox for computation.
 
+## Sample 31 does not ask before running generated Python
+
+This is the current explicit `CodeActApprovalMode.NeverRequire` setting,
+not a missing console prompt. Generated code executes automatically inside
+Hyperlight; the scoped host file tools and their existing approval rules
+are unchanged. The console reports actual tool calls/results.
+The current build also disables unrelated mode, memory, todo, skills, and
+search providers. If it saves a planning note or asks to switch to execute
+mode, exit the old process and rebuild the current source.
+
+To teach human approval for generated code, set `AlwaysRequire` in Sample 31's
+`Program.cs` and rebuild. Frozen slides describing an approval prompt refer
+to that earlier configuration. Do not treat sandbox isolation as human review.
+
 ## Shell sample (21) command needs approval every time
 
 This is intentional, including inspection calls. The model's description of

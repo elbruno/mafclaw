@@ -45,6 +45,12 @@ shell environment context and approval handling; the console displays real
 tool results and the host verifies final filenames and unchanged content
 hashes. Previous demo runs are preserved.
 
+## CodeAct execution policy
+
+Sample 31 currently uses **automatic sandbox execution** (`NeverRequire`),
+not a per-execution human approval prompt. Its host file-tool scope is
+unchanged. See [the CodeAct policy](samples/31-codeact-agent/README.md).
+
 ## Documentation
 
 - [`docs/README.md`](docs/README.md)

@@ -92,7 +92,9 @@ Try these prompts:
 - **31 (CodeAct):** `What is the total portfolio value, and what percent is
   in Technology?` The agent reads `holdings.csv` via `file_access`, then
   writes and runs Python in a Hyperlight micro-VM to compute the answer
-  (approve the `execute_code` call when prompted).
+  automatically, without a CodeAct approval prompt (`NeverRequire`). Confirm
+  the startup policy banner and inspect actual tool output. Use the included
+  mock data only; see [Sample 31](../samples/31-codeact-agent/README.md).
 - **41 (Background agents):** `Research MSFT, NVDA and SPY and summarize the
   latest news.` The agent fans the tickers out to a background research
   sub-agent, runs them concurrently, and aggregates the findings.

@@ -44,8 +44,12 @@ advertise -> select -> load instructions/resources -> bounded host action
   outputs rather than unsupported model arithmetic. Sample 30 shows the
   boundary in plain C#; Sample 31 lets a live Harness agent read
   `holdings.csv` through the normal `file_access` tools, then write and run
-  Python in a `HyperlightCodeActProvider` micro-VM sandbox (approval required
-  on every execution) to compute the answer and show its work.
+  Python in a `HyperlightCodeActProvider` micro-VM sandbox to compute the
+  answer and show its work. The current sample explicitly selects
+  `NeverRequire`, so generated code runs without a human approval prompt.
+  Scoped host file-tool rules remain unchanged; isolation is not human review.
+  Unrelated mode-switching, memory, todo, skills, and search providers are
+  disabled so the sample does not stop at a plan or write planning notes.
 - **Background agents:** Sample 40 models the queue-and-status boundary in
   plain C#; Sample 41 hands a live Harness agent a lean `TickerResearchAgent`
   (a plain chat-client agent scoped to `HostedWebSearchTool`) through
@@ -117,8 +121,9 @@ then labels the specific type that provides the reusable agent integration:
 - **21:** `LocalShellExecutor` supplies execution, `ShellEnvironmentProvider`
   supplies actual shell context, and `AsAIFunction`/`AsHarnessAgent` supply
   tool adaptation, invocation and approval. The host owns fixtures and verification.
-- **31:** `HyperlightCodeActProvider` bridges an approval-gated sandbox into
-  the agent, and `HarnessAgentOptions` composes it with file access and approval.
+- **31:** `HyperlightCodeActProvider` bridges automatic sandbox execution into
+  the agent (`NeverRequire`), and `HarnessAgentOptions` composes it with scoped
+  file access and the remaining tool-approval rules.
 - **41:** `AsAIAgent` creates the focused worker and
   `HarnessAgentOptions.BackgroundAgents` provides background delegation and
   result collection.

@@ -1,9 +1,10 @@
-// Objective: run the CodeAct agent conversation and surface execution approvals.
+// Objective: show actual CodeAct execution and any remaining tool approvals.
 // Steps:
 // A. Create a session and accept prompts.
-// B. Display responses and pending tool requests.
+// B. Display actual tool requests/results separately from assistant narration.
 // C. Send explicit approval or denial responses.
 
+using System.Text.Json;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 
@@ -30,9 +31,21 @@ internal static class AgentConsoleRunner
             }
 
             // B. AIAgent.RunAsync executes the framework agent loop for one prompt.
+            var reported = new HashSet<string>(StringComparer.Ordinal);
             var response = await agent.RunAsync(input, session);
             while (true)
             {
+                foreach (var content in response.Messages.SelectMany(message => message.Contents))
+                {
+                    if (content is FunctionCallContent call && reported.Add($"call:{call.CallId}"))
+                    {
+                        Console.WriteLine($"TOOL CALL {call.Name} [{call.CallId}]: {JsonSerializer.Serialize(call.Arguments)}");
+                    }
+                    else if (content is FunctionResultContent result && reported.Add($"result:{result.CallId}"))
+                    {
+                        Console.WriteLine($"TOOL RESULT [{result.CallId}]: {JsonSerializer.Serialize(result.Result)}");
+                    }
+                }
                 if (!string.IsNullOrWhiteSpace(response.Text))
                 {
                     Console.WriteLine(response.Text);
@@ -48,14 +61,14 @@ internal static class AgentConsoleRunner
                     break;
                 }
 
-                // C. Send explicit approval or denial for each execution.
+                // C. NeverRequire applies only to CodeAct. Keep other requested approvals explicit.
                 // C. ToolApprovalRequestContent maps the console choice to MAF's
                 // approval response instead of a custom tool-call protocol.
                 var approvals = new List<AIContent>();
                 foreach (var request in requests)
                 {
                     var call = request.ToolCall as FunctionCallContent;
-                    Console.Write($"Approve skill tool {call?.Name ?? request.ToolCall.CallId}? [y/N]: ");
+                    Console.Write($"Approve tool {call?.Name ?? request.ToolCall.CallId}? [y/N]: ");
                     var answer = Console.ReadLine();
                     var approved = answer is not null &&
                         (answer.Equals("y", StringComparison.OrdinalIgnoreCase) ||

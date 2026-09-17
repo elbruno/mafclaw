@@ -27,8 +27,10 @@ Harness demos that call a real Azure AI Foundry project:
   an OS sandbox.
 - **31 (CodeAct)** — reads `working/holdings.csv` through the normal
   `file_access` tools, then writes and runs Python in a Hyperlight
-  micro-VM sandbox (`HyperlightCodeActProvider`, `AlwaysRequire` approval)
+  micro-VM sandbox (`HyperlightCodeActProvider`, `NeverRequire`: automatic code execution)
   to compute totals and allocations instead of doing arithmetic in prose.
+  There is no CodeAct approval prompt; the scoped host file-tool rules are
+  unchanged. See [Sample 31's policy and run guide](31-codeact-agent/README.md).
 - **41 (Background agents)** — registers a lean `TickerResearchAgent`
   (plain chat-client agent with only `HostedWebSearchTool`) as a
   `BackgroundAgents` entry so the claw can research multiple tickers

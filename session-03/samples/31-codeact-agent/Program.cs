@@ -1,7 +1,7 @@
 // Objective: let a live agent read a file and compute inside a Hyperlight sandbox.
 // Steps:
 // A. Load Foundry settings and seed the mock holdings file.
-// B. Mount read-only file access and the approval-gated CodeAct provider.
+// B. Scope host file tools and configure automatic sandbox code execution.
 // C. Run the agent console and show the generated calculation.
 
 using Azure.AI.Extensions.OpenAI;
@@ -43,9 +43,10 @@ if (!File.Exists(holdingsPath))
 }
 
 // Microsoft.Agents.AI.Hyperlight's HyperlightCodeActProvider turns the Python
-// micro-VM into an approval-gated agent capability, avoiding a custom sandbox bridge.
+// micro-VM into an agent capability, avoiding a custom sandbox bridge.
+// This demo deliberately runs generated sandbox code without a human approval prompt.
 var codeActOptions = HyperlightCodeActProviderOptions.CreateForWasm(PythonGuestModule.GetModulePath());
-codeActOptions.ApprovalMode = CodeActApprovalMode.AlwaysRequire;
+codeActOptions.ApprovalMode = CodeActApprovalMode.NeverRequire;
 var codeAct = new HyperlightCodeActProvider(codeActOptions);
 
 IChatClient chatClient = new AIProjectClient(new Uri(endpoint), new AzureCliCredential())
@@ -53,10 +54,16 @@ IChatClient chatClient = new AIProjectClient(new Uri(endpoint), new AzureCliCred
     .GetResponsesClient()
     .AsIChatClient(model);
 
-// HarnessAgentOptions wires file access, CodeAct, and approvals into one agent
+// HarnessAgentOptions wires file access, CodeAct, and the remaining tool approvals into one agent
 // loop, instead of requiring the application to dispatch each request itself.
 AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 {
+    // Keep this lesson focused: no plan-first pause or unrelated memory/todo writes.
+    DisableAgentModeProvider = true,
+    DisableFileMemory = true,
+    DisableTodoProvider = true,
+    DisableAgentSkillsProvider = true,
+    DisableWebSearch = true,
     // FileSystemAgentFileStore gives MAF file_access tools a scoped root instead
     // of making the application implement file-tool registration and validation.
     FileAccessStore = new FileSystemAgentFileStore(workingDirectory),
@@ -78,9 +85,11 @@ AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 });
 
 Console.WriteLine("Sample 31 - MAF CodeAct bridge (Hyperlight sandbox)");
+Console.WriteLine("CODE EXECUTION POLICY: NeverRequire - generated Python runs automatically inside Hyperlight.");
+Console.WriteLine("Sandbox isolation is not human review. Use only the included mock data; host file-tool rules are unchanged.");
 Console.WriteLine("The agent reads holdings.csv via file_access, then writes and runs Python in a Hyperlight micro-VM to compute the answer.");
 Console.WriteLine("Try: What is the total portfolio value, and what percent is in Technology?");
 Console.WriteLine("Commands: /exit");
 
-// C. Start the console so the generated code and approval are visible.
+// C. Show actual tool requests/results; surface any remaining non-CodeAct approvals.
 await AgentConsoleRunner.RunAsync(agent);
