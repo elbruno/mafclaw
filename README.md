@@ -23,6 +23,17 @@ A 4-part Microsoft Reactor live coding series that builds a personal finance CLI
 | 3 | Thu Sep 17, 2026 | Scaling the Claw: Skills, Shell, CodeAct and Background Agents | 🟡 Ready: offline package + live Skills bridge | [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-scaling-the-claw-or-harness-capabilities/) &#124; [Event](https://aka.ms/mafclaw/3) |
 | 4 | Thu Sep 24, 2026 | Production Ready: Observability, Governance and Deployment | 🔲 Not started | [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-making-your-claw-production-ready/) &#124; [Event](https://aka.ms/mafclaw/4) |
 
+## Final slides (PDF)
+
+| Session | Download |
+|---|---|
+| 1 - Meet Your Claw | [Session 1 slides](./session-01/slides/mafclaw-session-01.pdf) |
+| 2 - Working With Your Data, Safely | [Session 2 slides](./session-02/slides/mafclaw-session-02.pdf) |
+| 3 - Scaling the Claw | [Session 3 slides](./session-03/slides/mafclaw-session-03.pdf) |
+
+These PDFs contain the audience slides, not private presenter notes.
+All financial examples are mock and educational, not financial advice.
+
 ## Repository layout
 
 - `session-01/` — Session 1: four incremental checkpoints (hello-agent → harness → tools → planning+todos) and the finished sample.
