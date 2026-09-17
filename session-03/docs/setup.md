@@ -12,6 +12,11 @@ and require an Azure AI Foundry project and model.
 - Azure CLI and an Azure AI Foundry project with a deployed model (Samples 11, 21, 31, 41)
 - A CPU with hardware virtualization enabled, for Sample 31's Hyperlight sandbox
 
+Sample 21 explicitly launches `pwsh` on every OS. Put PowerShell 7 on the
+executable path; the sample reports a startup error rather than silently
+changing to another shell. Configure authentication privately before sharing
+the terminal.
+
 Verify the SDK:
 
 ```powershell
@@ -78,10 +83,12 @@ Try these prompts:
 - **11 (Skills):** `Value 25 shares of MSFT using the mock data.` The agent
   advertises the file-based skill, loads its `SKILL.md` instructions and
   bundled price reference on demand, then returns a mock educational result.
-- **21 (Shell):** `Tidy up my trade confirmations.` The agent inspects the
-  seeded `working/confirmations` folder, proposes a plan, and (with your
-  approval on each command) reorganizes the files - it can never leave the
-  confined folder.
+- **21 (Shell):** `Tidy up my trade confirmations.` Open the fresh workspace
+  printed at startup. The agent requests inspection, proposes a rename batch,
+  and pauses for approval on every shell call. `TOOL RESULT` contains actual
+  executor output; `HOST VERIFIED: 4/4` requires the expected filenames and
+  original hashes to match. `/verify` repeats the local check without a model
+  call. Earlier runs are preserved; the configured directory is not a sandbox.
 - **31 (CodeAct):** `What is the total portfolio value, and what percent is
   in Technology?` The agent reads `holdings.csv` via `file_access`, then
   writes and runs Python in a Hyperlight micro-VM to compute the answer
@@ -91,6 +98,15 @@ Try these prompts:
   sub-agent, runs them concurrently, and aggregates the findings.
 
 ## Teaching-source check
+
+For the offline Sample 21 regression checks, run from the Session 03 directory:
+
+```powershell
+dotnet run --project .\tests\Sample21.Tests\MafClaw.Sample21.Tests.csproj
+```
+
+These require PowerShell 7 but use a fake model, so they do not need Foundry
+credentials. Rehearse the interactive model separately before presenting.
 
 Before presenting, open the relevant C# file and use its objective header to
 frame the explanation. The A/B/C comments should match the visible execution

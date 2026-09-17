@@ -1,18 +1,22 @@
-// Objective: expose a confined shell executor as an approval-gated agent tool.
+// Objective: show a model-proposed rename, explicit approval and host-verified results.
 // Steps:
-// A. Load Foundry settings and seed mock confirmations.
-// B. Confine shell execution and require approval.
-// C. Run the live agent console.
+// A. Load Foundry settings and prepare a fresh, preserved demo workspace.
+// B. Give MAF an explicit PowerShell executor, shell context and approval-gated tool.
+// C. Run the conversation and show real tool results plus independent verification.
 
+using System.ComponentModel;
+using System.ClientModel;
+using Azure;
 using Azure.AI.Extensions.OpenAI;
 using Azure.AI.Projects;
 using Azure.Identity;
+using MafClaw.Sample21;
 using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Tools.Shell;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 
-// A. Load endpoint and model settings for the live bridge.
+// A. Configuration stays local; never print endpoints or credentials on a livestream.
 var configuration = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .AddEnvironmentVariables()
@@ -23,83 +27,98 @@ var model = configuration["Foundry:Model"] ?? configuration["FOUNDRY_MODEL"] ?? 
 
 if (string.IsNullOrWhiteSpace(endpoint))
 {
-    Console.WriteLine("Missing Foundry:ProjectEndpoint.");
-    Console.WriteLine("Run from the repository root:");
-    Console.WriteLine(@".\tools\configure-user-secrets.ps1 -Session 3");
-    return;
+    Console.Error.WriteLine("Missing Foundry:ProjectEndpoint. Configure Session 3 before presenting.");
+    Console.Error.WriteLine(@".\tools\configure-user-secrets.ps1 -Session 3");
+    return 1;
 }
 
-// B. Seed the only folder this lesson allows the agent to change.
-var vaultDir = Path.Combine(AppContext.BaseDirectory, "working", "confirmations");
-Directory.CreateDirectory(vaultDir);
-SeedMessyConfirmations(vaultDir);
-
-// Microsoft.Agents.AI.Tools.Shell's LocalShellExecutor supplies the confined
-// execution boundary, avoiding a custom process runner and path-enforcement layer.
-await using var shell = new LocalShellExecutor(new LocalShellExecutorOptions
+try
 {
-    WorkingDirectory = vaultDir,
-    ConfineWorkingDirectory = true,
-    Policy = new ShellPolicy(denyList:
-    [
-        @"\brm\s+-rf\b", @"\bsudo\b", @":\(\)\s*\{", @"\bmkfs\b", @">\s*/dev/sd",
-    ]),
-    Timeout = TimeSpan.FromSeconds(15),
-});
-// AsAIFunction adapts the safe executor into an agent tool and keeps human
-// approval in the framework contract instead of a hand-written tool protocol.
-var runShell = shell.AsAIFunction(
-    "run_shell",
-    "Run a shell command confined to the trade-confirmations working directory.",
-    requireApproval: true);
+    var workspace = DemoWorkspace.Create(
+        Path.Combine(AppContext.BaseDirectory, "working", "confirmations"));
 
-IChatClient chatClient = new AIProjectClient(new Uri(endpoint), new AzureCliCredential())
-    .GetProjectOpenAIClient()
-    .GetResponsesClient()
-    .AsIChatClient(model);
-
-// AsHarnessAgent coordinates prompts, tool calls, and approvals so the host
-// supplies policy while Microsoft Agent Framework supplies the agent loop.
-AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
-{
-    AgentModeProviderOptions = new AgentModeProviderOptions { DefaultMode = "execute" },
-    ChatOptions = new ChatOptions
+    // B. LocalShellExecutor owns process startup, output capture and the timeout.
+    // ConfineWorkingDirectory re-anchors each command; it is NOT a filesystem sandbox.
+    await using var shell = new LocalShellExecutor(new LocalShellExecutorOptions
     {
-        Tools = [runShell],
-        Instructions = """
-            You are a finance-education assistant that tidies mock trade confirmation files.
-            Use the run_shell tool to inspect and reorganize files under the confined working
-            directory only. Propose a plan before running destructive or renaming commands.
-            Never invent files or claim a command ran if it was denied.
-            State clearly that this is mock educational data, not real trade records.
-            """,
-    },
-});
+        Shell = "pwsh",
+        WorkingDirectory = workspace.DirectoryPath,
+        ConfineWorkingDirectory = true,
+        Timeout = TimeSpan.FromSeconds(15),
+        MaxOutputBytes = 4096,
+        // This prefilter catches obvious off-task commands, not every possible unsafe script.
+        Policy = new ShellPolicy(denyList:
+        [
+            @"\b(?:Remove-Item|Clear-Content|Set-Content|Add-Content|Out-File)\b",
+            @"\b(?:rm|del|erase|rmdir|rd|sudo|mkfs)\b"
+        ])
+    });
 
-Console.WriteLine("Sample 21 - Microsoft Agent Framework confined shell");
-Console.WriteLine("The Harness exposes an approval-gated run_shell tool confined to one working folder.");
-Console.WriteLine("Try: Tidy up my trade confirmations.");
-Console.WriteLine("Commands: /exit");
-
-// C. Let the agent propose commands while the console owns approval.
-await AgentConsoleRunner.RunAsync(agent);
-
-static void SeedMessyConfirmations(string vaultDir)
-{
-    var files = new (string Name, string Content)[]
+    // MAF probes the real executor and supplies its dialect/version to the model.
+    // We do not implement a second shell-detection or context-provider mechanism.
+    var shellContext = new ShellEnvironmentProvider(shell, new ShellEnvironmentProviderOptions
     {
-        ("trade confirmation 1.txt", "MSFT BUY 10 shares - mock confirmation"),
-        ("conf_AAPL.txt", "AAPL SELL 5 shares - mock confirmation"),
-        ("copy of trade 3.txt", "NVDA BUY 8 shares - mock confirmation"),
-        ("SPY sell.txt", "SPY SELL 12 shares - mock confirmation"),
-    };
-
-    foreach (var (name, content) in files)
+        OverrideFamily = ShellFamily.PowerShell,
+        ProbeTools = []
+    });
+    var environment = await shellContext.RefreshAsync();
+    if (string.IsNullOrWhiteSpace(environment.ShellVersion))
     {
-        var path = Path.Combine(vaultDir, name);
-        if (!File.Exists(path))
-        {
-            File.WriteAllText(path, content);
-        }
+        throw new InvalidOperationException("PowerShell probe failed. Install PowerShell 7 and put pwsh on PATH.");
     }
+
+    // AsAIFunction keeps approval in the MAF protocol, including read-only shell calls.
+    var runShell = shell.AsAIFunction(
+        "run_shell", "Run PowerShell in the current mock-confirmations workspace.", requireApproval: true);
+
+    // AIProjectClient connects Foundry to the IChatClient abstraction used by MAF.
+    using IChatClient chatClient = new AIProjectClient(new Uri(endpoint), new AzureCliCredential())
+        .GetProjectOpenAIClient()
+        .GetResponsesClient()
+        .AsIChatClient(model);
+
+    // AsHarnessAgent owns model/tool routing and approval responses. This lesson needs
+    // only shell context and run_shell, not unrelated memory, skills, todos or web tools.
+    AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
+    {
+        AIContextProviders = [shellContext],
+        DisableAgentSkillsProvider = true,
+        DisableFileMemory = true,
+        DisableTodoProvider = true,
+        DisableWebSearch = true,
+        DisableAgentModeProvider = true,
+        DisableToolAutoApproval = true,
+        ChatOptions = new ChatOptions { Tools = [runShell], Instructions = DemoInstructions.Text }
+    });
+
+    Console.WriteLine("Sample 21 - inspect, propose, approve, execute, verify");
+    Console.WriteLine($"Shell: {shell.ResolvedShellBinary} (PowerShell {environment.ShellVersion})");
+    Console.WriteLine("Every model-proposed shell command requires approval. This is not an OS sandbox.");
+    workspace.WriteBefore(Console.Out);
+    Console.WriteLine("Try: Tidy up my trade confirmations.");
+    Console.WriteLine("Commands: /verify (host check, no model call), /exit");
+
+    // C. The console reports actual FunctionResultContent; the host checks file hashes.
+    await AgentConsoleRunner.RunAsync(agent, workspace);
+    return 0;
+}
+catch (AuthenticationFailedException)
+{
+    Console.Error.WriteLine("Azure authentication failed. Sign in privately before presenting.");
+    return 1;
+}
+catch (RequestFailedException exception)
+{
+    Console.Error.WriteLine($"Foundry request failed (HTTP {exception.Status}, code {exception.ErrorCode}). Check configuration privately.");
+    return 1;
+}
+catch (ClientResultException exception)
+{
+    Console.Error.WriteLine($"Model request failed (HTTP {exception.Status}). Check configuration privately.");
+    return 1;
+}
+catch (Exception exception) when (exception is Win32Exception or IOException or UnauthorizedAccessException or InvalidOperationException)
+{
+    Console.Error.WriteLine($"Demo stopped: {exception.Message}");
+    return 1;
 }

@@ -4,7 +4,7 @@ Session 03 extends the Session 02 finance advisor with scalable, inspectable
 orchestration:
 
 - discoverable skills
-- confined shell execution
+- approval-gated local shell execution
 - CodeAct-style calculation boundaries
 - background research tickets
 
@@ -38,6 +38,12 @@ while `dotnet --info` is denied before launching a child process. Its
 five-second timeout terminates the owned process rather than merely ending
 the wait. This sample demonstrates an allowlist, not an OS sandbox or a
 human approval gate.
+
+The live [Sample 21](samples/21-confined-shell-agent/README.md) then lets the
+model propose PowerShell commands in a fresh mock workspace. MAF supplies
+shell environment context and approval handling; the console displays real
+tool results and the host verifies final filenames and unchanged content
+hashes. Previous demo runs are preserved.
 
 ## Documentation
 

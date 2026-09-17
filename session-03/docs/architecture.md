@@ -33,10 +33,13 @@ advertise -> select -> load instructions/resources -> bounded host action
   launch. The runner captures both streams and terminates its owned process
   on timeout. Its working directory is an initial directory, not a sandbox;
   unlike the advisor's shell settings, this fixed-command sample has no
-  output-size cap. Sample 21 separately exposes `LocalShellExecutor` as an
-  approval-gated `run_shell` tool with configured command and directory
-  policies under `working/confirmations`. Do not present the two samples as
-  identical policies or as a general OS-isolation guarantee.
+  output-size cap. Sample 21 separately exposes an explicit PowerShell
+  `LocalShellExecutor` as an approval-gated `run_shell` tool. Its
+  `ShellEnvironmentProvider` supplies real environment facts, and each run
+  gets a fresh `working/confirmations/run-...` workspace. The console reports
+  actual tool results, while host code verifies filenames and full content
+  hashes. Do not present the two samples as identical policies or as a
+  general OS-isolation guarantee.
 - **CodeAct:** calculations are explicit code with inspectable inputs and
   outputs rather than unsupported model arithmetic. Sample 30 shows the
   boundary in plain C#; Sample 31 lets a live Harness agent read
@@ -82,14 +85,38 @@ can reach the runner.
 
 ## Reading the MAF bridge comments
 
+### Sample 21: separate intention, permission and evidence
+
+- `DemoWorkspace` seeds exactly four mock files in a new directory and keeps
+  a baseline in application memory. It never deletes or resets prior runs.
+- `LocalShellExecutor` uses `pwsh`, a 15-second timeout and a 4,096-byte
+  per-stream output cap. Its denylist is only a prefilter.
+- `ShellEnvironmentProvider` probes that same executor and contributes
+  authoritative shell facts through `AIContextProviders`; the host does not
+  invent a second environment-detection layer.
+- `AsAIFunction(..., requireApproval: true)` keeps every model-generated
+  shell call approval-gated. Standing auto-approval rules and unrelated
+  default capabilities are disabled for this focused lesson.
+- `ToolTranscript` displays complete proposed commands, approval decisions
+  and real `FunctionResultContent` separately from assistant narration.
+- `DemoVerifier` checks the actual names, lengths and SHA-256 hashes. Missing,
+  duplicate, altered, unexpected or non-regular entries prevent a verified
+  completion. Verification itself never renames files.
+
+`ConfineWorkingDirectory` re-anchors each persistent-shell command to its
+configured initial directory. It does not restrict every filesystem or OS
+operation inside the script. Likewise, post-execution hash checks establish
+the fixture outcome, not the absence of side effects elsewhere.
+
 Teach each numbered pair as a comparison, not as a framework magic trick. The
 plain sample first makes the capability and boundary visible; the MAF version
 then labels the specific type that provides the reusable agent integration:
 
 - **11:** `AgentSkillsProviderBuilder` handles skill discovery and progressive
   disclosure, and `AsHarnessAgent` supplies the agent/context routing loop.
-- **21:** `LocalShellExecutor` and `AsAIFunction` provide the confined shell
-  tool contract, while `AsHarnessAgent` handles its invocation and approval flow.
+- **21:** `LocalShellExecutor` supplies execution, `ShellEnvironmentProvider`
+  supplies actual shell context, and `AsAIFunction`/`AsHarnessAgent` supply
+  tool adaptation, invocation and approval. The host owns fixtures and verification.
 - **31:** `HyperlightCodeActProvider` bridges an approval-gated sandbox into
   the agent, and `HarnessAgentOptions` composes it with file access and approval.
 - **41:** `AsAIAgent` creates the focused worker and

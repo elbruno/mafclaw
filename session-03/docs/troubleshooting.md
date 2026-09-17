@@ -66,9 +66,44 @@ needs hardware virtualization. If it fails to launch the sandbox:
 
 ## Shell sample (21) command needs approval every time
 
-This is intentional: every `run_shell` call requires approval, and the
-executor is confined to `working/confirmations` so it can never leave that
-folder. Denying a command is a safe way to show the boundary during a demo.
+This is intentional, including inspection calls. The model's description of
+a command as "read-only" does not approve it. Review the full PowerShell
+script and respond `y`/`yes` or `n`; Enter denies it. Denying the rename should
+leave `HOST CHECK: NOT COMPLETE`, not a false execution or completion report.
+
+## Sample 21 mixes shell syntax or cannot start PowerShell
+
+The updated sample explicitly launches `pwsh` and wires the built-in
+`ShellEnvironmentProvider` into `AIContextProviders`. Check the startup shell
+version and ensure PowerShell 7 is installed and on PATH. There is no silent
+fallback to another shell. If a model still proposes Unix syntax, reject the
+command and direct it to the reported PowerShell environment.
+
+## Rebuilding Sample 21 reports a locked executable on Windows
+
+Exit the already-running sample with `/exit`, then run `dotnet run` again.
+The running app can lock its executable; this is not a NuGet or source-code
+failure. Do not delete its workspace or forcibly terminate unrelated processes.
+An already-running instance keeps its old code until it is restarted.
+
+## Sample 21 files differ from a previous run
+
+Each run creates a new directory under `working\confirmations`. Use the
+printed path. Earlier run folders and old flat-layout files are retained,
+not mixed into the new fixture or automatically deleted.
+
+## The assistant says done but Sample 21 does not say HOST VERIFIED
+
+The assistant's summary is not verification. The host requires all four
+expected names and the original full SHA-256 hashes, with no missing,
+duplicate, changed, unexpected or linked entries. Inspect the listed issues
+or use `/verify`. Do not clear a failing check by weakening it or deleting an
+unknown directory. A fresh application run creates a separate clean fixture.
+
+`TOOL RESULT` is the real executor result, including nonzero exit codes,
+errors, timeouts and truncation when reported. It does not imply that the
+entire rename task succeeded. The fixture contents have no trade dates;
+workspace timestamps and file metadata must not be presented as trade dates.
 
 ## Privacy
 

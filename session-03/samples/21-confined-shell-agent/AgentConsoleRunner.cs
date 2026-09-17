@@ -1,94 +1,80 @@
-// Objective: run an agent conversation and make each tool approval visible.
+// Objective: tell the inspect/propose/approve/execute/verify story without hiding evidence.
 // Steps:
-// A. Create one session and accept prompts.
-// B. Print responses and collect approval requests.
-// C. Send each approval decision back to the agent.
-
-// Session flow:
-// A. Create one agent session for the console conversation.
-// B. Send each user prompt to the Harness agent.
-// C. Print responses and stop at any approval request.
-// D. Send the user's approval decision back to continue the run.
+// A. Create one MAF session and accept a prompt or a local /verify command.
+// B. Display real tool results and request approval for every proposed shell call.
+// C. Resume through MAF, then independently verify the files when the turn finishes.
 
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 
+namespace MafClaw.Sample21;
+
 internal static class AgentConsoleRunner
 {
-    public static async Task RunAsync(AIAgent agent)
+    public static async Task RunAsync(
+        AIAgent agent, DemoWorkspace workspace, TextReader? input = null, TextWriter? output = null)
     {
-        // A. AIAgent.CreateSessionAsync gives MAF-owned conversation state, so
-        // this sample does not implement its own message-history container.
+        input ??= Console.In;
+        output ??= Console.Out;
+        var transcript = new ToolTranscript(output);
+        // A. MAF owns conversation history; the host owns local verification.
         var session = await agent.CreateSessionAsync();
-
         while (true)
         {
-            Console.Write("> ");
-            var input = Console.ReadLine();
-            if (input is null || input.Trim().Equals("/exit", StringComparison.OrdinalIgnoreCase))
+            output.Write("\n> ");
+            var prompt = input.ReadLine()?.Trim();
+            if (prompt is null || prompt.Equals("/exit", StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
-
-            if (input.Trim().StartsWith("/mode ", StringComparison.OrdinalIgnoreCase))
+            if (prompt.Equals("/verify", StringComparison.OrdinalIgnoreCase))
             {
-                Console.WriteLine($"(mode switching is not wired in this sample; staying in execute mode)");
+                DemoVerifier.Verify(workspace, output);
+                continue;
+            }
+            if (prompt.StartsWith('/'))
+            {
+                output.WriteLine("Unknown console command. Use /verify or /exit; mode switching is not part of this sample.");
+                continue;
+            }
+            if (prompt.Length == 0)
+            {
                 continue;
             }
 
-            if (string.IsNullOrWhiteSpace(input))
+            var response = await agent.RunAsync(prompt, session);
+            while (true)
             {
-                continue;
+                // B. Results come from FunctionResultContent, not the assistant's claims.
+                transcript.WriteResults(response);
+                if (!string.IsNullOrWhiteSpace(response.Text))
+                {
+                    output.WriteLine($"\nASSISTANT: {response.Text}");
+                }
+                var requests = response.Messages.SelectMany(message => message.Contents)
+                    .OfType<ToolApprovalRequestContent>().ToList();
+                if (requests.Count == 0)
+                {
+                    break;
+                }
+
+                var approvals = new List<AIContent>();
+                foreach (var request in requests)
+                {
+                    var decision = transcript.AskApproval(request, input);
+                    if (decision.EndOfInput)
+                    {
+                        output.WriteLine("Input closed. Pending commands were not submitted for execution.");
+                        DemoVerifier.Verify(workspace, output);
+                        return;
+                    }
+                    approvals.Add(decision.Response);
+                }
+
+                // C. AsHarnessAgent handles approval binding and actual tool invocation.
+                response = await agent.RunAsync([new ChatMessage(ChatRole.User, approvals)], session);
             }
-
-            // B. AIAgent.RunAsync executes the framework agent loop for one prompt.
-            var response = await agent.RunAsync(input, session);
-            await WriteResponseAndHandleApprovalsAsync(agent, session, response);
-        }
-    }
-
-    private static async Task WriteResponseAndHandleApprovalsAsync(AIAgent agent, AgentSession session, AgentResponse response)
-    {
-        while (true)
-        {
-            if (!string.IsNullOrWhiteSpace(response.Text))
-            {
-                Console.WriteLine(response.Text);
-            }
-
-            var approvalRequests = response.Messages
-                .SelectMany(message => message.Contents)
-                .OfType<ToolApprovalRequestContent>()
-                .ToList();
-
-            if (approvalRequests.Count == 0)
-            {
-                return;
-            }
-
-            // C. ToolApprovalRequestContent maps the console choice to MAF's
-                // approval response instead of a custom tool-call protocol.
-                var approvalResponses = new List<AIContent>();
-            foreach (var request in approvalRequests)
-            {
-                var functionCall = request.ToolCall as FunctionCallContent;
-                var toolName = functionCall?.Name ?? request.ToolCall.CallId;
-                var arguments = functionCall?.Arguments is null
-                    ? string.Empty
-                    : string.Join(", ", functionCall.Arguments.Select(item => $"{item.Key}: {item.Value}"));
-
-                Console.Write($"Approve tool {toolName}({arguments})? [y/N]: ");
-                var input = Console.ReadLine();
-                var approved = input is not null &&
-                    (input.Equals("y", StringComparison.OrdinalIgnoreCase) ||
-                     input.Equals("yes", StringComparison.OrdinalIgnoreCase));
-
-                approvalResponses.Add(request.CreateResponse(
-                    approved,
-                    approved ? "Approved by console user." : "Denied by console user."));
-            }
-
-            response = await agent.RunAsync([new ChatMessage(ChatRole.User, approvalResponses)], session);
+            DemoVerifier.Verify(workspace, output);
         }
     }
 }
