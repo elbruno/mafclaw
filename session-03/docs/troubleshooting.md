@@ -10,8 +10,28 @@ Install the .NET 10 SDK and run the build again.
 
 ## Shell sample rejects a command
 
-This is expected when the command is not in the allowlist. The sample is
-designed to fail closed; do not broaden the allowlist during a live demo.
+For Sample 20, this is expected unless the request is exactly the two tokens
+`dotnet` and `--version`. Try `dotnet run -- dotnet --version` from its
+directory. `dotnet run -- dotnet --info` intentionally returns exit code `2`
+and `Process started: no.` The requested child process did not start.
+
+Keep the `--` separator and do not quote the entire command as one token.
+Extra arguments and shell operators are rejected, not parsed. Do not broaden
+the allowlist merely to make an unexpected request pass during the demo.
+
+## Sample 20 times out or reports an execution error
+
+On a five-second timeout, Sample 20 terminates its owned process tree, waits
+for the launched process to exit, and returns CLI exit code `124`. A timeout
+is not reported as a successful command result.
+
+For `Execution failed`, check that the .NET SDK is available on the trusted
+machine's executable path. The launcher reports the error and returns `1`;
+it does not fall back to a different executable. The initial working
+directory is not a sandbox and does not grant additional OS permissions.
+
+Run `dotnet run --project .\tests\Sample20.Tests\MafClaw.Sample20.Tests.csproj`
+from the Session 03 directory for the offline regression checks.
 
 ## Background work says queued
 

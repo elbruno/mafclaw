@@ -10,7 +10,7 @@ Session 03 uses the same concept-to-agent ladder as Session 02:
 | Sample | Topic | Plain concept | MAF bridge |
 |---|---|---|---|
 | 10 / 11 | Skills | Discover and load local `SKILL.md` packages with bundled resources | Load the same files with `AgentSkillsProviderBuilder` and run them through a live Harness agent |
-| 20 / 21 | Shell | Validate and run one confined command | Expose a `LocalShellExecutor` as an approval-gated `run_shell` tool on a live Harness agent |
+| 20 / 21 | Shell | Accept or reject a CLI request against a fixed command policy, then execute the approved specification | Expose a `LocalShellExecutor` as an approval-gated `run_shell` tool on a live Harness agent |
 | 30 / 31 | CodeAct | Calculate portfolio value with explicit code | Let a live Harness agent read `holdings.csv` via `file_access`, then write and run Python in a Hyperlight sandbox to compute the answer |
 | 40 / 41 | Background agents | Queue and observe independent research | Hand a live Harness agent a `TickerResearchAgent` via `BackgroundAgents` so it can fan research out concurrently |
 
@@ -52,6 +52,31 @@ dotnet run --project .\samples\41-background-agents\MafClaw.Sample41.csproj
 ```
 
 All values are mock educational data. These samples are not financial advice.
+
+## Sample 20 - Policy before process launch
+
+Sample 20 is plain C# and has no human approval prompt. The host's allowlist
+is independent of the request; the executable and every argument must match.
+From the Session 03 directory, show both paths:
+
+```powershell
+dotnet run --project .\samples\20-confined-shell\MafClaw.Sample20.csproj -- dotnet --version
+dotnet run --project .\samples\20-confined-shell\MafClaw.Sample20.csproj -- dotnet --info
+$LASTEXITCODE # Expected: 2 for the second, denied request.
+```
+
+Only the first request starts a child process. The default no-argument run
+still performs the version check. `Process.Start` executes the matching
+specification; it does not validate the allowlist. The initial working
+directory is not a filesystem sandbox. On timeout, the runner terminates
+the process it owns instead of only cancelling its wait.
+
+See [Sample 20's source walkthrough and limits](20-confined-shell/README.md).
+Run its offline regression checks with:
+
+```powershell
+dotnet run --project .\tests\Sample20.Tests\MafClaw.Sample20.Tests.csproj
+```
 
 ## Presenter-friendly source
 

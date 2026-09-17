@@ -39,6 +39,27 @@ dotnet build .\samples\41-background-agents\MafClaw.Sample41.csproj
 No secrets, endpoints, model deployments, or network access are needed for the
 complete advisor or Samples `10`, `20`, `30`, and `40`.
 
+### Sample 20: show acceptance and rejection
+
+From the Session 03 directory:
+
+```powershell
+dotnet run --project .\samples\20-confined-shell\MafClaw.Sample20.csproj -- dotnet --version
+dotnet run --project .\samples\20-confined-shell\MafClaw.Sample20.csproj -- dotnet --info
+$LASTEXITCODE # Expected: 2, because the second request is denied.
+dotnet run --project .\tests\Sample20.Tests\MafClaw.Sample20.Tests.csproj
+```
+
+The allowed run prints the SDK version and child exit code. The denied run
+prints `Policy: DENIED` and `Process started: no.` before returning `2`.
+Pass tokens separately after `--`; a quoted `"dotnet --version"` is one token
+and is not interpreted as a command line. A no-argument run retains the
+original allowed version-check behavior.
+
+These checks do not prompt for approval or change the allowlist. The test
+project uses synthetic child processes to verify actual timeout termination
+and output capture, without adding them to the sample's allowed commands.
+
 ## Run the live samples
 
 From the repository root, authenticate and configure the four live projects:

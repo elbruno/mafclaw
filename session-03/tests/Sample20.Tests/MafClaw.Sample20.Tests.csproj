@@ -6,6 +6,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <InternalsVisibleTo Include="MafClaw.Sample20.Tests" />
+    <ProjectReference Include="..\..\samples\20-confined-shell\MafClaw.Sample20.csproj" />
   </ItemGroup>
 </Project>

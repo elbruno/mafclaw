@@ -27,12 +27,16 @@ advertise -> select -> load instructions/resources -> bounded host action
   and optional references/scripts. Sample 10 shows their plain-C# discovery and
   host-owned execution; Sample 11 uses `AgentSkillsProviderBuilder` to expose
   the same packages to a live Harness agent through progressive disclosure.
-- **Shell:** the host owns the allowlist, working directory, timeout,
-  cancellation, and output cap. Sample 20 walks the boundary in plain C#;
-  Sample 21 confines a live `LocalShellExecutor` to a seeded
-  `working/confirmations` folder and exposes it as an approval-gated
-  `run_shell` tool, so a Harness agent can reorganize files but never escape
-  the confined root.
+- **Shell:** Sample 20 separates a CLI request from a host-owned allowlist.
+  `CommandSpec` matches the executable and all arguments; the same matched
+  object supplies `CommandRunner`'s process settings. Denial returns before
+  launch. The runner captures both streams and terminates its owned process
+  on timeout. Its working directory is an initial directory, not a sandbox;
+  unlike the advisor's shell settings, this fixed-command sample has no
+  output-size cap. Sample 21 separately exposes `LocalShellExecutor` as an
+  approval-gated `run_shell` tool with configured command and directory
+  policies under `working/confirmations`. Do not present the two samples as
+  identical policies or as a general OS-isolation guarantee.
 - **CodeAct:** calculations are explicit code with inspectable inputs and
   outputs rather than unsupported model arithmetic. Sample 30 shows the
   boundary in plain C#; Sample 31 lets a live Harness agent read
@@ -49,6 +53,32 @@ The plain-C# samples (`10`, `20`, `30`, `40`) stay host-driven and offline so
 the boundary is visible without any live dependency. Their MAF-bridge
 counterparts (`11`, `21`, `31`, `41`) are live Harness agents against a real
 Azure AI Foundry project - see `setup.md` for configuring credentials.
+
+### Sample 20 execution path
+
+```text
+CLI executable + arguments
+          |
+          v
+independent host allowlist (exact match)
+          |
+          +-- no match --> DENIED, exit 2, no child process
+          |
+          +-- match ----> approved CommandSpec
+                              |
+                              v
+                    ProcessStartInfo / Process.Start
+                              |
+                              +-- completes --> output + child exit code
+                              |
+                              +-- times out --> terminate owned process,
+                                                wait for exit, CLI exit 124
+```
+
+`Process.Start` does not receive the allowlist and does not make an approval
+decision. Validation belongs before the launcher. The command-line request
+does not become a shell command string; only a matching host specification
+can reach the runner.
 
 ## Reading the MAF bridge comments
 

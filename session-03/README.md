@@ -32,6 +32,13 @@ dotnet run --project .\code\MafClaw.Session03.csproj
 
 See [`samples/README.md`](samples/README.md) for the complete numbered ladder.
 
+The plain-C# [Sample 20](samples/20-confined-shell/README.md) makes command
+policy visible before the MAF shell bridge: `dotnet --version` is allowed,
+while `dotnet --info` is denied before launching a child process. Its
+five-second timeout terminates the owned process rather than merely ending
+the wait. This sample demonstrates an allowlist, not an OS sandbox or a
+human approval gate.
+
 ## Documentation
 
 - [`docs/README.md`](docs/README.md)
