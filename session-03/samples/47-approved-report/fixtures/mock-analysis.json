@@ -1,0 +1,10 @@
+[
+  {
+    "Reference": "MOCK-ALLOCATION",
+    "Observation": "The made-up Northstar classroom exercise allocates 60 tokens to a growth basket and 40 tokens to a reserve basket, out of 100 total tokens."
+  },
+  {
+    "Reference": "MOCK-RISK",
+    "Observation": "The made-up growth basket is a single classroom category. Concentration is a discussion topic. No returns, risk probabilities, live prices, account balances, or tradable instruments are supplied."
+  }
+]

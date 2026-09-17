@@ -99,3 +99,26 @@ host plumbing it replaces. Present each pair in this order: first show the
 plain-C# primitive, then point to the MAF type that provides the same capability
 without reimplementing agent context, tool adaptation, approvals, sandbox
 bridging, or background delegation.
+
+## Additional main-agent orchestration samples
+
+The original 40/41 comparison remains intact. These are additional MAF
+variants, not renumbered replacements:
+
+| Sample | Scenario | Main lesson |
+|---|---|---|
+| [42](42-specialist-team/README.md) | News, allocation, and risk specialists | Different worker roles and actual fan-out/fan-in evidence |
+| [43](43-selective-delegation/README.md) | Route only the work needed | Direct answers versus selective delegation |
+| [44](44-research-write-review/README.md) | Research, write, review, optionally revise | Host-enforced dependencies and a bounded feedback loop |
+| [45](45-responsive-background-jobs/README.md) | Research while the conversation continues | Responsive host input, job IDs, collection, and cancellation |
+| [46](46-partial-results-deadlines/README.md) | Success alongside failure and slow work | Honest partial results, deadlines, and bounded retry |
+| [47](47-approved-report/README.md) | Present a report, then request permission to save | Exact-content human approval; no worker write authority |
+
+Use `--mode live` for real Foundry inference, or explicitly select
+`--mode fixture --demo` for the repeatable offline demonstration. Never
+present fixture news or scripted model choices as live research.
+
+The [orchestration guide](../docs/orchestration.md) contains all run/test
+commands. Shared [OrchestrationSupport](OrchestrationSupport/README.md)
+removes repeated connection/tracing plumbing; each scenario retains its own
+role definitions, policies, data, and independently runnable project.

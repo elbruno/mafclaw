@@ -115,3 +115,55 @@ account identifiers, credentials, or confidential data into a sample.
 If a presenter cannot follow a sample from its objective and A/B/C header, treat
 that as a documentation defect. Keep the code minimal, restore the header and
 major-block comments, and rerun the sample build before rehearsal.
+
+## Orchestration sample cannot connect to Foundry
+
+Samples 42-47 default to live mode and share Session 3's endpoint/model
+settings. Configure them with `.\tools\configure-user-secrets.ps1 -Session 3`
+from the repository root. For a deliberately offline run, explicitly pass
+`--mode fixture --demo`; no live failure automatically selects fixture mode.
+Use `--help` before the demo and keep raw service exceptions off the screen.
+
+## A background wait expired, but the worker is still running
+
+The MAF provider's `WaitTimeout` only ends that wait. It does not cancel the
+worker. Samples 45/46 teach additional host lifecycle rules; a cancellation
+request is not terminal until the worker observes it, and a deadline does not
+forcibly terminate code that ignores cancellation. Inspect the actual state
+and do not relabel pending work as a successful result.
+
+Samples 45/46 drain owned work and cancellation callbacks before disposing
+the shared clients. A noncooperative worker can therefore delay shutdown
+even after the partial report appears. This is an explicit lifetime limit,
+not a guaranteed forcible abort. Sample 45's eight-job retention also
+includes terminal jobs; collect needed results before starting a new process.
+
+## Job ID is unknown or disappears after restart
+
+Sample 45's registry is process-local, not a persistent queue. Use `/jobs`
+in the current process, then `/collect <id>` or `/cancel <id>`. Unknown IDs
+and collecting before completion must produce explicit diagnostic/pending
+output. Do not claim a restart resumes earlier work.
+
+## Review or report saving is refused
+
+Sample 44 enforces phase order and a one-revision ceiling in the host.
+Another model instruction cannot grant more rounds. Sample 47 requires a
+human decision for the exact proposed report; denial, EOF, content changes,
+or reused approval must not authorize a write. Inspect the proposal and
+host events instead of disabling those checks.
+
+## Shared support project cannot be found
+
+Keep `samples\OrchestrationSupport` next to the numbered sample folders.
+The projects build it automatically. Do not copy only a numbered folder
+and assume its connection/tracing project reference will still resolve.
+
+## News worker completed but no sources were returned
+
+An SDK task can complete with an explanation that hosted search is unavailable
+or produced no usable results. The completion/collection check proves that the
+worker returned, not that it obtained current news. Inspect source URLs and
+the limitation message, verify hosted-search support in the chosen Foundry
+deployment, and do not fabricate citations. Use explicit fixture mode to teach
+the orchestration mechanics independently of live search availability.

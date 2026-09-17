@@ -112,3 +112,20 @@ Before presenting, open the relevant C# file and use its objective header to
 frame the explanation. The A/B/C comments should match the visible execution
 order; if a sample changes, update its comments with the code rather than
 adding a separate script that can drift.
+
+## Configure and run Samples 42-47
+
+The six [orchestration extensions](orchestration.md) reuse Session 3's
+Foundry endpoint/model and user-secrets store. The setup script includes all
+six new projects; no new Azure resource, shell executor, or Hyperlight runtime
+is needed for these scenarios.
+
+Every numbered project references `samples\OrchestrationSupport`. Run
+`dotnet run --project <sample.csproj> -- --mode fixture --demo` to build and
+exercise an offline scenario, or use `--mode live` after private authentication.
+`--help` describes the individual console commands. Do not omit the explicit
+fixture selection when rehearsing without a cloud connection.
+
+See the guide for the six exact project paths and four offline test runners.
+The fixture checks exercise local boundaries and scripted MAF integration;
+they are distinct from a live-model rehearsal.

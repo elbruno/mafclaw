@@ -160,6 +160,12 @@ $script:SessionMap = [ordered]@{
             'samples\21-confined-shell-agent\MafClaw.Sample21.csproj'
             'samples\31-codeact-agent\MafClaw.Sample31.csproj'
             'samples\41-background-agents\MafClaw.Sample41.csproj'
+            'samples\42-specialist-team\MafClaw.Sample42.csproj'
+            'samples\43-selective-delegation\MafClaw.Sample43.csproj'
+            'samples\44-research-write-review\MafClaw.Sample44.csproj'
+            'samples\45-responsive-background-jobs\MafClaw.Sample45.csproj'
+            'samples\46-partial-results-deadlines\MafClaw.Sample46.csproj'
+            'samples\47-approved-report\MafClaw.Sample47.csproj'
         )
         Keys         = @(
             [pscustomobject]@{ Name = 'Foundry:ProjectEndpoint'; Prompt = 'Azure AI Foundry project endpoint URL'; EnvVar = 'FOUNDRY_PROJECT_ENDPOINT'; Required = $true; IsSecret = $false }

@@ -58,3 +58,15 @@ Every C# file in this package starts with an objective and A/B/C step header.
 Short comments before major blocks identify the boundary being demonstrated,
 so presenters can explain the code while sharing the screen without adding
 implementation noise.
+
+## Main-agent orchestration extensions
+
+Samples **42-47** extend the background-agent ladder without changing 40/41:
+specialist teams, selective delegation, research/write/review, responsive
+background jobs, partial results with deadlines, and a human-approved report.
+
+Each is a runnable MAF project with `--mode live` and an explicitly scripted
+`--mode fixture`. Start with the
+[orchestration guide](docs/orchestration.md) for all six commands, boundaries,
+and offline regression checks. These extensions do not change the existing
+offline `code` advisor or add real trading.

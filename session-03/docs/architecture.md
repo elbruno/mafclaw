@@ -133,3 +133,21 @@ The A/B/C headers mirror the teaching sequence: establish inputs, perform one
 bounded action, and return an inspectable result. This keeps each primitive
 visible in the source while the inline comments call out the trust boundary
 being demonstrated.
+
+## Main-agent orchestration variants
+
+[Samples 42-47](orchestration.md) separate three concerns that should not be
+collapsed into a single background-task label:
+
+- **Delegation:** 42/43 use a named MAF `BackgroundAgentsProvider` to expose
+  multiple specialists and collect results in separate sessions. The host
+  releases the provider session when done.
+- **Workflow policy:** 44/47 invoke MAF workers inside host-enforced phase
+  and approval rules. A model cannot grant itself a further revision or a write.
+- **Lifecycle:** 45/46 wrap live worker-agent runs in explicit host-owned
+  job/cancellation/deadline policy. They do not invent per-task cancellation
+  on the built-in provider or claim durable execution.
+
+Actual tool events and host outcomes are printed independently from agent
+narration. Fixture mode substitutes scripted inference/local workers and
+labels that substitution; it never masks a failed live request.

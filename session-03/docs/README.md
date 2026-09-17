@@ -25,3 +25,9 @@ Session 03 code is written for live online teaching. Every C# file identifies
 its objective and A/B/C steps at the top, then uses short comments before the
 major blocks. The comments explain the boundary to point at; they do not
 replace the implementation or add production behavior.
+
+## Orchestration extensions
+
+See [Main-agent orchestration: Samples 42-47](orchestration.md) for the
+additional specialist, routing, review, lifecycle, failure, and approval
+scenarios, with live/fixture commands and explicit host responsibility.

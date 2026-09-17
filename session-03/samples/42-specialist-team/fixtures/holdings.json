@@ -1,0 +1,6 @@
+[
+  { "symbol": "MOCK-A", "assetClass": "Equities", "units": 100, "price": 550 },
+  { "symbol": "MOCK-B", "assetClass": "Equities", "units": 100, "price": 100 },
+  { "symbol": "MOCK-BOND", "assetClass": "Bonds", "units": 250, "price": 100 },
+  { "symbol": "MOCK-CASH", "assetClass": "Cash", "units": 10000, "price": 1 }
+]

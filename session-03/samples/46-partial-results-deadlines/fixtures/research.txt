@@ -1,0 +1,6 @@
+FICTIONAL EDUCATIONAL FIXTURE — NOT FINANCIAL ADVICE.
+News: imaginary ACME launched a training-only product.
+Holdings: a fictional learner owns 12 ACME units.
+Unavailable source: deliberate local permanent failure, not a simulated real cloud incident.
+Slow source: deliberately blocked scripted inference in fixture mode; a cancellable local delay in live mode.
+No real prices, current news, recommendations, writes, purchases or trading operations.

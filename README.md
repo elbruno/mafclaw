@@ -20,7 +20,7 @@ A 4-part Microsoft Reactor live coding series that builds a personal finance CLI
 |---|---|---|---|---|
 | 1 | Thu Sep 3, 2026 | Meet Your Claw: A Harness in Three Lines of C# | ✅ Ready — 4 incremental checkpoints + finished sample | [Session guide](./session-01/README.md) &#124; [Blog](https://devblogs.microsoft.com/agent-framework/meet-your-agent-harness-and-claw/) &#124; [Live event](https://aka.ms/mafclaw/1) |
 | 2 | Thu Sep 10, 2026 | Working With Your Data, Safely: Files, Approvals and Memory | ✅ Ready — isolated safety samples + final Harness finance advisor app | [Session guide](./session-02/README.md) &#124; [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-working-with-your-data-safely/) &#124; [Event](https://aka.ms/mafclaw/2) |
-| 3 | Thu Sep 17, 2026 | Scaling the Claw: Skills, Shell, CodeAct and Background Agents | 🟡 Ready: offline package + live Skills bridge | [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-scaling-the-claw-or-harness-capabilities/) &#124; [Event](https://aka.ms/mafclaw/3) |
+| 3 | Thu Sep 17, 2026 | Scaling the Claw: Skills, Shell, CodeAct and Background Agents | 🟡 Ready: offline advisor, live MAF bridges, and orchestration Samples 42-47 | [Session guide](./session-03/README.md) &#124; [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-scaling-the-claw-or-harness-capabilities/) &#124; [Event](https://aka.ms/mafclaw/3) |
 | 4 | Thu Sep 24, 2026 | Production Ready: Observability, Governance and Deployment | 🔲 Not started | [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-making-your-claw-production-ready/) &#124; [Event](https://aka.ms/mafclaw/4) |
 
 ## Final slides (PDF)
@@ -38,7 +38,7 @@ All financial examples are mock and educational, not financial advice.
 
 - `session-01/` — Session 1: four incremental checkpoints (hello-agent → harness → tools → planning+todos) and the finished sample.
 - `session-02/` — Session 2: isolated samples for safe file access, approvals, and memory, plus the final Agent Framework/Harness finance advisor walkthrough.
-- `session-03/` — Session 3: an offline runnable package covering skills, confined shell, CodeAct, and background agents (`code/`, `samples/`, `docs/`), cumulative with Session 2.
+- `session-03/` — Session 3: a cumulative offline advisor, plain-C# concepts, live MAF bridges, and six additional main-agent orchestration samples (`code/`, `samples/`, `docs/`).
 - `session-04/` — Placeholder folder. Not started; a real .NET 10 snapshot will replace it after the session goes live.
 - `general/docs/` — Prerequisites, configuration, and troubleshooting for all sessions.
 
@@ -103,7 +103,7 @@ For the full walkthrough, see the [Session 2 guide](./session-02/README.md).
 # 1. Enter the repo
 cd mafclaw
 
-# 2. The complete advisor and all samples except 11 are offline
+# 2. The advisor and Samples 10/20/30/40 are offline; 11/21/31/41 require Foundry
 cd session-03
 
 # 3. Run the complete cumulative finance advisor
@@ -111,7 +111,7 @@ dotnet run --project .\code\MafClaw.Session03.csproj
 
 # 4. Run the numbered sample ladder (skills, confined shell, CodeAct, background agents)
 dotnet run --project .\samples\10-skills\MafClaw.Sample10.csproj
-# Configure Foundry first for the live Microsoft Agent Framework Skills bridge:
+# Configure Foundry first for the live Microsoft Agent Framework bridges:
 # cd ..; az login --output none; .\tools\configure-user-secrets.ps1 -Session 3; cd session-03
 dotnet run --project .\samples\11-skills-agent\MafClaw.Sample11.csproj
 dotnet run --project .\samples\20-confined-shell\MafClaw.Sample20.csproj
@@ -124,6 +124,21 @@ dotnet run --project .\samples\41-background-agents\MafClaw.Sample41.csproj
 
 For the full walkthrough, see the [Session 3 guide](./session-03/README.md).
 
+### Main-agent orchestration (Samples 42-47)
+
+The [orchestration guide](./session-03/docs/orchestration.md) covers specialist
+teams, selective delegation, research/write/review, responsive background
+jobs, partial results and deadlines, and a human-approved report.
+Each project offers `--mode live` plus explicitly scripted offline fixtures:
+
+```powershell
+# From the repository root; no Foundry connection is needed for fixture mode.
+dotnet run --project .\session-03\samples\42-specialist-team\MafClaw.Sample42.csproj -- --mode fixture --demo
+```
+
+Live mode requires the configured Session 3 model. Hosted news also depends
+on search availability; missing sources are reported rather than invented.
+
 ## Session 4 status
 
 Session 4 does **not** have runnable code yet. The `session-04/` folder contains an unsupported placeholder application — do not use it as reference code. A real implementation will replace it once the session goes live.
@@ -132,9 +147,10 @@ Session 3 is a runnable package: a complete offline finance advisor
 (`session-03/code/`) carrying forward Session 2's file-access, approval, and
 memory boundaries plus the new skills, shell, CodeAct, and background-agent
 concepts, and a numbered `session-03/samples/` ladder (`10`/`11`, `20`/`21`,
-`30`/`31`, `40`/`41`). Sample 11 is a live Microsoft Agent Framework Skills
-bridge that requires Foundry credentials; all other Session 3 projects remain
-offline.
+`30`/`31`, `40`/`41`). Samples 11/21/31/41 are live MAF bridges requiring
+Foundry credentials. Additional Samples 42-47 provide main-agent orchestration
+with live inference or explicitly selected offline fixtures. The complete
+advisor and the plain-C# samples remain offline.
 
 ## Important notes
 

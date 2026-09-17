@@ -1,0 +1,4 @@
+FICTIONAL EDUCATIONAL FIXTURE — NOT FINANCIAL ADVICE.
+NewsResearchAgent: ACME, an imaginary company, announced a training-only product.
+HoldingsResearchAgent: a fake learner holds 12 ACME units and 5 fictitious INDEX units.
+These are not real tickers, prices, current news, recommendations, or trading instructions.
