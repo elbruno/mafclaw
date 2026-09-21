@@ -1,0 +1,52 @@
+<Solution>
+  <Folder Name="/code/" />
+  <Folder Name="/code/Agent/">
+    <Project Path="code/Agent/MafClaw.Session04.Agent.csproj" />
+  </Folder>
+  <Folder Name="/code/Console/">
+    <Project Path="code/Console/MafClaw.Session04.Console.csproj" />
+  </Folder>
+  <Folder Name="/code/Contracts/">
+    <Project Path="code/Contracts/MafClaw.Session04.Contracts.csproj" />
+  </Folder>
+  <Folder Name="/code/Evals/">
+    <Project Path="code/Evals/MafClaw.Session04.Evals.csproj" />
+  </Folder>
+  <Folder Name="/code/Hosted/">
+    <Project Path="code/Hosted/MafClaw.Session04.Hosted.csproj" />
+  </Folder>
+  <Folder Name="/samples/" />
+  <Folder Name="/samples/10-observability/">
+    <Project Path="samples/10-observability/MafClaw.Sample10.csproj" />
+  </Folder>
+  <Folder Name="/samples/11-observability-agent/">
+    <Project Path="samples/11-observability-agent/MafClaw.Sample11.csproj" />
+  </Folder>
+  <Folder Name="/samples/20-governance/">
+    <Project Path="samples/20-governance/MafClaw.Sample20.csproj" />
+  </Folder>
+  <Folder Name="/samples/21-governance-agent/">
+    <Project Path="samples/21-governance-agent/MafClaw.Sample21.csproj" />
+  </Folder>
+  <Folder Name="/samples/22-purview-agent/">
+    <Project Path="samples/22-purview-agent/MafClaw.Sample22.csproj" />
+  </Folder>
+  <Folder Name="/samples/30-evaluations/">
+    <Project Path="samples/30-evaluations/MafClaw.Sample30.csproj" />
+  </Folder>
+  <Folder Name="/samples/31-evaluations-agent/">
+    <Project Path="samples/31-evaluations-agent/MafClaw.Sample31.csproj" />
+  </Folder>
+  <Folder Name="/samples/32-foundry-evaluations/">
+    <Project Path="samples/32-foundry-evaluations/MafClaw.Sample32.csproj" />
+  </Folder>
+  <Folder Name="/samples/40-host-contract/">
+    <Project Path="samples/40-host-contract/MafClaw.Sample40.csproj" />
+  </Folder>
+  <Folder Name="/samples/41-hosted-agent/">
+    <Project Path="samples/41-hosted-agent/MafClaw.Sample41.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MafClaw.Session04.Tests.csproj" />
+  </Folder>
+</Solution>

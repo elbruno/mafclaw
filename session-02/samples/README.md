@@ -3,7 +3,7 @@
 These samples use a concept-to-agent teaching ladder:
 
 - `10`, `20`, and `30` are small plain C# demos that isolate the concept.
-- `11`, `21`, `22`, `31`, and `32` implement those ideas with Microsoft Agent Framework, Harness, or Foundry APIs.
+- `11`, `21`, `22`, `31`, `32`, and `33` implement those ideas with Microsoft Agent Framework, Harness, or Foundry APIs.
 - `..\code\` is the complete finance advisor that combines all three concepts.
 
 ## Sample authoring rule
@@ -35,6 +35,7 @@ Every live-demo sample should be readable while the presenter is sharing the scr
 - `31-memory-store-agent` saves `Remember...` prompts as Foundry `UserProfile` memories, prints the saved scope/count, and uses `FoundryMemoryProvider` to recall durable user facts when memory is configured.
 - `32-local-file-memory-agent` gives the agent explicit current-user save/recall tools backed by an inspectable local JSON file.
 - `33-local-file-memory-context-provider` creates a local `FileMemoryProvider` variable and assigns it through `AIContextProviders = [localFileMemory]`, matching the provider shape used by sample 31 without requiring Foundry Memory.
+- Sample 33 disables Harness's default file-memory provider so the named provider is the only owner of its state key. This matters with the upgraded SDK, which rejects duplicate provider state keys. Its construction-only verification case uses synthetic configuration and exits before inference.
 - For the reliable live demo, run sample 32: save the profile, enter `/memory`, restart, recall it, then ask `What do you remember about other users?`.
 - Use sample 31 to compare the local application-owned approach with managed Foundry Memory, and sample 33 to show the same `AIContextProviders` wiring with local files.
 

@@ -134,6 +134,25 @@ Use these line ranges when sharing the code on screen. The short header at the t
 
 ## Demo safety checklist
 
+### September 2026 upgrade rehearsal
+
+Use the current .NET 10 projects and the session's `verification-manifest.json`;
+do not substitute an old .NET 9 output directory. Azure.AI.Projects
+3.0.0-beta.2 labels direct memory-store APIs with experimental diagnostic
+`AAIP001`. Only the two `FoundryMemoryDemoStore` implementations suppress this
+known diagnostic; approvals and current-user scope checks are unchanged.
+
+Run the new offline regression executable from the Session 2 directory:
+
+```powershell
+dotnet run --project .\tests\UpgradeRegression.Tests\MafClaw.UpgradeRegression.Tests.csproj -c Release
+```
+
+It checks the actual Sample 22 and 32 source, not a substitute implementation.
+Real console timing, live tool requests, and Foundry-managed memory remain
+separate rehearsal gates. Before running managed-memory startup, verify that
+the configured store already exists if resource creation is not authorized.
+
 - use mock data only
 - avoid real personal financial inputs
 - never screen-share raw exceptions or terminal output that includes resource IDs or tenant markers

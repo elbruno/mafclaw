@@ -136,7 +136,7 @@ It is not a prediction, recommendation, live balance or trade instruction.
   background results. Cancellation, unexpected defects and fatal exceptions are
   not indiscriminately wrapped. Live model selection/quality still varies;
   offline tests do not validate Azure access.
-* Scripted parsing validates captured tool schemas and the installed 1.20.0
+* Scripted parsing validates captured tool schemas and the installed 1.21.0
   provider's textual start/status envelopes. SDK changes should fail tests
   explicitly rather than manufacture results.
 

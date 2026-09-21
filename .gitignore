@@ -14,3 +14,14 @@ agent-file-memory/
 # Harness local state directories
 .harness/
 harness-state/
+
+# Local verification, deployment state and generated publish output
+.azure/
+.foundry/
+TestResults/
+out/
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template

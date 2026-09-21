@@ -1,3 +1,4 @@
+// Objective: demonstrate Harness file access within an explicitly approved local root.
 // Session flow:
 // A. Load the Foundry connection settings and create inside/outside demo files.
 // B. Build an IChatClient and expose the Harness file-access tools.
@@ -44,7 +45,7 @@ if (!File.Exists(portfolioPath))
 }
 
 // Create a harmless decoy file outside the approved root for the denial demo.
-var deniedDirectory = Path.Combine(Path.GetTempPath(), "mafclaw-session-02-outside-root");
+var deniedDirectory = Path.Combine(AppContext.BaseDirectory, "outside-root");
 Directory.CreateDirectory(deniedDirectory);
 var deniedPath = Path.Combine(deniedDirectory, "outside-portfolio.csv");
 File.WriteAllText(deniedPath, "symbol,shares\nPRIVATE,999\n");

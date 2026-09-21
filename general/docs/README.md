@@ -4,7 +4,7 @@ This guide covers prerequisites, configuration, and troubleshooting for all MafC
 
 ## Target stack
 
-- **.NET 10** SDK and runtime
+- **.NET 10** SDK and runtime; the repository selects stable SDK 10.0.401 or a later .NET 10 feature band
 - **C#** (language)
 - **Azure Foundry** project and model
 - **Azure CLI** (`az`) for authentication
@@ -22,7 +22,11 @@ Verify installation:
 dotnet --version
 ```
 
-Must report 10.0.0 or later.
+Must report an installed .NET 10 SDK compatible with `global.json`: 10.0.401
+or a later stable .NET 10 feature band. A .NET 11 preview alone is not enough.
+The verified release baseline is SDK 10.0.401 and runtime 10.0.12.
+The root `NuGet.Config` selects public nuget.org for reproducible sample restores;
+no private feed credentials are required.
 
 ### 2. Install Azure CLI
 
@@ -72,11 +76,16 @@ See the [Session 1 guide](../../session-01/README.md) for the full checkpoint wa
 
 ## Configuration: Foundry project and model
 
-Sessions 1 and 2 require access to a Microsoft Foundry project with a deployed
-model (e.g. `gpt-5-mini`). Session 3's complete advisor and all samples except
-`11-skills-agent` are offline; Sample 11 is a live file-based Skills/Harness
-demo and needs Foundry configuration — see the
-[Session 3 guide](../../session-03/README.md).
+Session 1's checkpoints/final app and Session 2's live MAF samples/final app
+require a Microsoft Foundry project with a deployed model. Session 2's
+plain-C# primitives are offline.
+
+Session 3's complete advisor and samples 10/20/30/40 are offline. Samples
+11/21/31/41 require Foundry; samples 42-47 offer live inference and an explicitly
+selected fixture mode. See the [Session 3 guide](../../session-03/README.md).
+Session 4 separates deterministic verification from live agent inference and
+optional governance/evaluation services; its
+[setup guidance](../../session-04/docs/README.md) is the authority for each path.
 
 ### Configure user secrets
 
@@ -93,7 +102,10 @@ This script:
 - Never stores secrets in files or logs.
 - Works only for your current user on this machine.
 
-The `UserSecretsId` is committed to each `.csproj`. All checkpoint projects and the finished sample share one ID — configuring once configures all.
+The `UserSecretsId` is committed to projects that need it. Session 1's
+checkpoints and finished sample share an ID. Other sessions can use separate
+stores; the setup script visits their declared projects. Plain-C# offline
+samples do not need credentials.
 
 **Preview mode** (run from the repository root):
 
@@ -116,15 +128,15 @@ $env:FOUNDRY_MODEL = "gpt-5-mini"
 
 ### Verify configuration
 
-After running the setup script, verify the settings were stored (in a private terminal):
+After running the setup script, check required key presence without displaying values:
 
 ```powershell
-dotnet user-secrets list --project .\session-01\checkpoints\01-hello-agent\MafClaw.Checkpoint01.csproj
+.\tools\configure-user-secrets.ps1 -Session 1 -Check
 ```
 
 ### How config is loaded
 
-Each `Program.cs` reads config with three inline lines — no config class:
+The earlier minimal hosts read user-secrets and environment variables directly:
 
 ```csharp
 var config = new ConfigurationBuilder()
@@ -133,11 +145,17 @@ var endpoint = config["Foundry:ProjectEndpoint"]!;
 var model = config["Foundry:Model"] ?? "gpt-5-mini";
 ```
 
-User-secrets and environment variables are the only two sources. There is no `appsettings.json` and no multi-level configuration hierarchy.
+The live connection settings use user-secrets and environment variables,
+not committed credentials. Session 4 validates its host-specific configuration
+centrally; consult its setup guide for optional features and supported keys.
+Configuration values are passed to the SDK through JSON stdin, not command-line
+value arguments. `-Check` reports presence; `-WhatIf` neither reads values nor writes them.
 
 ## ⚠️ Privacy warning
 
-These samples have **no try/catch or error-handling wrapper**. Raw Azure exceptions can contain **tenant IDs, account names, resource identifiers, and endpoint URLs**.
+Earlier minimal samples can surface raw Azure exceptions containing **tenant
+IDs, account names, resource identifiers, and endpoint URLs**. New safe
+diagnostics do not make arbitrary provider output suitable for screen sharing.
 
 If you are streaming, recording, or screen-sharing:
 
@@ -241,3 +259,20 @@ If you encounter issues:
 ## Keep session-specific content separate
 
 Session-specific setup, troubleshooting, and checkpoint guides live inside each `session-0X/docs/` folder.
+
+## Verify an upgraded checkout
+
+Run the deterministic path first; do not treat a successful build as proof of
+live compatibility:
+
+```powershell
+.\tools\verify-repository.ps1 -Mode Offline
+.\tools\audit-packages.ps1 -IncludeAdvisories
+```
+
+The verifier discovers all public projects, builds in Release, and executes the
+cases in each session's verification manifest. It does not infer offline safety
+from a project name. Live cases require explicit `-Mode Live` or `-Mode All`
+and can incur model/service charges. Skipped live cases remain `NotRun`.
+See the [verification tools guide](../../tools/README.md) for coverage, safe
+reports and failure handling.

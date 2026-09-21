@@ -9,16 +9,18 @@
     <AssemblyName>MafClaw.Session01</AssemblyName>
     <RootNamespace>MafClaw.Session01</RootNamespace>
     <UserSecretsId>8f001de5-00b8-4cd2-835b-e0ea21979f0f</UserSecretsId>
+    <!-- Archived test output may remain in old checkouts; it is not app source. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);**\bin\**;**\obj\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.AI.Projects" Version="2.1.0-beta.4" />
+    <PackageReference Include="Azure.AI.Projects" Version="3.0.0-beta.2" />
     <PackageReference Include="Azure.Identity" Version="1.21.0" />
-    <PackageReference Include="Microsoft.Agents.AI" Version="1.20.0" />
-    <PackageReference Include="Microsoft.Agents.AI.Foundry" Version="1.20.0-preview.260831.1" />
-    <PackageReference Include="Microsoft.Agents.AI.Harness" Version="1.20.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.11" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.11" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Agents.AI" Version="1.21.0" />
+    <PackageReference Include="Microsoft.Agents.AI.Foundry" Version="1.21.0-preview.260911.1" />
+    <PackageReference Include="Microsoft.Agents.AI.Harness" Version="1.21.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.12" />
   </ItemGroup>
 </Project>

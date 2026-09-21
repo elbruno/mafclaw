@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <UserSecretsId>mafclaw-session-04</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Azure.AI.Projects" Version="3.0.0-beta.2" />
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
+    <PackageReference Include="Microsoft.Agents.AI" Version="1.21.0" />
+    <PackageReference Include="Microsoft.Agents.AI.Harness" Version="1.21.0" />
+    <PackageReference Include="Microsoft.Agents.AI.Foundry" Version="1.21.0-preview.260911.1" />
+    <PackageReference Include="Microsoft.Agents.AI.Purview" Version="1.21.0-rc1" />
+    <PackageReference Include="Microsoft.Agents.AI.Hyperlight" Version="1.21.0-preview.260911.1" />
+    <PackageReference Include="Microsoft.Agents.AI.Tools.Shell" Version="1.21.0-preview.260911.1" />
+    <PackageReference Include="Hyperlight.HyperlightSandbox.Guest.Python" Version="0.7.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.12" />
+    <PackageReference Include="OpenTelemetry" Version="1.18.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.18.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.18.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Contracts\MafClaw.Session04.Contracts.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="skills\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\evals\cases.json" Link="evaluation-cases.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

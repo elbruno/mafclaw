@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {"id":"console-fixture","project":"code\\Console\\MafClaw.Session04.Console.csproj","mode":"offline","runner":"run","args":["--fixture"],"stdin":"Value the snapshot.\n/exit\n","environment":{"OTEL_EXPORTER_OTLP_ENDPOINT":""},"timeoutSeconds":60,"expectedExitCode":0,"requiredOutput":["TOOL RESULT","27124.95"]},
+    {"id":"contracts-and-maf-eval","project":"code\\Evals\\MafClaw.Session04.Evals.csproj","mode":"offline","runner":"run","args":["--mode","fixture"],"timeoutSeconds":120,"expectedExitCode":0,"requiredOutput":["CONTRACTS: 24/24","EVALUATION PASS"]},
+    {"id":"detect-agent-regression","project":"code\\Evals\\MafClaw.Session04.Evals.csproj","mode":"offline","runner":"run","args":["--mode","fixture","--inject-regression"],"timeoutSeconds":120,"expectedExitCode":1,"requiredOutput":["EVALUATION FAIL"]},
+    {"id":"all-regressions","project":"tests\\MafClaw.Session04.Tests.csproj","coversProjects":["code\\Hosted\\MafClaw.Session04.Hosted.csproj"],"mode":"offline","runner":"run","args":[],"timeoutSeconds":240,"expectedExitCode":0,"requiredOutput":["SESSION04 TESTS PASS"]},
+    {"id":"sample10","project":"samples\\10-observability\\MafClaw.Sample10.csproj","mode":"offline","runner":"run","args":[],"timeoutSeconds":30,"expectedExitCode":0,"requiredOutput":["OBSERVABILITY PRIMITIVE PASS"]},
+    {"id":"sample11-fixture","project":"samples\\11-observability-agent\\MafClaw.Sample11.csproj","mode":"offline","runner":"run","args":["--fixture"],"environment":{"OTEL_EXPORTER_OTLP_ENDPOINT":""},"timeoutSeconds":60,"expectedExitCode":0,"requiredOutput":["OBSERVABILITY AGENT PASS","TOOL RESULT"]},
+    {"id":"sample20","project":"samples\\20-governance\\MafClaw.Sample20.csproj","mode":"offline","runner":"run","args":[],"timeoutSeconds":30,"expectedExitCode":0,"requiredOutput":["GOVERNANCE PRIMITIVE PASS","DENIED:"]},
+    {"id":"sample21-fixture","project":"samples\\21-governance-agent\\MafClaw.Sample21.csproj","mode":"offline","runner":"run","args":["--fixture"],"timeoutSeconds":60,"expectedExitCode":0,"requiredOutput":["GOVERNANCE AGENT PASS","Actual simulated trades: 0"]},
+    {"id":"purview-prerequisite-description-only","project":"samples\\22-purview-agent\\MafClaw.Sample22.csproj","mode":"offline","runner":"run","args":["--describe"],"timeoutSeconds":30,"expectedExitCode":2,"requiredOutput":["No Purview request was made."]},
+    {"id":"sample30","project":"samples\\30-evaluations\\MafClaw.Sample30.csproj","mode":"offline","runner":"run","args":[],"timeoutSeconds":30,"expectedExitCode":0,"requiredOutput":["EVALUATION PRIMITIVE PASS"]},
+    {"id":"sample30-detect-regression","project":"samples\\30-evaluations\\MafClaw.Sample30.csproj","mode":"offline","runner":"run","args":["--inject-regression"],"timeoutSeconds":30,"expectedExitCode":1,"requiredOutput":["EVALUATION PRIMITIVE FAIL"]},
+    {"id":"sample31-fixture","project":"samples\\31-evaluations-agent\\MafClaw.Sample31.csproj","mode":"offline","runner":"run","args":["--fixture"],"timeoutSeconds":90,"expectedExitCode":0,"requiredOutput":["EVALUATION AGENT PASS"]},
+    {"id":"foundry-eval-prerequisite-description-only","project":"samples\\32-foundry-evaluations\\MafClaw.Sample32.csproj","mode":"offline","runner":"run","args":["--describe"],"timeoutSeconds":30,"expectedExitCode":2,"requiredOutput":["No evaluation was submitted."]},
+    {"id":"sample40-http","project":"samples\\40-host-contract\\MafClaw.Sample40.csproj","mode":"offline","runner":"run","args":["--self-test"],"timeoutSeconds":60,"expectedExitCode":0,"requiredOutput":["HOST CONTRACT PASS"]},
+    {"id":"sample41-responses","project":"samples\\41-hosted-agent\\MafClaw.Sample41.csproj","mode":"offline","runner":"run","args":["--fixture","--self-test"],"timeoutSeconds":90,"expectedExitCode":0,"requiredOutput":["HOSTED AGENT PASS"]},
+    {"id":"live-console-quote","project":"code\\Console\\MafClaw.Session04.Console.csproj","mode":"live","runner":"run","args":["--no-shell","--no-codeact"],"stdin":"Use get_stock_price to show the mock MSFT quote.\n/exit\n","timeoutSeconds":180,"expectedExitCode":0,"requiredOutput":["TOOL RESULT","512.34"]},
+    {"id":"live-observability","project":"samples\\11-observability-agent\\MafClaw.Sample11.csproj","mode":"live","runner":"run","args":["--live"],"timeoutSeconds":180,"expectedExitCode":0,"requiredOutput":["OBSERVABILITY AGENT PASS"]},
+    {"id":"live-governance-denial","project":"samples\\21-governance-agent\\MafClaw.Sample21.csproj","mode":"live","runner":"run","args":["--live"],"stdin":"n\n","timeoutSeconds":180,"expectedExitCode":0,"requiredOutput":["GOVERNANCE AGENT PASS","Actual simulated trades: 0"]},
+    {"id":"live-local-evaluation","project":"samples\\31-evaluations-agent\\MafClaw.Sample31.csproj","mode":"live","runner":"run","args":["--live"],"timeoutSeconds":180,"expectedExitCode":0,"requiredOutput":["EVALUATION AGENT PASS"]}
+  ]
+}

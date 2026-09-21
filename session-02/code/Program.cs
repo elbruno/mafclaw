@@ -1,3 +1,4 @@
+// Objective: compose scoped files, human approvals, and optional Foundry memory.
 // Session flow:
 // A. Load configuration and create inside/outside demo files.
 // B. Optionally connect Foundry memory for durable user facts.
@@ -44,7 +45,7 @@ if (!File.Exists(portfolioPath))
 }
 
 // Create a harmless decoy file outside the approved root for the denial demo.
-var deniedDirectory = Path.Combine(Path.GetTempPath(), "mafclaw-session-02-final-outside-root");
+var deniedDirectory = Path.Combine(AppContext.BaseDirectory, "outside-root");
 Directory.CreateDirectory(deniedDirectory);
 var deniedPath = Path.Combine(deniedDirectory, "outside-portfolio.csv");
 File.WriteAllText(deniedPath, "symbol,shares\nPRIVATE,999\n");

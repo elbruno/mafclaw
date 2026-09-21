@@ -12,6 +12,25 @@ The official source article is:
 
 ## What this session teaches
 
+### .NET 10 upgrade
+
+The final app and all nine samples target **.NET 10**, including the plain-C#
+file, approval, and JSON-memory primitives. Agent projects use MAF/Harness
+**1.21.0**, Foundry **1.21.0-preview.260911.1**, Azure.AI.Projects
+**3.0.0-beta.2**, Azure.Identity **1.21.0**, and configuration **10.0.12**.
+Existing preview APIs remain explicit; no stable dependency moves to a preview.
+
+The session's `NuGet.Config` uses nuget.org without changing global feeds.
+`verification-manifest.json` separates deterministic file/approval/memory
+checks from opt-in, bounded live checks. Foundry-managed memory still needs
+its own configured store; local JSON tools and `FileMemoryProvider` do not.
+Outside-root denial fixtures now remain beside the executable, outside
+`working`, rather than writing into a shared system temporary directory.
+
+The dependency-free [upgrade regression runner](tests/UpgradeRegression.Tests/README.md)
+links the real approval and JSON-memory implementations and checks their
+fail-closed and persistence behavior without calling a model.
+
 The agent from Session 1 can talk, browse the web, and plan. Session 2 adds the boundary that turns it from a clever conversation partner into a practical assistant for real user data.
 
 The samples use a teaching ladder. The `10`, `20`, and `30` samples teach each safety primitive as plain C# so the behavior is easy to see. The agentic samples then show the same boundaries through Microsoft Agent Framework, Harness, local tools, and Foundry Memory. The final app in `code/` combines all three into one finance advisor.

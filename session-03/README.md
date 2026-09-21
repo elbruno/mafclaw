@@ -22,6 +22,22 @@ https://devblogs.microsoft.com/agent-framework/agent-harness-scaling-the-claw-or
 All data is mock and educational. The complete `code` sample is offline and
 does not call a model or access the network.
 
+## .NET 10 upgrade and verification
+
+All 22 projects target **.NET 10**. The live bridges and orchestration support
+use MAF/Harness **1.21.0**, Foundry/Shell/Hyperlight
+**1.21.0-preview.260911.1**, Azure.AI.Projects **3.0.0-beta.2**,
+Azure.Identity **1.21.0**, configuration **10.0.12**, and the Hyperlight Python
+guest **0.7.0** where applicable. Preview packages are limited to existing
+preview integrations. The session-local `NuGet.Config` selects nuget.org.
+
+`verification-manifest.json` defines deterministic app/fixture checks, the six
+executable regression runners, and separately opted-in live checks. Run these
+regression projects with **`dotnet run`**, not `dotnet test`: they are executable
+assertion suites. Fixture success proves host mechanics, not live Foundry,
+hosted-search, or Hyperlight service/platform availability. No live failure
+automatically switches to fixtures.
+
 ## Run the complete advisor
 
 ```powershell

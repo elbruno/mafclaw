@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/microsoft/AgentSchema/refs/heads/main/schemas/v1.0/AgentManifest.yaml
+name: mafclaw-session-04
+displayName: MafClaw Session 4
+description: >
+  Educational C# finance agent with shared policy and tools, real MAF Responses
+  hosting, privacy-filtered telemetry and restricted hosted capabilities.
+metadata:
+  tags:
+    - Agent Framework
+    - Responses Protocol
+    - Educational Mock Data
+template:
+  name: mafclaw-session-04
+  kind: hosted
+  protocols:
+    - protocol: responses
+      version: 2.0.0
+  resources:
+    cpu: "1.0"
+    memory: 2Gi
+  environment_variables:
+    - name: FOUNDRY_PROJECT_ENDPOINT
+      value: "{{FOUNDRY_PROJECT_ENDPOINT}}"
+    - name: FOUNDRY_MODEL
+      value: "{{FOUNDRY_MODEL}}"
+    - name: ASPNETCORE_HTTP_PORTS
+      value: "8088"
+parameters:
+  properties: []
+resources: []

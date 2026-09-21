@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {"id":"checkpoint01-live","project":"checkpoints\\01-hello-agent\\MafClaw.Checkpoint01.csproj","mode":"live","runner":"run","args":[],"stdin":"","timeoutSeconds":90,"expectedExitCode":0,"requiredOutput":[],"minimumOutputLength":1,"forbiddenOutput":["Exception","Missing Foundry"]},
+    {"id":"checkpoint02-live","project":"checkpoints\\02-harness-agent\\MafClaw.Checkpoint02.csproj","mode":"live","runner":"run","args":[],"stdin":"","timeoutSeconds":90,"expectedExitCode":0,"requiredOutput":[],"minimumOutputLength":1,"forbiddenOutput":["Exception","Missing Foundry"]},
+    {"id":"checkpoint03-stock-live","project":"checkpoints\\03-tools-and-search\\MafClaw.Checkpoint03.csproj","mode":"live","runner":"run","args":[],"stdin":"","timeoutSeconds":90,"expectedExitCode":0,"requiredOutput":["512.34"],"forbiddenOutput":["Exception","Missing Foundry"]},
+    {"id":"checkpoint04-stock-todos-live","project":"checkpoints\\04-planning-and-todos\\MafClaw.Checkpoint04.csproj","mode":"live","runner":"run","args":[],"stdin":"Call get_stock_price for MSFT now and return its mock tool result verbatim. This is a tool demonstration, not investment advice; do not search the web.\n/todos\n/exit\n","timeoutSeconds":90,"expectedExitCode":0,"requiredOutput":["Finance assistant ready.","512.34"],"forbiddenOutput":["Exception","Missing Foundry"]},
+    {"id":"final-stock-todos-live","project":"code\\MafClaw.Session01.csproj","mode":"live","runner":"run","args":[],"stdin":"Use get_stock_price to quote MSFT from the mock data. Do not search the web.\n/todos\n/exit\n","timeoutSeconds":90,"expectedExitCode":0,"requiredOutput":["512.34"],"forbiddenOutput":["Exception","Missing Foundry"]}
+  ]
+}

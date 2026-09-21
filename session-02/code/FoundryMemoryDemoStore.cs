@@ -1,3 +1,4 @@
+// Objective: persist and verify current-user profile facts through Foundry's preview memory API.
 // Session flow:
 // A. Detect presenter prompts that should become durable profile memory.
 // B. Save those facts directly to the configured Foundry memory store.
@@ -6,6 +7,8 @@
 using Azure.AI.Projects;
 using Azure.AI.Projects.Memory;
 
+// Azure.AI.Projects 3.0.0-beta.2 marks MemoryStores experimental; this sample teaches that API.
+#pragma warning disable AAIP001
 internal sealed class FoundryMemoryDemoStore(AIProjectClient projectClient, string memoryStoreName, string scope)
 {
     public string Scope => scope;
@@ -45,3 +48,4 @@ internal sealed class FoundryMemoryDemoStore(AIProjectClient projectClient, stri
         return count;
     }
 }
+#pragma warning restore AAIP001

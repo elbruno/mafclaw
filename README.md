@@ -7,7 +7,7 @@ A 4-part Microsoft Reactor live coding series that builds a personal finance CLI
 - **Series page:** https://aka.ms/mafclaw
 - **Blog introduction:** http://aka.ms/mafclaw/blog
 - **Sample repository:** http://aka.ms/mafclaw/repo
-- **.NET YouTube recordings:**
+- **.NET YouTube streams and recordings:**
   - [Session 1](https://www.youtube.com/watch?v=iUs15X1v2w4)
   - [Session 2](https://www.youtube.com/watch?v=V58coa0llUo)
   - [Session 3](https://www.youtube.com/watch?v=rMhX0-oE4aY)
@@ -21,7 +21,7 @@ A 4-part Microsoft Reactor live coding series that builds a personal finance CLI
 | 1 | Thu Sep 3, 2026 | Meet Your Claw: A Harness in Three Lines of C# | ✅ Ready — 4 incremental checkpoints + finished sample | [Session guide](./session-01/README.md) &#124; [Blog](https://devblogs.microsoft.com/agent-framework/meet-your-agent-harness-and-claw/) &#124; [Live event](https://aka.ms/mafclaw/1) |
 | 2 | Thu Sep 10, 2026 | Working With Your Data, Safely: Files, Approvals and Memory | ✅ Ready — isolated safety samples + final Harness finance advisor app | [Session guide](./session-02/README.md) &#124; [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-working-with-your-data-safely/) &#124; [Event](https://aka.ms/mafclaw/2) |
 | 3 | Thu Sep 17, 2026 | Scaling the Claw: Skills, Shell, CodeAct and Background Agents | 🟡 Ready: offline advisor, live MAF bridges, and orchestration Samples 42-47 | [Session guide](./session-03/README.md) &#124; [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-scaling-the-claw-or-harness-capabilities/) &#124; [Event](https://aka.ms/mafclaw/3) |
-| 4 | Thu Sep 24, 2026 | Production Ready: Observability, Governance and Deployment | 🔲 Not started | [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-making-your-claw-production-ready/) &#124; [Event](https://aka.ms/mafclaw/4) |
+| 4 | Thu Sep 24, 2026 | Production Ready: Observability, Governance and Deployment | 🟡 Local implementation; cloud/service verification separately gated | [Session guide](./session-04/README.md) &#124; [Blog](https://devblogs.microsoft.com/agent-framework/agent-harness-making-your-claw-production-ready/) &#124; [Event](https://aka.ms/mafclaw/4) |
 
 ## Final slides (PDF)
 
@@ -39,7 +39,7 @@ All financial examples are mock and educational, not financial advice.
 - `session-01/` — Session 1: four incremental checkpoints (hello-agent → harness → tools → planning+todos) and the finished sample.
 - `session-02/` — Session 2: isolated samples for safe file access, approvals, and memory, plus the final Agent Framework/Harness finance advisor walkthrough.
 - `session-03/` — Session 3: a cumulative offline advisor, plain-C# concepts, live MAF bridges, and six additional main-agent orchestration samples (`code/`, `samples/`, `docs/`).
-- `session-04/` — Placeholder folder. Not started; a real .NET 10 snapshot will replace it after the session goes live.
+- `session-04/` — Shared .NET 10 agent factory, console/evaluation/Responses hosts, four teaching pairs, conditional service integrations and regression tooling.
 - `general/docs/` — Prerequisites, configuration, and troubleshooting for all sessions.
 
 ## Getting started
@@ -141,7 +141,20 @@ on search availability; missing sources are reported rather than invented.
 
 ## Session 4 status
 
-Session 4 does **not** have runnable code yet. The `session-04/` folder contains an unsupported placeholder application — do not use it as reference code. A real implementation will replace it once the session goes live.
+Session 4 replaces the unsupported placeholder with runnable .NET 10 code.
+Start with explicit fixtures, then configure the live model:
+
+```powershell
+dotnet run --project .\session-04\code\Evals\MafClaw.Session04.Evals.csproj -- --mode fixture
+.\session-04\scripts\verify-session.ps1 -Mode Offline
+.\tools\configure-user-secrets.ps1 -Session 4
+dotnet run --project .\session-04\code\Console\MafClaw.Session04.Console.csproj
+```
+
+The [Session 4 guide](./session-04/README.md) distinguishes deterministic
+checks, live inference, optional Purview/Foundry grading and hosted deployment.
+A local Responses test does not certify a cloud deployment or production
+identity. Final slide PDFs are published only after presenter approval.
 
 Session 3 is a runnable package: a complete offline finance advisor
 (`session-03/code/`) carrying forward Session 2's file-access, approval, and

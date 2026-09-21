@@ -147,7 +147,7 @@ The host retains the exact provider and releases it in `finally`.
   being indiscriminately wrapped.
 * Live routing can vary. Fixture tests validate dispatch mechanics and
   boundaries, not cloud availability or live model quality.
-* The fixture validates SDK-generated schemas and consumes the 1.20.0
+* The fixture validates SDK-generated schemas and consumes the 1.21.0
   provider's text result envelopes. A changed SDK contract fails visibly.
 
 ## Regression checks

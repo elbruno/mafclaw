@@ -4,6 +4,19 @@ A visual, guided live-coding session that builds one personal-finance assistant 
 
 Based on the [official Session 1 article](https://devblogs.microsoft.com/agent-framework/meet-your-agent-harness-and-claw/).
 
+## Runtime and regression baseline
+
+All five projects target **.NET 10**. The September 2026 upgrade uses MAF/Harness
+**1.21.0**, the corresponding Foundry **1.21.0-preview.260911.1** bridge,
+Azure.AI.Projects **3.0.0-beta.2**, Azure.Identity **1.21.0**, and configuration
+packages **10.0.12**. The preview dependencies are required by the existing
+Foundry APIs; stable dependencies remain stable.
+
+`NuGet.Config` scopes restores to nuget.org without changing user-wide feeds.
+`verification-manifest.json` describes bounded, redirected live smoke checks.
+These checkpoints remain **live-only**: a successful build or `/exit` is not
+evidence of a successful model/tool turn. No credentials are included.
+
 ## Checkpoints
 
 Run all commands from `session-01`.

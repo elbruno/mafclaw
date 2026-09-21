@@ -1,3 +1,4 @@
+// Objective: demonstrate allowed and denied access without touching shared system folders.
 // Session flow:
 // A. Create the approved working folder and seed mock portfolio data.
 // B. Read the portfolio only when the path stays inside that folder.
@@ -23,8 +24,7 @@ Console.WriteLine($"Allowed file read: {portfolioPath}");
 Console.WriteLine(allowedContent);
 
 // This path is outside the sandbox, so the guard should block it.
-var unsafePath = Path.Combine(Path.GetTempPath(), "outside-the-sandbox.txt");
-File.WriteAllText(unsafePath, "not allowed");
+var unsafePath = Path.Combine(AppContext.BaseDirectory, "outside-the-sandbox.txt");
 Console.WriteLine();
 Console.WriteLine("Unsafe path check: ");
 Console.WriteLine(IsSafePath(unsafePath, sandboxRoot) ? "Allowed" : "Blocked");

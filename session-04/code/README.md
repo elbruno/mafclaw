@@ -1,20 +1,16 @@
-# Session 04 code snapshot
+# Session 4 cumulative code
 
-Minimal .NET sample for Episode 4.
-
-Target framework: .NET 9.
-
-## Scope
-
-- placeholder observability configuration
-- governance checklist for safe demo publishing
-- deployment-ready summary with mock values only
-- self-contained console output suitable for a final snapshot
-
-## Run
+Target: .NET 10. `Contracts` is plain C#; `Agent` composes the shared MAF
+instructions, tools and policies. `Console`, `Evals` and `Hosted` are thin hosts.
+No project depends on a previous session's source.
 
 ```powershell
-dotnet run --project .\MafClaw.Session04.csproj
+dotnet run --project .\Console\MafClaw.Session04.Console.csproj -- --fixture
+dotnet run --project .\Evals\MafClaw.Session04.Evals.csproj -- --mode fixture
+dotnet run --project .\Hosted\MafClaw.Session04.Hosted.csproj -- --fixture --urls http://127.0.0.1:8088
 ```
 
-The sample is self-contained and uses safe placeholder configuration only. Replace nothing in source control with real secrets.
+The original `MafClaw.Session04.csproj` placeholder is retired. See
+[setup](../docs/setup.md) for live configuration and
+[architecture](../docs/architecture.md) for the intentional local/hosted
+differences. All data is synthetic and educational, not financial advice.

@@ -58,6 +58,8 @@ IChatClient chatClient = new AIProjectClient(new Uri(endpoint), new AzureCliCred
 // Attach the local memory provider through the same AIContextProviders hook used by FoundryMemoryProvider.
 AIAgent agent = chatClient.AsHarnessAgent(new HarnessAgentOptions
 {
+    // The named provider owns memory; disable Harness's duplicate default provider.
+    DisableFileMemory = true,
     AIContextProviders = [localFileMemory],
     AgentModeProviderOptions = new AgentModeProviderOptions { DefaultMode = "execute" },
     ChatOptions = new ChatOptions

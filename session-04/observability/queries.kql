@@ -1,0 +1,11 @@
+// Workspace-based Application Insights. Confirm schema after deploying the pinned runtime.
+AppDependencies
+| where TimeGenerated > ago(1h)
+| summarize Calls=count(), Failures=countif(Success == false), P95Ms=percentile(DurationMs, 95) by Name
+| order by Failures desc
+
+// SDK metric table availability depends on the chosen hosting exporter.
+AppMetrics
+| where TimeGenerated > ago(1h)
+| where Name startswith "mafclaw."
+| summarize Total=sum(Sum) by Name

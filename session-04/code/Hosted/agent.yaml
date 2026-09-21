@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/microsoft/AgentSchema/refs/heads/main/schemas/v1.0/ContainerAgent.yaml
+kind: hosted
+name: mafclaw-session-04
+protocols:
+  - protocol: responses
+    version: 2.0.0
+resources:
+  cpu: "1.0"
+  memory: 2Gi
+environment_variables:
+  - name: FOUNDRY_PROJECT_ENDPOINT
+    value: ${FOUNDRY_PROJECT_ENDPOINT}
+  - name: FOUNDRY_MODEL
+    value: ${FOUNDRY_MODEL}
+  - name: ASPNETCORE_HTTP_PORTS
+    value: "8088"

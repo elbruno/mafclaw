@@ -48,6 +48,10 @@
     Removes only MafClaw-owned keys for the selected session. Safe to combine with
     -WhatIf to preview which keys would be removed.
 
+.PARAMETER Check
+    Reports whether required and optional keys are configured, without displaying
+    values or writing settings. Missing required configuration fails the check.
+
 .EXAMPLE
     .\tools\configure-user-secrets.ps1 -Session 1
 
@@ -89,11 +93,15 @@ param (
     # SECURITY: the value appears in shell history. Use FOUNDRY_MODEL env var when possible.
     [string] $FoundryModel,
 
-    [switch] $Clear
+    [switch] $Clear,
+
+    [switch] $Check
 )
 
 Set-StrictMode -Version 3
 $ErrorActionPreference = 'Stop'
+if ($Clear -and $Check) { throw '-Clear and -Check cannot be combined.' }
+if ($ProjectPath -and $Session -eq 'All') { throw '-ProjectPath requires one explicit session.' }
 
 # ---------------------------------------------------------------------------
 # Session configuration map — non-secret metadata only.
@@ -141,6 +149,7 @@ $script:SessionMap = [ordered]@{
             'samples\22-approval-retries-timeouts\MafClaw.Sample22.csproj'
             'samples\31-memory-store-agent\MafClaw.Sample31.csproj'
             'samples\32-local-file-memory-agent\MafClaw.Sample32.csproj'
+            'samples\33-local-file-memory-context-provider\MafClaw.Sample33.csproj'
             'code\MafClaw.Session02.csproj'
         )
         Keys         = @(
@@ -173,21 +182,29 @@ $script:SessionMap = [ordered]@{
         )
     }
     '4' = @{
-        Label        = 'Session 4 – Making Your Claw Production-Ready (placeholder – code not yet implemented)'
-        Status       = 'placeholder'
+        Label        = 'Session 4 – Observability, governance, evaluations and hosting'
+        Status       = 'active'
         Folder       = 'session-04'
         ProjectPaths = @(
-            'code\MafClaw.Session04.csproj'
+            'code\Console\MafClaw.Session04.Console.csproj'
+            'code\Evals\MafClaw.Session04.Evals.csproj'
+            'code\Hosted\MafClaw.Session04.Hosted.csproj'
+            'samples\11-observability-agent\MafClaw.Sample11.csproj'
+            'samples\21-governance-agent\MafClaw.Sample21.csproj'
+            'samples\22-purview-agent\MafClaw.Sample22.csproj'
+            'samples\31-evaluations-agent\MafClaw.Sample31.csproj'
+            'samples\32-foundry-evaluations\MafClaw.Sample32.csproj'
+            'samples\41-hosted-agent\MafClaw.Sample41.csproj'
         )
         Keys         = @(
             [pscustomobject]@{ Name = 'Foundry:ProjectEndpoint';              Prompt = 'Azure AI Foundry project endpoint URL';                    EnvVar = 'FOUNDRY_PROJECT_ENDPOINT';              Required = $true;  IsSecret = $false }
             [pscustomobject]@{ Name = 'Foundry:Model';                        Prompt = 'Foundry model or deployment name';                        EnvVar = 'FOUNDRY_MODEL';                         Required = $true;  IsSecret = $false }
-            [pscustomobject]@{ Name = 'Foundry:MemoryStore';                  Prompt = 'Foundry memory store name (Enter to skip)';               EnvVar = 'FOUNDRY_MEMORY_STORE';                  Required = $false; IsSecret = $false }
-            [pscustomobject]@{ Name = 'Foundry:EmbeddingModel';               Prompt = 'Foundry embedding model name (Enter to skip)';            EnvVar = 'FOUNDRY_EMBEDDING_MODEL';               Required = $false; IsSecret = $false }
-            [pscustomobject]@{ Name = 'Foundry:MemoryScope';                  Prompt = 'Foundry memory scope/user id (Enter for sample default)'; EnvVar = 'FOUNDRY_MEMORY_SCOPE';                  Required = $false; IsSecret = $false }
-            [pscustomobject]@{ Name = 'Foundry:ToolboxEndpoint';              Prompt = 'Foundry Toolbox or MCP endpoint (Enter to skip)';         EnvVar = 'FOUNDRY_TOOLBOX_ENDPOINT';              Required = $false; IsSecret = $false }
-            [pscustomobject]@{ Name = 'ApplicationInsights:ConnectionString'; Prompt = 'Application Insights connection string (Enter to skip)';  EnvVar = 'APPLICATIONINSIGHTS_CONNECTION_STRING'; Required = $false; IsSecret = $true  }
-            [pscustomobject]@{ Name = 'Foundry:EvaluationEndpoint';           Prompt = 'Foundry evaluation endpoint (Enter to skip)';             EnvVar = 'FOUNDRY_EVALUATION_ENDPOINT';           Required = $false; IsSecret = $false }
+            [pscustomobject]@{ Name = 'Foundry:MemoryEnabled'; Prompt = 'Use an existing Foundry memory store instead of local memory (true/false, Enter to skip)'; EnvVar = 'FOUNDRY_MEMORY_ENABLED'; Required = $false; IsSecret = $false }
+            [pscustomobject]@{ Name = 'Foundry:MemoryStore'; Prompt = 'Existing Foundry memory store name (Enter to skip)'; EnvVar = 'FOUNDRY_MEMORY_STORE'; Required = $false; IsSecret = $false }
+            [pscustomobject]@{ Name = 'Foundry:MemoryScope'; Prompt = 'Unique opaque current-user memory scope (Enter to skip)'; EnvVar = 'FOUNDRY_MEMORY_SCOPE'; Required = $false; IsSecret = $false }
+            [pscustomobject]@{ Name = 'Purview:Enabled'; Prompt = 'Enable licensed Purview screening (true/false, Enter to skip)'; EnvVar = 'PURVIEW_ENABLED'; Required = $false; IsSecret = $false }
+            [pscustomobject]@{ Name = 'Purview:ClientId'; Prompt = 'Approved Purview application ID (Enter to skip)'; EnvVar = 'PURVIEW_CLIENT_APP_ID'; Required = $false; IsSecret = $false }
+            [pscustomobject]@{ Name = 'OTEL_EXPORTER_OTLP_ENDPOINT'; Prompt = 'OTLP HTTP collector base URI (Enter to skip)'; EnvVar = 'OTEL_EXPORTER_OTLP_ENDPOINT'; Required = $false; IsSecret = $false }
         )
     }
 }
@@ -309,10 +326,11 @@ if (-not $isWhatIf) {
     }
 }
 
-$sessionKeys = if ($Session -eq 'All') { [string[]]$script:SessionMap.Keys } else { @($Session) }
+$sessionKeys = @(if ($Session -eq 'All') { [string[]]$script:SessionMap.Keys } else { $Session })
 
 # Shared value cache so -Session All collects each unique key only once
 $valueCache = @{}
+$missingConfiguration = [Collections.Generic.List[string]]::new()
 
 foreach ($sk in $sessionKeys) {
     $cfg = $script:SessionMap[$sk]
@@ -364,6 +382,35 @@ foreach ($sk in $sessionKeys) {
     foreach ($csproj in $projects) {
         Write-Host "  Configuring project: $csproj"
 
+        if ($Check) {
+            if ($isWhatIf) {
+                Write-Host '  Would check key presence only; no values were read.'
+                continue
+            }
+            $storedValues = @()
+            try {
+                if (Test-HasUserSecretsId -CsprojPath $csproj) {
+                    $storedValues = @(& dotnet user-secrets list --project $csproj 2>&1)
+                    if ($LASTEXITCODE -ne 0) {
+                        throw 'Unable to inspect user-secrets. Rerun diagnostics in a private terminal.'
+                    }
+                }
+                foreach ($k in $cfg.Keys) {
+                    $configured = [bool]($storedValues -match
+                        ('^' + [regex]::Escape($k.Name) + '\s*=\s*.+$')) -or
+                        -not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($k.EnvVar)) -or
+                        -not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($k.Name.Replace(':', '__')))
+                    $status = if ($configured) { 'configured' } elseif ($k.Required) { 'MISSING' } else { 'not configured (optional)' }
+                    Write-Host "  $($k.Name): $status"
+                    if (-not $configured -and $k.Required) {
+                        $missingConfiguration.Add("$csproj : $($k.Name)")
+                    }
+                }
+            }
+            finally { $storedValues = @() }
+            continue
+        }
+
         # ---- UserSecretsId init (set mode only) ----
         if (-not $Clear) {
             if (-not (Test-HasUserSecretsId -CsprojPath $csproj)) {
@@ -371,7 +418,7 @@ foreach ($sk in $sessionKeys) {
                     Write-Host '  Initialising user-secrets...'
                     $initOut = & dotnet user-secrets init --project $csproj 2>&1
                     if ($LASTEXITCODE -ne 0) {
-                        throw "dotnet user-secrets init failed for '$csproj': $initOut"
+                        throw "dotnet user-secrets init failed for '$csproj'. Inspect diagnostics privately."
                     }
                     Write-Host '  UserSecretsId created.'
                 }
@@ -386,9 +433,9 @@ foreach ($sk in $sessionKeys) {
                 if ($PSCmdlet.ShouldProcess("$csproj : $($k.Name)", 'Remove user-secret')) {
                     $rmOut = & dotnet user-secrets remove $k.Name --project $csproj 2>&1
                     if ($LASTEXITCODE -eq 0) {
-                        Write-Host "  Removed  : $($k.Name)"
+                        Write-Host "  Cleared  : $($k.Name)"
                     } else {
-                        Write-Host "  Not found: $($k.Name) (nothing to remove)"
+                        throw "Could not clear '$($k.Name)'. Inspect diagnostics privately."
                     }
                 }
             } else {
@@ -409,9 +456,11 @@ foreach ($sk in $sessionKeys) {
                 # ShouldProcess prints the WhatIf message and returns $false in WhatIf mode.
                 # In normal mode it returns $true and the set runs.
                 if ($PSCmdlet.ShouldProcess("$csproj : $($k.Name)", 'Set user-secret')) {
-                    $setOut = & dotnet user-secrets set $k.Name $value --project $csproj 2>&1
+                    # JSON stdin keeps values out of child process arguments.
+                    $payload = @{ $k.Name = $value } | ConvertTo-Json -Compress
+                    $setOut = $payload | & dotnet user-secrets set --project $csproj 2>&1
                     if ($LASTEXITCODE -ne 0) {
-                        throw "dotnet user-secrets set failed for '$($k.Name)': $setOut"
+                        throw "dotnet user-secrets set failed for '$($k.Name)'. Inspect diagnostics privately."
                     }
                     Write-Host "  Set      : $($k.Name)"
                 }
@@ -425,11 +474,15 @@ foreach ($sk in $sessionKeys) {
 # Summary
 if ($isWhatIf) {
     Write-Host 'WhatIf complete — no changes were made.' -ForegroundColor Yellow
+} elseif ($Check) {
+    if ($missingConfiguration.Count -gt 0) {
+        throw "Required configuration is missing: $($missingConfiguration -join '; ')"
+    }
+    Write-Host 'Configuration check passed. No values were displayed or changed.' -ForegroundColor Green
 } elseif ($Clear) {
     Write-Host 'Clear complete.' -ForegroundColor Green
     Write-Host 'Run without -Clear to reconfigure the removed keys.'
 } else {
     Write-Host 'Configuration complete.' -ForegroundColor Green
-    Write-Host "Verify: dotnet user-secrets list --project <path>"
-    Write-Host '(Run in a private terminal — the list command prints stored values.)'
+    Write-Host "Verify safely: .\tools\configure-user-secrets.ps1 -Session $Session -Check"
 }
