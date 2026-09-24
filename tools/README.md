@@ -5,12 +5,25 @@ Run these commands from the public repository root with PowerShell 7 and the
 use `public-staging` automatically.
 
 ```powershell
-.\tools\configure-user-secrets.ps1 -Session 4 -WhatIf
-.\tools\configure-user-secrets.ps1 -Session 4 -Check
+.\tools\configure-user-secrets.ps1 -WhatIf
+.\tools\configure-user-secrets.ps1
+.\tools\configure-user-secrets.ps1 -Check
 .\tools\verify-repository.ps1 -Mode Inventory
 .\tools\verify-repository.ps1 -Mode Offline
 .\tools\audit-packages.ps1 -IncludeAdvisories
 ```
+
+With no `-Session` argument, setup configures **all sessions (1-4)** and all
+their declared cloud-backed projects, including the settings stores used by
+shared helpers. Each unique setting is collected once and reused wherever
+needed. Supply the required endpoint/model; optional service settings can be
+skipped with Enter, leaving existing values unchanged. Offline-only projects
+need no secrets, and optional services are not provisioned or enabled automatically.
+
+Use `-Session 4` (or another number) for a targeted run. `-Check` and `-WhatIf`
+also cover all sessions by default. `-ProjectPath` requires an explicit numbered
+session. Removal always requires an explicit selection: for example,
+`-Session 4 -Clear` or `-Session All -Clear`.
 
 `Inventory` discovers source projects independently of solution membership and
 asks MSBuild for the effective target frameworks and package references,

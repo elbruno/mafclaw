@@ -2,12 +2,14 @@
 // A. Define the same four synthetic holdings.
 // B. Calculate totals using decimal values and explicit rounding.
 // C. Supply the CSV shown by scoped file and CodeAct tools.
+
 using System.Globalization;
 
 namespace MafClaw.Session04;
 
 public static class MockPortfolio
 {
+    // A. Every demo starts from these synthetic snapshot prices, not a changing market feed.
     public static IReadOnlyList<Holding> Holdings { get; } = Array.AsReadOnly<Holding>(
     [
         new("MSFT", 35, 430.12m, "Technology"),
@@ -18,6 +20,7 @@ public static class MockPortfolio
 
     public static PortfolioSummary Summarize(IEnumerable<Holding>? holdings = null)
     {
+        // B. Multiply/sum with decimal, then round explicitly so the audience can reproduce the result.
         var rows = (holdings ?? Holdings).ToArray();
         if (rows.Any(row => row.Shares < 0 || row.Price < 0))
             throw new ArgumentException("Synthetic holdings cannot have negative quantities or prices.");
@@ -28,6 +31,7 @@ public static class MockPortfolio
             "Mock educational snapshot. Not financial advice.");
     }
 
+    // C. Generate the file-tool teaching data from the same rows so code and CSV cannot drift.
     public static string Csv => "symbol,shares,price,sector\n" +
         string.Join('\n', Holdings.Select(row => string.Create(CultureInfo.InvariantCulture,
             $"{row.Symbol},{row.Shares},{row.Price},{row.Sector}"))) + "\n";

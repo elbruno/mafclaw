@@ -1,7 +1,8 @@
-// Objective: separate deterministic contracts, live inference and remote grading.
+// Objective: run the complete Session 4 finance agent through an evaluation host, not a chat UI.
 // A. Require an explicit mode.
 // B. Run the same factory and published MAF evaluator API.
 // C. Persist a safe report and fail the process for failed evaluations.
+
 using System.Security.Cryptography;
 using System.Text.Json;
 using Azure.AI.Projects;
@@ -12,6 +13,7 @@ using Microsoft.Agents.AI.Foundry;
 
 try
 {
+    // A. Fixture scripts inference; live uses a model with local grading; foundry also grades remotely.
     var mode = args.Length >= 2 && args[0] == "--mode" ? args[1] : "";
     if (mode is not ("fixture" or "live" or "foundry") ||
         args.Skip(2).Any(argument => argument != "--inject-regression"))
@@ -20,6 +22,8 @@ try
     if (inject && mode != "fixture")
         throw new FinanceConfigurationException("Regression injection is restricted to fixture mode.");
     using var deadline = new CancellationTokenSource(TimeSpan.FromMinutes(3));
+
+    // B. First verify deterministic contracts, then grade a conversation from the same finance factory.
     var checks = await FinanceContractChecks.RunAsync(cancellationToken: deadline.Token);
     var settings = mode == "fixture" ? null : FinanceSettings.Load();
     await using var build = await FinanceAgentFactory.CreateAsync(new FinanceAgentOptions
@@ -28,12 +32,17 @@ try
         Settings = settings, ChatClient = mode == "fixture" ? ScriptedChatClient.Portfolio(inject) : null,
         EnableShell = false, EnableCodeAct = false, EnableMemory = false, EnableResearch = false
     }, deadline.Token);
+
+    // MAF's IAgentEvaluator/EvaluateAsync separate running an agent from judging its output.
+    // FoundryEvals handles remote grading integration; LocalEvaluator keeps grading in-process.
     IAgentEvaluator evaluator = mode == "foundry"
         ? new FoundryEvals(new AIProjectClient(settings!.ProjectEndpoint, new AzureCliCredential()),
             settings.Model, FoundryEvals.Relevance, FoundryEvals.Coherence)
         : FinanceEvaluations.CreateLocalEvaluator();
     var evaluation = await build.Agent.EvaluateAsync([FinanceEvaluations.Query], evaluator,
         cancellationToken: deadline.Token);
+
+    // C. Both kinds of checks must pass. Store reproducible version/outcome evidence, not conversation text.
     var passed = checks.All(check => check.Passed) && evaluation.AllPassed;
     var dataset = Path.Combine(AppContext.BaseDirectory, "evaluation-cases.json");
     var report = new
@@ -52,6 +61,8 @@ try
         JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true }), deadline.Token);
     Console.WriteLine($"CONTRACTS: {checks.Count(check => check.Passed)}/{checks.Count}");
     Console.WriteLine($"MAF EVALUATION: {evaluation.Passed}/{evaluation.Total}; MODE: {mode}");
+
+    // The failing process exit lets automation reject a candidate even when inference completed.
     Console.WriteLine(passed ? "EVALUATION PASS" : "EVALUATION FAIL");
     return passed ? 0 : 1;
 }

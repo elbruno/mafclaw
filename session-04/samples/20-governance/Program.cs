@@ -1,17 +1,27 @@
-// Objective: show application policy before a side effect in plain C#.
-// A. Supply one allowed and one synthetically restricted request.
-// B. Enforce policy before changing state.
-// C. Verify that only the allowed request changed state.
-using MafClaw.Session04;
+// Objective: Sample 20 (plain C#) enforces a rule before a mock action, without an agent.
+// A. Prepare one ordinary note and one synthetic restricted note.
+// B. Check the rule before adding anything to the in-memory outbox.
+// C. Verify that the denied note never reached the outbox.
 
-var actions = 0;
-foreach (var request in new[] { "Explain the mock portfolio.", FinancePolicy.RestrictedMarker })
+// A. Nothing is sent anywhere. This small list makes the side effect visible to the audience.
+var outbox = new List<string>();
+var requests = new[] { "Welcome to the workshop.", "PRIVATE-DEMO: do not publish this synthetic note." };
+
+// B. The application owns this rule; it is not a system prompt or enterprise DLP product.
+foreach (var note in requests)
 {
-    var rule = FinancePolicy.GetBlockingRule(request);
-    if (rule is not null) { Console.WriteLine($"DENIED: {rule}; no action."); continue; }
-    actions++;
-    Console.WriteLine("ALLOWED: recorded a mock local action.");
+    if (note.Contains("PRIVATE-DEMO", StringComparison.OrdinalIgnoreCase))
+    {
+        Console.WriteLine("DENIED: synthetic restricted marker; no action.");
+        continue;
+    }
+
+    outbox.Add(note);
+    Console.WriteLine("ALLOWED: added one mock note to the local outbox.");
 }
-Console.WriteLine("This is a teaching rule, not Purview or a production DLP system.");
-Console.WriteLine(actions == 1 ? "GOVERNANCE PRIMITIVE PASS" : "GOVERNANCE PRIMITIVE FAIL");
-return actions == 1 ? 0 : 1;
+
+// C. Inspect state, not just a denial message. Sample 21 adds a real MAF approval pause.
+Console.WriteLine($"OUTBOX COUNT: {outbox.Count}. No message was sent.");
+var passed = outbox.Count == 1 && outbox[0] == requests[0];
+Console.WriteLine(passed ? "GOVERNANCE PRIMITIVE PASS" : "GOVERNANCE PRIMITIVE FAIL");
+return passed ? 0 : 1;

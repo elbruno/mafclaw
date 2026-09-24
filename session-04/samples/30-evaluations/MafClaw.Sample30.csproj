@@ -1,4 +1,3 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><OutputType>Exe</OutputType></PropertyGroup>
-  <ItemGroup><ProjectReference Include="..\..\code\Contracts\MafClaw.Session04.Contracts.csproj" /></ItemGroup>
 </Project>

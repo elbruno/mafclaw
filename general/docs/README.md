@@ -92,15 +92,20 @@ optional governance/evaluation services; its
 The repository includes a PowerShell setup script. Run from the **repository root**:
 
 ```powershell
-.\tools\configure-user-secrets.ps1 -Session 1
+.\tools\configure-user-secrets.ps1
 ```
 
 This script:
 
-- Prompts you interactively for Foundry project endpoint and model name.
+- Configures all sessions (1-4) and their cloud-backed projects by default.
+- Prompts once per unique setting, reusing the endpoint/model across projects.
+- Offers optional service settings; Enter skips them without clearing existing values.
 - Stores settings under keys `Foundry:ProjectEndpoint` and `Foundry:Model` in .NET user-secrets.
-- Never stores secrets in files or logs.
+- Never writes configured values to repository files or logs.
 - Works only for your current user on this machine.
+
+Use `-Session 1` (or another number) only when intentionally limiting the run
+to one session. `-Session All` is equivalent to the default.
 
 The `UserSecretsId` is committed to projects that need it. Session 1's
 checkpoints and finished sample share an ID. Other sessions can use separate
@@ -110,17 +115,20 @@ samples do not need credentials.
 **Preview mode** (run from the repository root):
 
 ```powershell
-.\tools\configure-user-secrets.ps1 -Session 1 -WhatIf
+.\tools\configure-user-secrets.ps1 -WhatIf
 ```
 
 **Environment variables** (alternative for CI or scripted use):
 
 ```powershell
 $env:FOUNDRY_PROJECT_ENDPOINT = "https://your-project.services.ai.azure.com/api/projects/your-project"
-$env:FOUNDRY_MODEL = "gpt-5-mini"
+$env:FOUNDRY_MODEL = "gpt-6-luna"
 ```
 
 **Clear session settings** (run from the repository root):
+
+Removal requires an explicit `-Session`; use `-Session All` only when you
+intend to remove the owned keys across all sessions.
 
 ```powershell
 .\tools\configure-user-secrets.ps1 -Session 1 -Clear
@@ -131,7 +139,7 @@ $env:FOUNDRY_MODEL = "gpt-5-mini"
 After running the setup script, check required key presence without displaying values:
 
 ```powershell
-.\tools\configure-user-secrets.ps1 -Session 1 -Check
+.\tools\configure-user-secrets.ps1 -Check
 ```
 
 ### How config is loaded
@@ -142,7 +150,7 @@ The earlier minimal hosts read user-secrets and environment variables directly:
 var config = new ConfigurationBuilder()
     .AddUserSecrets<Program>().AddEnvironmentVariables().Build();
 var endpoint = config["Foundry:ProjectEndpoint"]!;
-var model = config["Foundry:Model"] ?? "gpt-5-mini";
+var model = config["Foundry:Model"] ?? "gpt-6-luna";
 ```
 
 The live connection settings use user-secrets and environment variables,
@@ -193,7 +201,7 @@ Ensure you are targeting the correct tenant containing your Foundry project.
 
 **Fix:**
 
-- Confirm the model name in your user-secrets matches a deployed model in your Foundry project. Default is `gpt-5-mini`.
+- Confirm the model name in your user-secrets matches a deployed model in your Foundry project. Default is `gpt-6-luna`.
 - Check the Foundry portal to verify the deployment exists and your identity has access.
 - Do not share the error output — it may contain your project endpoint.
 

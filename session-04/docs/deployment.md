@@ -11,13 +11,28 @@ uses `AzureCliCredential` for development and is not the production entry point.
 
 ## Local protocol proof
 
+Sample 40 serves an ordinary `/message` greeting and `/readiness`, without a
+model. Sample 41 creates `HostedLessonAgent` in its own entry point, then
+registers `AddFoundryResponses` and `MapFoundryResponses` directly. It has no
+tools or final-app dependencies. Its self-test requires a completed greeting,
+not a portfolio value. The host owns history, so it does not add a second
+Harness history store.
+
+From either sample directory, `dotnet run` starts the teaching server. The
+flags below are for finite automated checks, not required for the on-air run.
+Sample 41 accepts the Responses HTTP protocol but uses Chat Completions for
+model inference; the two sides of that bridge are independent.
+
 ```powershell
 # From session-04, no model credentials:
 dotnet run --project .\samples\41-hosted-agent\MafClaw.Sample41.csproj -- --fixture --self-test
 dotnet run --project .\code\Hosted\MafClaw.Session04.Hosted.csproj -- --fixture --urls http://127.0.0.1:8088
 ```
 
-The server exposes the MAF Responses protocol and `/capabilities`; the SDK
+Without self-test mode, the introductory servers bind only to loopback ports
+5090 (40) and 5091 (41). They do not demonstrate production authentication.
+
+The complete `code\Hosted` server exposes the MAF Responses protocol and `/capabilities`; the SDK
 provides readiness checks. Local mode is unauthenticated development mode.
 Do not expose it directly to other users. The Foundry edge must authenticate
 production requests and provide the platform identity/session headers.

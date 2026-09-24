@@ -1,63 +1,50 @@
 # Session persistence
 
-Samples 60/61 teach conversation/session persistence: saving conversation
-state and resuming it later, without replaying every prior turn by hand.
-This is distinct from Session 2's **memory** samples
-(`FoundryMemoryProvider`, `FileMemoryProvider`, JSON tool memory), which are
-about *long-term recall across otherwise-unrelated sessions* (facts a user
-explicitly asked the agent to remember). Session persistence here is about
-*resuming the same conversation/thread itself* — the difference between "the
-agent remembers my name from last week" (memory) and "this is literally the
-same conversation, continued" (session persistence).
-
-## 60: what "session state" is, in plain C#
-
-`MafClaw.Sample60` has no model and no agent framework. It keeps an explicit,
-serializable list of turns (`Turn.cs`), writes it to a JSON file after every
-turn, and reloads it with `--resume`:
+From either `60-session-persistence` or `61-session-persistence-agent`, run:
 
 ```powershell
-dotnet run --project .\samples\60-session-persistence\MafClaw.Sample60.csproj
-dotnet run --project .\samples\60-session-persistence\MafClaw.Sample60.csproj -- --resume <path-from-previous-run>
-dotnet run --project .\samples\60-session-persistence\MafClaw.Sample60.csproj -- --self-test
+dotnet run
 ```
 
-`--self-test` runs two turns, reloads the transcript from disk (simulating a
-process restart), runs one more turn, and verifies the reloaded transcript
-kept counting from where it left off. Fully offline and deterministic.
+Each program saves two exchanges, restores state from JSON and continues the
+conversation in one invocation. No mode switches or save/resume arguments
+are needed. The printed file under `.local\sessions` stays available for the
+presenter to inspect; each run gets a unique filename.
 
-## 61: an actual MAF `AgentSession`
+## 60: plain C# transcript
 
-`MafClaw.Sample61` uses the Microsoft Agent Framework's own session
-persistence surface instead of a hand-rolled message list:
+The host owns a `List<Turn>`, saves it using `JsonSerializer`, reloads a fresh
+list and adds a third exchange. The assertion requires four messages before
+restore and six after continuing. Replies are clearly deterministic, with no
+model involved.
 
-- `agent.CreateSessionAsync()` creates an `AgentSession`.
-- `agent.SerializeSessionAsync(session)` returns a `JsonElement` you can
-  write anywhere (file, database, cache).
-- `agent.DeserializeSessionAsync(element)` restores an `AgentSession` that,
-  when reused, continues the same conversation — the harness/agent resends
-  the prior history to the model, so you never manually replay turns.
+## 61: MAF `AgentSession`
 
-```powershell
-dotnet run --project .\samples\61-session-persistence-agent\MafClaw.Sample61.csproj -- --fixture --self-test
-dotnet run --project .\samples\61-session-persistence-agent\MafClaw.Sample61.csproj -- --live --save <path>
-dotnet run --project .\samples\61-session-persistence-agent\MafClaw.Sample61.csproj -- --live --resume <path>
-```
+The entry point directly builds the Harness and demonstrates:
 
-The fixture's scripted replies are fixed text, so a passing run alone would
-not prove real persistence. `RecordingChatClient` wraps the chat client and
-records the exact messages sent to it; `--self-test` asserts that after
-`DeserializeSessionAsync`, the next model call actually included the earlier
-turns ("My name is Ada.", "I prefer email over calls.") — proving the
-restored session, not the scripted answer, carries the history forward.
+1. `CreateSessionAsync` creates a conversation.
+2. Two `RunAsync` calls establish a name and contact preference.
+3. `SerializeSessionAsync` produces the framework-owned JSON state.
+4. `DeserializeSessionAsync` restores a fresh session from disk.
+5. A third `RunAsync` continues that restored conversation.
 
-## Choosing between them
+`RecordingChatClient` observes the exact messages sent on the last model
+request. A PASS requires both earlier user facts in that outbound history;
+plausible prose alone does not prove session restoration.
 
-Use plain transcript persistence (60) when you own the full message loop and
-want simple, inspectable JSON. Use `AgentSession` persistence (61) once you
-are building on a MAF agent/harness: it also carries harness-owned state
-(todos, tool-approval state, context-provider state), not just chat history,
-and its serialized shape is provider-defined, so treat it as opaque and
-store it like any other application secret-adjacent data — see
-[Session | Microsoft Learn](https://learn.microsoft.com/en-us/agent-framework/concepts/agents/conversations/session)
-for the service-session-ID scoping caveats in hosted/multi-user apps.
+The cloud connection uses Chat Completions, leaving history with the Harness.
+It does not depend on the provider's Responses conversation store. The previous
+Responses path returned HTTP 500 on the configured deployment; the local
+session demonstration needs neither that endpoint nor server-side storage.
+
+`--fixture --self-test` is retained for automated offline checks. It scripts
+inference but exercises real serialization/restoration and deletes only its
+own temporary file. Normal `dotnet run` uses the configured live model.
+
+## Session state is not semantic memory
+
+This resumes the **same conversation**, unlike the Session 2 memory examples
+that recall selected facts across different conversations. The serialized
+MAF schema can include provider-owned state, so store it as opaque data rather
+than depending on its internal shape. Use synthetic facts on stream; never
+publish conversation files containing private data.

@@ -1,5 +1,8 @@
-// Objective: prove that a restored MAF AgentSession actually carries prior turns to the model.
-// A. Wrap the real chat client and remember exactly what messages it was asked to answer.
+// Objective: expose the outbound history used to verify Sample 61's restored MAF session.
+// A. Capture messages before delegating to either a scripted or live IChatClient.
+// B. Apply the same observation to streaming calls.
+// C. Forward service lookup and disposal to the wrapped client.
+
 using Microsoft.Extensions.AI;
 
 namespace MafClaw.Session04.Samples;
@@ -11,6 +14,7 @@ public sealed class RecordingChatClient(IChatClient inner) : IChatClient
     public Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> messages,
         ChatOptions? options = null, CancellationToken cancellationToken = default)
     {
+        // A. Capture the request, not the answer: this is what the persistence assertion inspects.
         LastMessages = messages.ToArray();
         return inner.GetResponseAsync(messages, options, cancellationToken);
     }
@@ -18,10 +22,12 @@ public sealed class RecordingChatClient(IChatClient inner) : IChatClient
     public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(IEnumerable<ChatMessage> messages,
         ChatOptions? options = null, CancellationToken cancellationToken = default)
     {
+        // B. Streaming changes response delivery, not what counts as evidence of sent history.
         LastMessages = messages.ToArray();
         return inner.GetStreamingResponseAsync(messages, options, cancellationToken);
     }
 
+    // C. Preserve the inner client's services and lifetime; the wrapper adds observation only.
     public object? GetService(Type serviceType, object? serviceKey = null) =>
         serviceKey is null && serviceType.IsInstanceOfType(this) ? this : inner.GetService(serviceType, serviceKey);
 

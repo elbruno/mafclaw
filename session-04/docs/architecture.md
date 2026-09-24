@@ -4,9 +4,13 @@ The complete app is the final composition in the teaching sequence.
 MCP 50/51, session persistence 60/61 and Foundry Local 70/71 are separate
 audience-follow-up samples; they are not registered in `FinanceAgentFactory`.
 
-`FinanceAgentFactory` builds one set of business instructions, mock tools and
-named providers. `Contracts` contains plain-C# fixtures so the primitive samples
-do not acquire a hidden MAF dependency.
+All numbered samples are independent of the complete app: none references
+`code` projects. They construct the relevant SDK agent/Harness directly;
+`samples\Support` supplies only non-domain chat, fixture and output helpers.
+
+For the final reveal, `FinanceAgentFactory` builds one set of business
+instructions, mock tools and named providers. `Contracts` contains the final
+app's plain-C# financial fixtures, not prerequisites for the teaching samples.
 
 The local profile uses `AsHarnessAgent`: planning, actual file tools, a named
 `FileMemoryProvider`, skills, bounded shell/Hyperlight and background research.

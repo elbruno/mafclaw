@@ -6,13 +6,16 @@ approved Azure sign-in. PowerShell 7 is required for the setup scripts and
 the optional local shell capability. Hyperlight additionally needs supported
 local virtualization; never substitute an unsandboxed interpreter silently.
 
-From the repository root:
+From the repository root, configure all sessions in one run:
 
 ```powershell
-.\tools\configure-user-secrets.ps1 -Session 4 -WhatIf
-.\tools\configure-user-secrets.ps1 -Session 4
-.\tools\configure-user-secrets.ps1 -Session 4 -Check
+.\tools\configure-user-secrets.ps1 -WhatIf
+.\tools\configure-user-secrets.ps1
+.\tools\configure-user-secrets.ps1 -Check
 ```
+
+Add `-Session 4` only to limit setup or checks to Session 4. The default is
+all sessions; each unique setting is collected once and reused across projects.
 
 The cloud-backed Session 4 agent projects share the non-secret `UserSecretsId`
 `mafclaw-session-04`. Values are not committed or printed. Set only the
@@ -30,6 +33,15 @@ features you intend to use:
 | `Foundry:MemoryScope` / `FOUNDRY_MEMORY_SCOPE` | Required unique opaque current-user scope from trusted configuration, never model input |
 
 Local file memory does not require Foundry Memory or embedding settings.
+The memory, shell and Hyperlight settings/capabilities below belong to the
+complete app. Generic numbered samples do not instantiate those final-app
+providers. Sample 22 alone opts into Purview screening; Sample 11 displays
+local SDK spans and does not consume the OTLP exporter setting.
+Sample 12 exports all three signals to the standalone Aspire dashboard:
+run `aspire dashboard run` in a separate terminal, open its printed login URL,
+then `dotnet run` in `samples\12-observability-aspire`. It defaults to
+loopback OTLP/HTTP port 4318; only a local port override uses the
+`OTEL_EXPORTER_OTLP_ENDPOINT` environment variable. No Docker or AppHost is needed.
 Managed memory binds its configured current-user scope at startup and uses only explicit
 `Remember ...` requests; the app does not create a cloud memory store.
 Purview/managed-memory configuration must be provisioned and authorized separately.
@@ -53,7 +65,7 @@ dotnet run --project .\code\Evals\MafClaw.Session04.Evals.csproj -- --mode fixtu
 .\scripts\verify-session.ps1 -Mode Offline
 ```
 
-The solution includes all sixteen numbered samples, including 50/51, 60/61
+The solution includes all seventeen numbered samples, including 12, 50/51, 60/61
 and 70/71. Foundry Local projects currently target Windows x64. See the
 [sample ladder](../samples/README.md) for each independent run command.
 

@@ -6,14 +6,22 @@ evaluation, hosting and operations follow. Show each plain-C# primitive before
 its MAF bridge. Reveal the complete finance app and shared definition at the
 end; the small samples keep the individual concepts explainable.
 
-MCP 50/51, persistence 60/61 and Foundry Local 70/71 are standalone follow-ups,
-not new integrations in `FinanceAgentFactory`.
+For live code walkthroughs, read each entry point's purpose and A/B/C header
+before scrolling to its matching block comments. Pause at the observable result
+and name what MAF/Harness supplied at each framework boundary. See the
+[sample reading guide](../samples/README.md#reading-the-code-on-stream) and
+[teaching-first contribution rules](../../CONTRIBUTING.md#teaching-first-sample-code).
+
+Every numbered sample is generic and independent of the final application.
+Agent/Harness construction is visible in the sample entry point; shared
+`samples\Support` helpers only handle model connection, fixtures and output.
+There are no project references from the samples to `code`.
 
 | Topic | Guide |
 |---|---|
 | SDK, configuration and run commands | [Setup](setup.md) |
 | Factory, lifetimes and host capability differences | [Architecture](architecture.md) |
-| Actual traces, metrics, privacy and OTLP | [Observability](observability.md) |
+| Actual traces, metrics, correlated logs, Aspire (Sample 12), privacy and OTLP | [Observability](observability.md) |
 | Authorization, approval and optional Purview | [Governance](governance.md) |
 | Deterministic contracts, actual MAF evals and optional remote grading | [Evaluations](evaluations.md) |
 | Container/bundled deployment and identity gates | [Deployment](deployment.md) |

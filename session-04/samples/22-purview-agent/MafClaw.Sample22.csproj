@@ -1,4 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><OutputType>Exe</OutputType><UserSecretsId>mafclaw-session-04</UserSecretsId></PropertyGroup>
-  <ItemGroup><ProjectReference Include="..\..\code\Agent\MafClaw.Session04.Agent.csproj" /></ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Support\MafClaw.SampleSupport.csproj" />
+    <PackageReference Include="Microsoft.Agents.AI.Purview" Version="1.21.0-rc1" />
+  </ItemGroup>
 </Project>

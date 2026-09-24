@@ -51,6 +51,20 @@ All financial examples are mock and educational, not financial advice.
 - **Azure CLI** — https://learn.microsoft.com/cli/azure/install-azure-cli
 - **PowerShell 7+** — for configuration scripts
 
+### Configure all sessions
+
+From the repository root, the no-argument command configures every session's
+cloud-backed projects, asking once per unique setting:
+
+```powershell
+.\tools\configure-user-secrets.ps1
+.\tools\configure-user-secrets.ps1 -Check
+```
+
+Optional service settings can be skipped with Enter. Use `-Session 1`, `2`,
+`3`, or `4` only for targeted setup, as in the individual quick starts below.
+Offline-only projects do not need secrets.
+
 ### Quick start (Session 1)
 
 ```powershell

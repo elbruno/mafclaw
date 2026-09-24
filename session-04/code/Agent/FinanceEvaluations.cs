@@ -1,7 +1,8 @@
 // Objective: use the published MAF evaluator API on actual agent conversations.
-// A. Check exact numeric answers and an actual valuation tool result.
-// B. Keep local grading separate from the cost of live inference.
-// C. Add Foundry model grading only through its explicit evaluator.
+// A. Define local checks for the answer and its mock-data disclaimer.
+// B. Require an actual valuation tool result in the conversation.
+// C. Normalize typed/JSON tool results before checking exact decimals.
+
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.Agents.AI;
@@ -13,18 +14,23 @@ public static class FinanceEvaluations
 {
     public const string Query = "Use value_portfolio to give the fixed snapshot total and Technology percentage. State the mock-data disclaimer.";
 
+    // A. MAF's LocalEvaluator combines FunctionEvaluator checks; the host need not aggregate scores.
+    // These are local predicates even when the conversation came from a chargeable live model.
     public static LocalEvaluator CreateLocalEvaluator() => new(
         FunctionEvaluator.Create("exact_snapshot", (EvalItem item) =>
             Regex.IsMatch(item.Response, @"(?<![\d.])(?:27,124\.95|27124\.95)(?!\d)") &&
             Regex.IsMatch(item.Response, @"(?<![\d.])66\.01(?!\d)")),
         FunctionEvaluator.Create("mock_disclaimer", (EvalItem item) =>
             item.Response.Contains("mock", StringComparison.OrdinalIgnoreCase)),
+
+        // B. Correct prose alone can be guessed; require the structured tool receipt as well.
         FunctionEvaluator.Create("actual_valuation_tool", (EvalItem item) =>
             item.Conversation.SelectMany(message => message.Contents)
                 .OfType<FunctionResultContent>().Any(result => HasExactSnapshot(result.Result))));
 
     private static bool HasExactSnapshot(object? result)
     {
+        // C. A tool result may arrive as a CLR value or JSON; check its numbers, not a text substring.
         if (result is PortfolioSummary summary)
             return summary.Total == 27124.95m && summary.TechnologyPercent == 66.01m;
         var element = JsonSerializer.SerializeToElement(result);

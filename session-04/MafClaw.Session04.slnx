@@ -22,6 +22,9 @@
   <Folder Name="/samples/11-observability-agent/">
     <Project Path="samples/11-observability-agent/MafClaw.Sample11.csproj" />
   </Folder>
+  <Folder Name="/samples/12-observability-aspire/">
+    <Project Path="samples/12-observability-aspire/MafClaw.Sample12.csproj" />
+  </Folder>
   <Folder Name="/samples/20-governance/">
     <Project Path="samples/20-governance/MafClaw.Sample20.csproj" />
   </Folder>
@@ -63,6 +66,9 @@
   </Folder>
   <Folder Name="/samples/71-foundry-local-agent/">
     <Project Path="samples/71-foundry-local-agent/MafClaw.Sample71.csproj" />
+  </Folder>
+  <Folder Name="/samples/Support/">
+    <Project Path="samples/Support/MafClaw.SampleSupport.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/MafClaw.Session04.Tests.csproj" />

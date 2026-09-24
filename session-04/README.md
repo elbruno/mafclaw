@@ -11,7 +11,7 @@ follow-ups, then the operational lessons, and ends with the complete finance app
 The package contains real implementations, replacing the old .NET 9 placeholder:
 
 - `code`: shared finance contracts/factory plus console, evaluation and Responses hosts.
-- `samples`: seven plain-C# / MAF pairs and two conditional service integrations.
+- `samples`: seven plain-C# / MAF pairs, an Aspire observability variant, and two conditional service integrations.
 - `docs`: setup, MCP tools, session persistence, Foundry Local, architecture,
   telemetry, policy, evaluations, deployment and operations.
 - `tests`, `evals`, `observability`, `scripts`: executable evidence and operating assets.
@@ -31,6 +31,28 @@ These are independently runnable teaching samples, not additional capabilities
 of `FinanceAgentFactory`. The complete finance app composes the earlier
 session features and Session 4 operational controls at the end of the lesson.
 The [sample ladder](samples/README.md) contains every run command.
+
+**For the live walkthrough:** run `.\tools\configure-user-secrets.ps1` once
+from the repository root, then enter a numbered sample folder and use
+`dotnet run`. No `--live` or save/resume arguments are needed. Samples 60/61
+show the entire persistence flow in one run. Samples 70/71 use local models
+and need no cloud settings; pre-cache them before streaming.
+For [Sample 12](samples/12-observability-aspire/README.md), first start
+`aspire dashboard run` in another terminal. Then `dotnet run` exports the
+generic agent's traces, metrics and structured logs to the local dashboard.
+
+## Generic teaching samples first; financial app last
+
+Every numbered sample is independent of the final app's projects and builds
+its own relevant MAF/Harness integration. The walkthroughs use tiny generic
+examples: a lesson-topic tool for observability, a mock outbox for approval,
+`2 + 3` for evaluation, and a greeting for hosting. MCP, persistence and local
+inference also have no financial-app dependencies. The cumulative financial
+application remains in `code` for the final reveal.
+
+The published v04 slides predate these generic sample rewrites. Use the
+current source and guides for the revised demos; slide regeneration is
+deferred until the sample review is complete.
 
 ## Run without credentials
 

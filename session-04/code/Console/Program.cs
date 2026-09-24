@@ -1,16 +1,20 @@
-// Objective: run the cumulative agent interactively or demonstrate an explicit fixture.
+// Objective: present the complete Session 4 finance agent through its interactive console host.
 // A. Select live/fixture behavior and optional local capabilities.
 // B. Build the shared agent and configure non-sensitive telemetry.
 // C. Run the console, then release sessions and providers.
+
 using MafClaw.Session04;
 
 try
 {
+    // A. No flag means live inference. --fixture is explicit, not a fallback for missing secrets.
     var fixture = args.Contains("--fixture");
     var allowed = new[] { "--fixture", "--no-shell", "--no-codeact", "--trace" };
     if (args.Any(argument => !allowed.Contains(argument)))
         throw new FinanceConfigurationException("Usage: [--fixture] [--no-shell] [--no-codeact] [--trace]");
     var settings = fixture ? null : FinanceSettings.Load();
+
+    // B. The host chooses exporters and authority; FinanceAgentFactory owns the shared definition.
     using var telemetry = new FinanceTelemetry(settings?.OtlpEndpoint ?? FinanceSettings.LoadTelemetryEndpoint(),
         console: args.Contains("--trace"));
     await using var build = await FinanceAgentFactory.CreateAsync(new FinanceAgentOptions
@@ -20,6 +24,9 @@ try
         EnableShell = !args.Contains("--no-shell"), EnableCodeAct = !args.Contains("--no-codeact"),
         EnableResearch = !fixture
     });
+
+    // C. FinanceConsole supplies the human approval UI; MAF supplies the session and tool loop.
+    // Keep this entry point on screen first, then reveal the factory during the final-app segment.
     Console.WriteLine(fixture ? "FIXTURE: scripted inference, actual MAF tool execution. Ask for the portfolio once."
         : "LIVE: cumulative MAF finance advisor. CodeAct requires approval; shell is not an OS sandbox.");
     await FinanceConsole.RunAsync(build);

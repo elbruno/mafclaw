@@ -5,6 +5,12 @@ using MafClaw.Session04.Tests;
 
 try
 {
+    if (args.SequenceEqual(["--sample12"]))
+    {
+        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(90));
+        await AspireTelemetryChecks.RunAsync(deadline.Token);
+        return 0;
+    }
     var count = await Session04Tests.RunAsync();
     Console.WriteLine($"SESSION04 TESTS PASS: {count} checks. No model/service calls.");
     return 0;

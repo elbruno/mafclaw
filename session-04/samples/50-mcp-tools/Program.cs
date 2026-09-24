@@ -1,13 +1,15 @@
-// Objective: show the raw MCP client protocol before any agent wraps it.
+// Objective: Sample 50 (plain C#) discovers and calls MCP tools without a model or agent.
 // A. Connect to a real public MCP server over Streamable HTTP.
 // B. List the tools it exposes.
 // C. Call one tool directly and print its raw structured result.
+
 using System.Text.Json;
 using ModelContextProtocol.Client;
 
 const string Endpoint = "https://learn.microsoft.com/api/mcp";
 const string Query = "What's new in .NET 10?";
 
+// Describe-only stays offline. Even without a model, the live MCP path needs network access.
 if (args.Length == 1 && args[0] == "--describe")
 {
     Console.WriteLine($"MCP DESCRIBE: would connect to {Endpoint} (Streamable HTTP, no auth), list its tools, " +
@@ -18,9 +20,11 @@ if (args.Length == 1 && args[0] == "--describe")
 
 try
 {
-    if (args.Length != 1 || args[0] != "--live")
-        throw new InvalidOperationException("Usage: --describe | --live");
+    if (args.Length > 1 || (args.Length == 1 && args[0] != "--live"))
+        throw new InvalidOperationException("Run with dotnet run. Offline preview: --describe.");
 
+    // A. ModelContextProtocol.Client supplies Streamable HTTP and the protocol handshake,
+    // so the sample does not hand-build JSON-RPC requests or manage protocol negotiation.
     using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(30));
     var transport = new HttpClientTransport(new HttpClientTransportOptions
     {
@@ -32,6 +36,7 @@ try
     // McpClient.CreateAsync performs the real MCP initialize handshake over HTTP.
     await using var client = await McpClient.CreateAsync(transport, cancellationToken: deadline.Token);
 
+    // B. Discover the server's actual tools rather than assuming a locally defined function.
     var tools = await client.ListToolsAsync(cancellationToken: deadline.Token);
     Console.WriteLine($"Discovered {tools.Count} tool(s) on {Endpoint}:");
     foreach (var tool in tools) Console.WriteLine($"  - {tool.Name}: {tool.Description}");
@@ -39,13 +44,15 @@ try
     var searchTool = tools.FirstOrDefault(tool => tool.Name == "microsoft_docs_search")
         ?? throw new InvalidOperationException("microsoft_docs_search was not offered by this server.");
 
-    // A direct CallToolAsync bypasses any model; this is the same call an agent's function-invocation loop makes.
+    // C. The application chooses the tool and its arguments; in Sample 51 an agent takes that role.
+    // A direct CallToolAsync bypasses inference but still sends a real request to Microsoft Learn.
     var result = await client.CallToolAsync(searchTool.Name,
         new Dictionary<string, object?> { ["query"] = Query }, cancellationToken: deadline.Token);
 
     Console.WriteLine($"RAW TOOL RESULT for \"{Query}\":");
     foreach (var content in result.Content) Console.WriteLine(JsonSerializer.Serialize(content));
 
+    // A result must contain content and not carry the MCP error flag to pass.
     var passed = result.Content.Count > 0 && result.IsError != true;
     Console.WriteLine(passed ? "MCP CLIENT PASS" : "MCP CLIENT FAIL");
     return passed ? 0 : 1;

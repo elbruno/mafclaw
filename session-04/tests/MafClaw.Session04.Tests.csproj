@@ -3,5 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\code\Agent\MafClaw.Session04.Agent.csproj" />
     <ProjectReference Include="..\code\Hosted\MafClaw.Session04.Hosted.csproj" />
+    <ProjectReference Include="..\samples\Support\MafClaw.SampleSupport.csproj" />
+    <ProjectReference Include="..\samples\12-observability-aspire\MafClaw.Sample12.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

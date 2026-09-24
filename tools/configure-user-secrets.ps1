@@ -4,7 +4,8 @@
 
 .DESCRIPTION
     The single entry point for setting up .NET user-secrets across all MafClaw
-    session sample projects. Discovers the session's configured .csproj files,
+    session sample projects. By default, configures every session and prompts
+    only once per unique setting. Discovers each session's configured .csproj files,
     runs dotnet user-secrets init when a UserSecretsId is absent, and
     stores the required settings without ever printing configured values.
 
@@ -20,7 +21,8 @@
     user-secrets store. All other keys in the store are untouched.
 
 .PARAMETER Session
-    Session to configure: 1, 2, 3, 4, or All. Defaults to 1.
+    Session to configure: 1, 2, 3, 4, or All. Defaults to All.
+    Use an explicit session number to limit setup or checks to that session.
 
 .PARAMETER ProjectPath
     Overrides automatic project discovery with an explicit .csproj path.
@@ -46,11 +48,16 @@
 
 .PARAMETER Clear
     Removes only MafClaw-owned keys for the selected session. Safe to combine with
-    -WhatIf to preview which keys would be removed.
+    -WhatIf to preview which keys would be removed. Requires an explicit -Session
+    selection (including All) so the broader setup default cannot broaden deletion.
 
 .PARAMETER Check
     Reports whether required and optional keys are configured, without displaying
     values or writing settings. Missing required configuration fails the check.
+
+.EXAMPLE
+    # Configure all sessions, collecting each unique setting once.
+    .\tools\configure-user-secrets.ps1
 
 .EXAMPLE
     .\tools\configure-user-secrets.ps1 -Session 1
@@ -76,7 +83,7 @@
 [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
 param (
     [ValidateSet('1', '2', '3', '4', 'All')]
-    [string] $Session = '1',
+    [string] $Session = 'All',
 
     [string] $ProjectPath,
 
@@ -101,6 +108,9 @@ param (
 Set-StrictMode -Version 3
 $ErrorActionPreference = 'Stop'
 if ($Clear -and $Check) { throw '-Clear and -Check cannot be combined.' }
+if ($Clear -and -not $PSBoundParameters.ContainsKey('Session')) {
+    throw '-Clear requires an explicit -Session (1, 2, 3, 4, or All).'
+}
 if ($ProjectPath -and $Session -eq 'All') { throw '-ProjectPath requires one explicit session.' }
 
 # ---------------------------------------------------------------------------
@@ -190,6 +200,7 @@ $script:SessionMap = [ordered]@{
             'code\Evals\MafClaw.Session04.Evals.csproj'
             'code\Hosted\MafClaw.Session04.Hosted.csproj'
             'samples\11-observability-agent\MafClaw.Sample11.csproj'
+            'samples\12-observability-aspire\MafClaw.Sample12.csproj'
             'samples\21-governance-agent\MafClaw.Sample21.csproj'
             'samples\22-purview-agent\MafClaw.Sample22.csproj'
             'samples\31-evaluations-agent\MafClaw.Sample31.csproj'

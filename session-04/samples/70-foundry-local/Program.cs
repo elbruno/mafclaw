@@ -1,95 +1,62 @@
-// Objective: run one real on-device chat completion with Foundry Local, no cloud endpoint at all.
-// A. Start (or attach to) the local Foundry Local runtime and open its model catalog.
-// B. Ensure a small chat model is downloaded and loaded, then start its OpenAI-compatible web service.
-// C. Call it with the real, official OpenAI SDK against http://127.0.0.1 and print the on-device answer.
-using System.ClientModel;
-using System.Net;
-using System.Net.Sockets;
+// Objective: Sample 70 (plain C#, no MAF) calls a local model with dotnet run.
+// A. Start Foundry Local in-process and select a small model.
+// B. Download it only if missing, then load it.
+// C. Ask one question through the native SDK and unload the model.
+
 using Microsoft.AI.Foundry.Local;
 using Microsoft.Extensions.Logging.Abstractions;
-using OpenAI;
 
-const string Alias = "phi-4-mini"; // small, tool-capable chat model; ~3.6 GB once cached
-const string Question = "In one sentence, what is Retrieval-Augmented Generation?";
-
-if (args.Length == 1 && args[0] == "--describe")
+if (args.SequenceEqual(["--describe"]))
 {
-    Console.WriteLine($"FOUNDRY LOCAL DESCRIBE: would start the Foundry Local runtime, resolve model \"{Alias}\" " +
-        "from its catalog, download/load it if needed, start its local OpenAI-compatible web service, then call " +
-        $"it with the official OpenAI SDK to ask \"{Question}\". Everything runs on this machine; no cloud endpoint is used.");
+    Console.WriteLine("FOUNDRY LOCAL DESCRIBE: qwen2.5-0.5b, in-process SDK, no cloud credentials or HTTP server.");
     Console.WriteLine("No model was downloaded, loaded, or run.");
     return 2;
 }
 
 try
 {
-    if (args.Length != 1 || args[0] != "--live")
-        throw new InvalidOperationException("Usage: --describe | --live");
-
+    if (args.Length > 1 || (args.Length == 1 && args[0] != "--live"))
+        throw new InvalidOperationException("Run with dotnet run. Offline preview: --describe.");
     using var deadline = new CancellationTokenSource(TimeSpan.FromMinutes(10));
 
-    // FoundryLocalManager.CreateAsync starts (or attaches to) the native Foundry Local runtime in-process.
-    var configuration = new Configuration
-    {
-        AppName = "MafClaw.Sample70",
-        Web = new Configuration.WebService { Urls = $"http://127.0.0.1:{FindFreePort()}" }
-    };
-    await FoundryLocalManager.CreateAsync(configuration, NullLogger.Instance, deadline.Token);
+    // A. Microsoft.AI.Foundry.Local owns the native runtime; no REST server or port is needed.
+    await FoundryLocalManager.CreateAsync(new Configuration { AppName = "ElBruno_MAF_FoundryLocal" },
+        NullLogger.Instance, deadline.Token);
     var manager = FoundryLocalManager.Instance;
-
     var catalog = await manager.GetCatalogAsync(deadline.Token);
-    var model = await catalog.GetModelAsync(Alias, deadline.Token)
-        ?? throw new InvalidOperationException($"Model \"{Alias}\" was not found in the Foundry Local catalog.");
+    var model = await catalog.GetModelAsync("qwen2.5-0.5b", deadline.Token)
+        ?? throw new InvalidOperationException("qwen2.5-0.5b was not found in the local model catalog.");
+
+    // B. Cache this model once; Sample 71 downloads its own larger, tool-capable model.
     if (!await model.IsCachedAsync(deadline.Token))
     {
-        Console.WriteLine($"Downloading {Alias} (first run only)...");
+        Console.WriteLine("Downloading qwen2.5-0.5b (about 528 MB, first run only)...");
         await model.DownloadAsync(progress => Console.Write($"\r  {progress:F0}%   "), deadline.Token);
         Console.WriteLine();
     }
-    if (!await model.IsLoadedAsync(deadline.Token))
+    await model.LoadAsync(deadline.Token);
+    try
     {
-        Console.WriteLine($"Loading {Alias} into the local runtime...");
-        await model.LoadAsync(deadline.Token);
+        // C. This is the raw SDK client. Sample 71 adapts the same local engine to MAF's IChatClient.
+        using var session = new ChatSession(model);
+        session.SetOptions(new RequestOptions { Search = new SearchOptions { MaxOutputTokens = 128 } });
+        using var request = new Request();
+        request.AddItem(MessageItem.User("Explain local AI in one short sentence."));
+        using var response = await session.ProcessRequestAsync(request, deadline.Token);
+        var answer = string.Concat(response.OfType<MessageItem>().Select(message => message.GetSimpleText()));
+        Console.WriteLine($"ON-DEVICE ANSWER: {answer}");
+        var passed = !string.IsNullOrWhiteSpace(answer);
+        Console.WriteLine(passed ? "FOUNDRY LOCAL CLIENT PASS" : "FOUNDRY LOCAL CLIENT FAIL: no completed answer.");
+        return passed ? 0 : 1;
     }
-
-    await manager.StartWebServiceAsync(deadline.Token);
-    var baseUrl = manager.Urls?.FirstOrDefault()
-        ?? throw new InvalidOperationException("Foundry Local did not report a bound web service URL.");
-    Console.WriteLine($"Foundry Local web service ready at {baseUrl}");
-
-    // The official OpenAI SDK talks to the local, OpenAI-compatible endpoint; no API key is actually checked.
-    var client = new OpenAIClient(new ApiKeyCredential("not-needed"),
-        new OpenAIClientOptions { Endpoint = new Uri($"{baseUrl}/v1") });
-    var chatClient = client.GetChatClient(model.Id);
-
-    Console.WriteLine($"Asking {Alias}: {Question}");
-    var completion = (await chatClient.CompleteChatAsync(
-        [new OpenAI.Chat.UserChatMessage(Question)], cancellationToken: deadline.Token)).Value;
-    var answer = string.Concat(completion.Content.Select(part => part.Text));
-    Console.WriteLine($"ON-DEVICE ANSWER: {answer}");
-
-    // Best-effort teardown: a benign "session still in use" race while HTTP keep-alive winds down must not
-    // override a completion that already succeeded, so cleanup failures are logged, not thrown.
-    try { await model.UnloadAsync(deadline.Token); }
-    catch (Exception cleanupException) { Console.Error.WriteLine($"(non-fatal) model unload: {cleanupException.GetType().Name}"); }
-    try { await manager.StopWebServiceAsync(deadline.Token); manager.Shutdown(); }
-    catch (Exception cleanupException) { Console.Error.WriteLine($"(non-fatal) web service shutdown: {cleanupException.GetType().Name}"); }
-
-    var passed = !string.IsNullOrWhiteSpace(answer);
-    Console.WriteLine(passed ? "FOUNDRY LOCAL CLIENT PASS" : "FOUNDRY LOCAL CLIENT FAIL");
-    return passed ? 0 : 1;
+    finally
+    {
+        await model.UnloadAsync();
+        manager.Shutdown();
+    }
 }
 catch (Exception exception)
 {
-    Console.Error.WriteLine($"Foundry Local client failed: {exception.GetType().Name}: {exception.Message}");
+    Console.Error.WriteLine($"Foundry Local failed: {exception.GetType().Name}. Check the native runtime and model availability.");
     return 1;
-}
-
-static int FindFreePort()
-{
-    using var listener = new TcpListener(IPAddress.Loopback, 0);
-    listener.Start();
-    var port = ((IPEndPoint)listener.LocalEndpoint).Port;
-    listener.Stop();
-    return port;
 }

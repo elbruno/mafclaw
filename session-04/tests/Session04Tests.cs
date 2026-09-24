@@ -2,6 +2,7 @@
 // A. Run the versioned synthetic contracts.
 // B. Exercise actual tool approval, memory confinement, telemetry and cancellation.
 // C. Start the real Responses host on an ephemeral loopback port.
+
 using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -27,7 +28,10 @@ internal static class Session04Tests
 
     public static async Task<int> RunAsync()
     {
+        // Keep generic teaching samples independently runnable before the final financial-app reveal.
+        SampleBoundaryChecks.Run();
         using var deadline = new CancellationTokenSource(TimeSpan.FromMinutes(3));
+        await CheckSampleDiagnosticsAsync(deadline.Token);
         foreach (var result in await FinanceContractChecks.RunAsync(cancellationToken: deadline.Token))
             Check(result.Passed, result.Id);
         Check(MockPortfolio.Summarize([new("ROUND", 1, 1.005m, "Other")]).Total == 1.01m, "Decimal rounding.");
@@ -40,6 +44,40 @@ internal static class Session04Tests
         await CheckOtlpAsync(deadline.Token);
         await CheckHostedAsync(deadline.Token);
         return count;
+    }
+
+    private static async Task CheckSampleDiagnosticsAsync(CancellationToken cancellationToken)
+    {
+        // Produce a real SDK exception locally, without credentials or a cloud request.
+        var builder = WebApplication.CreateBuilder();
+        builder.Logging.ClearProviders();
+        await using var app = builder.Build();
+        app.Urls.Add("http://127.0.0.1:0");
+        app.MapPost("/chat/completions", () => Results.Json(
+            new { error = new { message = "Synthetic private endpoint and provider payload.", type = "invalid_request_error" } },
+            statusCode: 400));
+        await app.StartAsync(cancellationToken);
+        var client = new OpenAI.Chat.ChatClient("synthetic-model", new System.ClientModel.ApiKeyCredential("synthetic"),
+            new OpenAI.OpenAIClientOptions { Endpoint = new Uri(app.Urls.Single()) });
+        var original = Console.Error;
+        using var output = new StringWriter();
+        try
+        {
+            await client.CompleteChatAsync([new OpenAI.Chat.UserChatMessage("Hello.")], cancellationToken: cancellationToken);
+            throw new InvalidOperationException("The synthetic provider must return HTTP 400.");
+        }
+        catch (System.ClientModel.ClientResultException exception)
+        {
+            Console.SetError(output);
+            var result = MafClaw.Samples.DemoOutput.Report(exception);
+            Check(result == 1 && output.ToString().Contains("HTTP 400"), "Sample diagnostics expose the HTTP status.");
+            Check(!output.ToString().Contains("Synthetic private"), "Sample diagnostics do not disclose raw provider messages.");
+        }
+        finally
+        {
+            Console.SetError(original);
+            await app.StopAsync(cancellationToken);
+        }
     }
 
     private static async Task CheckApprovalAsync(bool approved, CancellationToken cancellationToken)

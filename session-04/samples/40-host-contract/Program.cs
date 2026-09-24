@@ -1,26 +1,35 @@
-// Objective: teach a real HTTP lifecycle using plain C# and ASP.NET.
-// A. Expose readiness and a synthetic read-only portfolio endpoint.
-// B. Optionally start on a free loopback port and make a real request.
-// C. Verify the response and stop the server.
+// Objective: Sample 40 (plain C#/ASP.NET) introduces an HTTP lifecycle before agent hosting.
+// A. Map two tiny read-only endpoints.
+// B. Start a loopback server and optionally make a real self-test request.
+// C. Inspect the JSON response, stop the server and report the result.
+
 using System.Net.Http.Json;
-using MafClaw.Session04;
+using System.Text.Json;
 
 try
 {
+    if (args.Length > 1 || (args.Length == 1 && args[0] != "--self-test"))
+        throw new InvalidOperationException("Usage: [--self-test]");
     var selfTest = args.Contains("--self-test");
-    var builder = WebApplication.CreateBuilder(args.Where(argument => argument != "--self-test").ToArray());
+
+    // A. These are ordinary HTTP routes: no model, agent or SDK protocol is involved yet.
+    var builder = WebApplication.CreateBuilder();
     await using var app = builder.Build();
     app.MapGet("/readiness", () => Results.Ok(new { ready = true }));
-    app.MapGet("/portfolio", () => MockPortfolio.Summarize());
-    if (!selfTest) { await app.RunAsync(); return 0; }
+    app.MapGet("/message", () => new { message = "Hello from plain HTTP." });
+
+    // B. This unauthenticated teaching server stays on loopback; it is not a public deployment.
     app.Urls.Clear();
-    app.Urls.Add("http://127.0.0.1:0");
+    app.Urls.Add(selfTest ? "http://127.0.0.1:0" : "http://127.0.0.1:5090");
+    if (!selfTest) { await app.RunAsync(); return 0; }
     using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(30));
     await app.StartAsync(deadline.Token);
     using var http = new HttpClient { BaseAddress = new Uri(app.Urls.Single()) };
-    var result = await http.GetFromJsonAsync<PortfolioSummary>("/portfolio", deadline.Token);
+    var result = await http.GetFromJsonAsync<JsonElement>("/message", deadline.Token);
+
+    // C. A listening port is not enough: require the expected payload from the real HTTP call.
+    var passed = result.GetProperty("message").GetString() == "Hello from plain HTTP.";
     await app.StopAsync(deadline.Token);
-    var passed = result?.Total == 27124.95m;
     Console.WriteLine(passed ? "HOST CONTRACT PASS" : "HOST CONTRACT FAIL");
     return passed ? 0 : 1;
 }

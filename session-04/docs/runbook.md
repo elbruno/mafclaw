@@ -16,6 +16,12 @@ its workers within the request and is not durable background processing.
 
 ## On failure
 
+For Sample 12, start `aspire dashboard run` before `dotnet run`. Its UI uses
+18888, but OTLP/HTTP uses 4318. Check `mafclaw-sample12` in Traces, Metrics
+and Structured logs; a model answer is not proof of export. A stale
+`OTEL_EXPORTER_OTLP_ENDPOINT` environment override must match the local
+HTTP collector, not the browser. See the [sample runbook](../samples/12-observability-aspire/README.md#troubleshooting-and-automated-checks).
+
 Stop the failed demonstration, preserve a safe result record and switch to the
 explicit fixture/previously reviewed evidence. Never describe a fixture as live,
 an HTTP 200 as completed work, or a missing service as a successful policy test.
