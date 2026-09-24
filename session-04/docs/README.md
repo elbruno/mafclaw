@@ -1,8 +1,13 @@
 # Session 4 documentation
 
-The teaching sequence is one shared agent definition followed by observability,
-governance, evaluation and deployment. Show each primitive before its MAF bridge.
-The final app composes the capabilities; the small samples keep them explainable.
+The teaching sequence starts with a recap, then the audience-requested MCP,
+session-persistence and Foundry Local samples. Observability, governance,
+evaluation, hosting and operations follow. Show each plain-C# primitive before
+its MAF bridge. Reveal the complete finance app and shared definition at the
+end; the small samples keep the individual concepts explainable.
+
+MCP 50/51, persistence 60/61 and Foundry Local 70/71 are standalone follow-ups,
+not new integrations in `FinanceAgentFactory`.
 
 | Topic | Guide |
 |---|---|
@@ -12,6 +17,9 @@ The final app composes the capabilities; the small samples keep them explainable
 | Authorization, approval and optional Purview | [Governance](governance.md) |
 | Deterministic contracts, actual MAF evals and optional remote grading | [Evaluations](evaluations.md) |
 | Container/bundled deployment and identity gates | [Deployment](deployment.md) |
+| Consuming MCP tools, raw client and MAF agents | [MCP tools](mcp-tools.md) |
+| Saving/restoring conversations, plain and `AgentSession` | [Session persistence](session-persistence.md) |
+| On-device inference with Foundry Local, plain and MAF bridge | [Foundry Local](foundry-local.md) |
 | Known failure modes | [Troubleshooting](troubleshooting.md) |
 | Preflight, rollback and operating boundaries | [Runbook](runbook.md) |
 

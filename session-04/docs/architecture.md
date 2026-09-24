@@ -1,5 +1,9 @@
 # One definition, explicit host policies
 
+The complete app is the final composition in the teaching sequence.
+MCP 50/51, session persistence 60/61 and Foundry Local 70/71 are separate
+audience-follow-up samples; they are not registered in `FinanceAgentFactory`.
+
 `FinanceAgentFactory` builds one set of business instructions, mock tools and
 named providers. `Contracts` contains plain-C# fixtures so the primitive samples
 do not acquire a hidden MAF dependency.

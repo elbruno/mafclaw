@@ -14,7 +14,7 @@ From the repository root:
 .\tools\configure-user-secrets.ps1 -Session 4 -Check
 ```
 
-All Session 4 live projects share the non-secret `UserSecretsId`
+The cloud-backed Session 4 agent projects share the non-secret `UserSecretsId`
 `mafclaw-session-04`. Values are not committed or printed. Set only the
 features you intend to use:
 
@@ -36,6 +36,12 @@ Purview/managed-memory configuration must be provisioned and authorized separate
 Application Insights settings are supplied to the hosted runtime by its deployment,
 not written to source or passed as command-line values.
 
+The setup helper includes the new cloud-backed agents in samples 51 and 61.
+The raw MCP client (50) and Foundry Local samples (70/71) need no Foundry
+project credentials. Sample 51's fixture still calls the public Microsoft Learn
+MCP server; it is not an offline test. Foundry Local's first live run may
+download a model before inference runs on-device.
+
 From `session-04`:
 
 ```powershell
@@ -46,6 +52,10 @@ dotnet run --project .\code\Console\MafClaw.Session04.Console.csproj
 dotnet run --project .\code\Evals\MafClaw.Session04.Evals.csproj -- --mode fixture
 .\scripts\verify-session.ps1 -Mode Offline
 ```
+
+The solution includes all sixteen numbered samples, including 50/51, 60/61
+and 70/71. Foundry Local projects currently target Windows x64. See the
+[sample ladder](../samples/README.md) for each independent run command.
 
 The first console command is an explicit two-response fixture: ask for the
 snapshot once, then `/exit`. The other two use live inference; the last enables

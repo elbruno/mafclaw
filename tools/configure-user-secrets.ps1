@@ -64,7 +64,7 @@
 .EXAMPLE
     # Preferred automation pattern — no shell-history exposure
     $env:FOUNDRY_PROJECT_ENDPOINT = 'https://myproject.services.ai.azure.com/'
-    $env:FOUNDRY_MODEL = 'gpt-4o'
+    $env:FOUNDRY_MODEL = 'gpt-6-luna'
     .\tools\configure-user-secrets.ps1 -Session 1
 
 .EXAMPLE
@@ -195,6 +195,8 @@ $script:SessionMap = [ordered]@{
             'samples\31-evaluations-agent\MafClaw.Sample31.csproj'
             'samples\32-foundry-evaluations\MafClaw.Sample32.csproj'
             'samples\41-hosted-agent\MafClaw.Sample41.csproj'
+            'samples\51-mcp-tools-agent\MafClaw.Sample51.csproj'
+            'samples\61-session-persistence-agent\MafClaw.Sample61.csproj'
         )
         Keys         = @(
             [pscustomobject]@{ Name = 'Foundry:ProjectEndpoint';              Prompt = 'Azure AI Foundry project endpoint URL';                    EnvVar = 'FOUNDRY_PROJECT_ENDPOINT';              Required = $true;  IsSecret = $false }

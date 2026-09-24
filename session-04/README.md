@@ -4,12 +4,33 @@ One finance-agent definition, multiple hosts, and explicit operational
 boundaries. This is a .NET 10 educational reference, not a production financial
 service or compliance certification. All portfolio/trade data is synthetic.
 
+[Download the Session 4 slides (PDF, 24 pages)](slides/mafclaw-session-04.pdf).
+The light .NET-purple comic presentation starts with the recap and audience
+follow-ups, then the operational lessons, and ends with the complete finance app.
+
 The package contains real implementations, replacing the old .NET 9 placeholder:
 
 - `code`: shared finance contracts/factory plus console, evaluation and Responses hosts.
-- `samples`: four plain-C# / MAF pairs and two conditional service integrations.
-- `docs`: setup, architecture, telemetry, policy, evaluations, deployment and operations.
+- `samples`: seven plain-C# / MAF pairs and two conditional service integrations.
+- `docs`: setup, MCP tools, session persistence, Foundry Local, architecture,
+  telemetry, policy, evaluations, deployment and operations.
 - `tests`, `evals`, `observability`, `scripts`: executable evidence and operating assets.
+
+## Audience follow-ups from Session 3
+
+Start with the recap, then these three focused topics before the Session 4
+observability, governance, evaluation and hosting lessons:
+
+| Topic | Plain C# | Microsoft Agent Framework | Guide |
+|---|---|---|---|
+| Consume external MCP tools | [50](samples/50-mcp-tools) | [51](samples/51-mcp-tools-agent) | [MCP tools](docs/mcp-tools.md) |
+| Save and restore a conversation | [60](samples/60-session-persistence) | [61](samples/61-session-persistence-agent) | [Session persistence](docs/session-persistence.md) |
+| Run inference on-device | [70](samples/70-foundry-local) | [71](samples/71-foundry-local-agent) | [Foundry Local](docs/foundry-local.md) |
+
+These are independently runnable teaching samples, not additional capabilities
+of `FinanceAgentFactory`. The complete finance app composes the earlier
+session features and Session 4 operational controls at the end of the lesson.
+The [sample ladder](samples/README.md) contains every run command.
 
 ## Run without credentials
 
@@ -53,7 +74,8 @@ No cloud deployment is implied by this package.
 
 See the [sample ladder](samples/README.md), [setup](docs/setup.md),
 [architecture](docs/architecture.md), and [runbook](docs/runbook.md).
-Candidate slides and presenter material remain private until final approval.
+The [audience slides](slides/README.md) contain no presenter notes.
+Editable deck sources, presenter material and production evidence remain private.
 
 ## Resources
 

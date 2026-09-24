@@ -30,6 +30,7 @@ A 4-part Microsoft Reactor live coding series that builds a personal finance CLI
 | 1 - Meet Your Claw | [Session 1 slides](./session-01/slides/mafclaw-session-01.pdf) |
 | 2 - Working With Your Data, Safely | [Session 2 slides](./session-02/slides/mafclaw-session-02.pdf) |
 | 3 - Scaling the Claw | [Session 3 slides](./session-03/slides/mafclaw-session-03.pdf) |
+| 4 - Production Ready | [Session 4 slides](./session-04/slides/mafclaw-session-04.pdf) |
 
 These PDFs contain the audience slides, not private presenter notes.
 All financial examples are mock and educational, not financial advice.
@@ -39,7 +40,7 @@ All financial examples are mock and educational, not financial advice.
 - `session-01/` — Session 1: four incremental checkpoints (hello-agent → harness → tools → planning+todos) and the finished sample.
 - `session-02/` — Session 2: isolated samples for safe file access, approvals, and memory, plus the final Agent Framework/Harness finance advisor walkthrough.
 - `session-03/` — Session 3: a cumulative offline advisor, plain-C# concepts, live MAF bridges, and six additional main-agent orchestration samples (`code/`, `samples/`, `docs/`).
-- `session-04/` — Shared .NET 10 agent factory, console/evaluation/Responses hosts, four teaching pairs, conditional service integrations and regression tooling.
+- `session-04/` — Shared .NET 10 agent factory, console/evaluation/Responses hosts, seven teaching pairs, conditional service integrations, regression tooling and audience slides.
 - `general/docs/` — Prerequisites, configuration, and troubleshooting for all sessions.
 
 ## Getting started

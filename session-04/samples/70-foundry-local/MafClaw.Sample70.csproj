@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- Microsoft.AI.Foundry.Local.Runtime ships native ONNX Runtime binaries per RID; this sample is inherently machine-local. -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AI.Foundry.Local" Version="2.0.1" />
+    <PackageReference Include="OpenAI" Version="2.14.0" />
+  </ItemGroup>
+</Project>

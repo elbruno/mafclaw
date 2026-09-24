@@ -46,6 +46,24 @@
   <Folder Name="/samples/41-hosted-agent/">
     <Project Path="samples/41-hosted-agent/MafClaw.Sample41.csproj" />
   </Folder>
+  <Folder Name="/samples/50-mcp-tools/">
+    <Project Path="samples/50-mcp-tools/MafClaw.Sample50.csproj" />
+  </Folder>
+  <Folder Name="/samples/51-mcp-tools-agent/">
+    <Project Path="samples/51-mcp-tools-agent/MafClaw.Sample51.csproj" />
+  </Folder>
+  <Folder Name="/samples/60-session-persistence/">
+    <Project Path="samples/60-session-persistence/MafClaw.Sample60.csproj" />
+  </Folder>
+  <Folder Name="/samples/61-session-persistence-agent/">
+    <Project Path="samples/61-session-persistence-agent/MafClaw.Sample61.csproj" />
+  </Folder>
+  <Folder Name="/samples/70-foundry-local/">
+    <Project Path="samples/70-foundry-local/MafClaw.Sample70.csproj" />
+  </Folder>
+  <Folder Name="/samples/71-foundry-local-agent/">
+    <Project Path="samples/71-foundry-local-agent/MafClaw.Sample71.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/MafClaw.Session04.Tests.csproj" />
   </Folder>
